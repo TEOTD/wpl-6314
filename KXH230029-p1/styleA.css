@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+    /* Resets default margins and paddings for all elements */
+}
+
+body {
+    font-family: Tahoma;
+    font-size: 40px;
+    /* Sets the font style to Tahoma and font size to 40px for the body text */
+}
+
+.box-parent {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: space-evenly;
+    /* Sets the container as a flexbox, arranges child elements in a column, 
+       stretches it to full height of the screen, and evenly spaces the boxes */
+}
+
+.box {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    display: flex;
+    flex-shrink: 0;
+    flex-grow: 0;
+    justify-content: center;
+    border-top: 1px solid #687291;
+    /* Defines each box's size, centers it horizontally, 
+       uses flexbox for child content alignment, and adds a top border */
+}
+
+.box:nth-child(odd) {
+    background-color: #dfe1e7;
+    /* Applies a light gray background to odd-numbered boxes */
+}
+
+.box:nth-child(even) {
+    background-color: #eeeff2;
+    /* Applies a slightly lighter background to even-numbered boxes */
+}
+
+.box:last-child {
+    background-color: #687291;
+    border: 4px solid black;
+    align-items: center;
+    /* Special styling for the last box: dark background, thicker border, 
+       and centers the content vertically */
+}

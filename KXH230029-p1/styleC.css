@@ -1,0 +1,75 @@
+* {
+    margin: 0;
+    padding: 0;
+    /* Resets all default margins and paddings */
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: Tahoma;
+    font-size: 40px;
+    /* Sets to full window height, removes margin, and applies Tahoma font */
+}
+
+.box-parent {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-evenly;
+    /* Flexbox layout for vertical alignment with even spacing between items */
+}
+
+.box {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #687291;
+    transition: width 3s, height 3s, transform 5s;
+    animation: addshadow 3s infinite alternate;
+    /* Box with a fixed size, centered horizontally, flex for centering content,
+       animated size and rotation transitions, and shadow animation */
+}
+
+.box:nth-child(odd) {
+    background-image: linear-gradient(to bottom, #5a74c1, #ffffff);
+    /* Gradient background for odd-numbered boxes */
+}
+
+.box:nth-child(even) {
+    background-image: linear-gradient(to top, #ffffff, #f97a7a);
+    /* Gradient background for even-numbered boxes */
+}
+
+.box:last-child {
+    background-image: linear-gradient(to top, #ffffff, #687291);
+    border: 4px solid black;
+    align-items: center;
+    /* Special styling for the last box with a gradient background and thick border */
+}
+
+.box:nth-child(odd):hover {
+    transform: rotate(180deg);
+    /* Rotates the boxes 1, 3, 5 180 degrees clockwise when hovered */
+}
+
+.box:nth-child(even):hover {
+    transform: rotate(-180deg);
+    /* Rotates the boxes 2, 4, 6 180 degrees anti clockwise when hovered */
+}
+
+@keyframes addshadow {
+    from {
+        box-shadow: 0px 0px 0px white;
+        width: 100px;
+        height: 100px;
+    }
+    to {
+        box-shadow: 10px 5px 5px black;
+        width: 110px;
+        height: 110px;
+    }
+    /* Adds a shadow and slightly increases the size during animation */
+}

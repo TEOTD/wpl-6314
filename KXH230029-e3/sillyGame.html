@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silly Game</title>
+    <style>
+      /* Added styling to make the game look a little good */
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        flex-direction: column;
+        overflow: auto;
+        text-wrap: nowrap;
+      }
+
+      div {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: inline-block;
+        width: 120px;
+        margin-bottom: 10px;
+      }
+
+      input[type="text"] {
+        padding: 8px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        width: 50px;
+      }
+
+      button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+        margin-left: 20px;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .game-area {
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+
+      table {
+        border-collapse: collapse;
+        margin: auto;
+        margin-top: 20px;
+        table-layout: fixed;
+      }
+
+      table,
+      td {
+        border: 2px solid #333;
+      }
+
+      td {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        background-color: #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        word-wrap: break-word;
+        white-space: nowrap;
+        padding: 10px;
+        min-width: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Silly Game</h1>
+    <div>
+      <label for="rows">Enter #rows:</label>
+      <input type="text" name="rows" id="rows" />
+      <br />
+      <label for="cols">Enter #cols:</label>
+      <input type="text" name="cols" id="cols" />
+      <br />
+      <button>Start a new game</button>
+    </div>
+
+    <script>
+      "use strict";
+
+      // Game class represents the entire game logic and behavior
+      class Game {
+        // On game construction, the default values for columns and rows are set, and a button listener is added to start the game
+        constructor(button, colsInput, rowsInput) {
+          this.button = button;
+          this.colsInput = colsInput;
+          this.rowsInput = rowsInput;
+          this.columns = 2;
+          this.rows = 2;
+          this.clickCount = 0;
+          this.totalCells = 0;
+          this.gameOver = false;
+
+          this.setDefaultValues();
+          this.addButtonListener();
+        }
+
+        // Set default values for the input fields for columns and rows
+        setDefaultValues() {
+          this.colsInput.value = this.columns;
+          this.rowsInput.value = this.rows;
+        }
+
+        // Reset the game state by removing any existing game area and resetting variables
+        resetGame() {
+          const existingGameArea = document.querySelector("#game-area");
+          if (existingGameArea) {
+            existingGameArea.remove(); // Remove previous game area if it exists
+          }
+          this.button.style.display = "block"; // Show the start button
+          this.clickCount = 0; // Reset click count
+          this.gameOver = false; // Reset game over flag
+        }
+
+        // Create the game area with a table of cells based on the input row and column values
+        createGameArea() {
+          this.columns = parseInt(this.colsInput.value);
+          this.rows = parseInt(this.rowsInput.value);
+          this.totalCells = this.columns * this.rows;
+
+          // Check if the input row/column count exceeds the maximum allowed limit and exit if yes
+          if (!this.checkRowLimitCount()) {
+            return;
+          }
+
+          // Create game area container
+          const gameArea = document.createElement("div");
+          gameArea.className = "game-area";
+          gameArea.id = "game-area";
+          document.body.appendChild(gameArea);
+
+          // Create a table to represent the game grid
+          const table = document.createElement("table");
+          table.className = "game-table";
+          gameArea.appendChild(table);
+
+          // Create rows and cells in the table
+          for (let column = 0; column < this.columns; column++) {
+            const tr = document.createElement("tr");
+            tr.className = "column";
+            table.appendChild(tr);
+
+            for (let row = 0; row < this.rows; row++) {
+              const td = document.createElement("td");
+              td.className = "row";
+              td.textContent = column * this.rows + row + 1;
+              tr.appendChild(td);
+            }
+          }
+
+          // Add click event listener to the table to handle cell clicks (uses event bubbling)
+          this.addTableClickListener(table);
+        }
+
+        // Add a click event listener to handle cell clicks and check if all cells have been clicked
+        addTableClickListener(table) {
+          table.addEventListener("click", (event) => {
+            if (this.gameOver) return; // Do nothing if the game is already over
+
+            const clickedCell = event.target;
+
+            // Check if the clicked element is a table cell and it has not been clicked yet, if its clicked turn the cell orange and increment the click count
+            if (
+              clickedCell.tagName === "TD" &&
+              clickedCell.style.backgroundColor !== "orange"
+            ) {
+              clickedCell.style.backgroundColor = "orange";
+              this.clickCount++;
+
+              // If all cells are clicked, end the game
+              if (this.clickCount === this.totalCells) {
+                this.endGame(table);
+              }
+            }
+          });
+        }
+
+        // End the game by turning all cells red, showing the start button, and preventing further clicks
+        endGame(table) {
+          this.gameOver = true;
+          const cells = document.querySelectorAll("td");
+          cells.forEach((cell) => {
+            cell.style.backgroundColor = "red";
+            cell.style.cursor = "not-allowed";
+          });
+          this.button.style.display = "block";
+        }
+
+        // Add event listener to the start button to reset the game and start a new one
+        addButtonListener() {
+          this.button.addEventListener("click", () => {
+            // Reset previous game if it exists
+            this.resetGame();
+            this.button.style.display = "none"; // Hide the button during the game
+            this.createGameArea();
+          });
+        }
+
+        // Check if the row/column count exceeds the maximum allowed limit (25x25)
+        checkRowLimitCount() {
+          const maxRowCount = 25;
+          const maxColumnCount = 25;
+          if (this.rows > maxRowCount || this.columns > maxColumnCount) {
+            // Display error message if limits are exceeded
+            const errorMessage = document.createElement("div");
+            errorMessage.id = "error-message";
+            errorMessage.textContent = `Error: Maximum allowed rows and columns are 25. Please start a new game.`;
+            errorMessage.style.color = "red";
+            document.body.appendChild(errorMessage);
+            this.resetGame(); // Reset the game if limits are exceeded
+            return false; // Return false indicating the check failed
+          }
+
+          // Remove previous error message if inputs are within limits
+          const errorMessage = document.querySelector("#error-message");
+          if (errorMessage) {
+            errorMessage.remove();
+          }
+          return true; // Return true if the check passed
+        }
+      }
+
+      // On DOM content loaded, capture the button and input fields, and initialize the game
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.querySelector("button");
+        const colsInput = document.querySelector("#cols");
+        const rowsInput = document.querySelector("#rows");
+
+        // Create a new game instance using the captured elements
+        const game = new Game(button, colsInput, rowsInput);
+      });
+    </script>
+  </body>
+</html>
