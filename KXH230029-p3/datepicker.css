@@ -1,5 +1,5 @@
 * {
-    margin: 0;
+    margin: 20;
     padding: 0;
     box-sizing: border-box;
 }
@@ -10,7 +10,7 @@ body {
     justify-content: center;
     flex-direction: column;
     text-align: center;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f3f3f3;
     font-family: Arial, Helvetica, sans-serif;
 }
@@ -20,8 +20,8 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 550px;
-    width: 420px;
+    width: 90%;
+    max-width: 420px;
     margin: 20px auto;
     box-shadow: 0 10px 30px #373737;
     border-radius: 10px;
@@ -29,7 +29,7 @@ body {
 }
 
 .calender-header {
-    height: 25%;
+    height: 5vh;
     width: 100%;
     margin: 0;
     padding: 0 10px;
@@ -44,7 +44,7 @@ body {
 
 .calender-header-day-month-year {
     font-weight: bold;
-    font-size: 24px;
+    font-size: 1.5rem;
     letter-spacing: 0.2ch;
     text-align: center;
     flex-grow: 1;
@@ -54,7 +54,7 @@ body {
 .calender-header-next-month {
     font-weight: bold;
     color: #ffffff;
-    font-size: 24px;
+    font-size: 1.5rem;
     cursor: pointer;
     padding: 0 15px;
 }
@@ -79,7 +79,7 @@ table {
 th, td {
     text-align: center;
     padding: 15px;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: bold;
     color: #373737;
     border: 1px solid #ccc;
@@ -117,4 +117,45 @@ td:hover {
 .calender-header-next-month:hover {
     color: #d1d1d1;
     transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .picker-parent {
+        height: auto;
+    }
+
+    .calender-header-day-month-year {
+        font-size: 1.2rem;
+    }
+
+    th, td {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    td {
+        padding: 10px 5px;
+    }
+
+    .calender-day-today {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calender-header-prev-month, .calender-header-next-month {
+        font-size: 1.2rem;
+        padding: 0 10px;
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    .calender-day-today {
+        width: 30px;
+        height: 30px;
+    }
 }
