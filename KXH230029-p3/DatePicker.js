@@ -6,8 +6,18 @@ class DatePicker {
     this.callback = callback;
 
     this.monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     this.shortDayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
     this.selectedDate = null;
@@ -38,12 +48,12 @@ class DatePicker {
 
     const prevMonth = this.createElement("div", {
       className: "calender-header-prev-month",
-      textContent: "<"
+      textContent: "<",
     });
 
     const nextMonth = this.createElement("div", {
       className: "calender-header-next-month",
-      textContent: ">"
+      textContent: ">",
     });
 
     header.append(dayMonthYear, prevMonth, nextMonth);
@@ -71,7 +81,7 @@ class DatePicker {
       className: "calender-day-row",
     });
 
-    this.shortDayNames.forEach(day => {
+    this.shortDayNames.forEach((day) => {
       const calenderDay = this.createElement("th", {
         className: "calender-area-days-data",
         id: `calender-area-days-data-${day}`,
@@ -87,8 +97,16 @@ class DatePicker {
 
   getCalendarGrid(date) {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    const daysInPrevMonth = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+    const daysInMonth = new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0
+    ).getDate();
+    const daysInPrevMonth = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      0
+    ).getDate();
 
     const calendarBody = this.createElement("tbody", {
       id: `calendarBody-${this.id}`,
@@ -116,19 +134,21 @@ class DatePicker {
         });
 
         if (rowCount === 0 && j < firstDay) {
-          cell.textContent = prevMonthDaysStart++;
+          cell.textContent = `${prevMonthDaysStart}`;
+          prevMonthDaysStart++;
           cell.classList.add("calender-day-dimmed");
         } else if (current_date > daysInMonth) {
-          cell.textContent = next_month_date++;
+          cell.textContent = `${next_month_date}`;
+          next_month_date++;
           cell.classList.add("calender-day-dimmed");
         } else {
-          cell.textContent = current_date;
+          cell.textContent = `${current_date}`;
 
           const today = new Date();
           if (
-              current_date === today.getDate() &&
-              date.getMonth() === today.getMonth() &&
-              date.getFullYear() === today.getFullYear()
+            current_date === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear()
           ) {
             cell.classList.add("calender-day-selected");
           }
@@ -159,7 +179,10 @@ class DatePicker {
     const { header, prevMonth, nextMonth } = this.renderHeader(date);
 
     const updateCalendar = (monthChange) => {
-      const newDate = new Date(date.getFullYear(), date.getMonth() + monthChange);
+      const newDate = new Date(
+        date.getFullYear(),
+        date.getMonth() + monthChange
+      );
       this.render(newDate);
     };
 
@@ -169,8 +192,15 @@ class DatePicker {
     const calendarArea = this.renderCalendarArea(date);
     calendarArea.addEventListener("click", (event) => {
       const target = event.target;
-      if (target.classList.contains("calender-day-data") && !target.classList.contains("calender-day-dimmed")) {
-        const selectedDate = new Date(date.getFullYear(), date.getMonth(), target.textContent);
+      if (
+        target.classList.contains("calender-day-data") &&
+        !target.classList.contains("calender-day-dimmed")
+      ) {
+        const selectedDate = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          target.textContent
+        );
         const fixedDate = {
           month: selectedDate.getMonth() + 1,
           day: selectedDate.getDate(),
@@ -188,7 +218,7 @@ class DatePicker {
     });
 
     fragment.append(header, calendarArea);
-    dateParent.innerHTML = '';
+    dateParent.innerHTML = "";
     dateParent.appendChild(fragment);
   }
 }
