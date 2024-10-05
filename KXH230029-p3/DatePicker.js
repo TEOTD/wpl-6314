@@ -10,6 +10,7 @@ class DatePicker {
       "July", "August", "September", "October", "November", "December"
     ];
     this.shortDayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    this.selectedDate = null;
   }
 
   createElement(tag, attrs = {}) {
@@ -90,7 +91,7 @@ class DatePicker {
     const daysInPrevMonth = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 
     const calendarBody = this.createElement("tbody", {
-      id: "calendarBody",
+      id: `calendarBody-${this.id}`,
     });
 
     let current_date = 1;
@@ -104,14 +105,14 @@ class DatePicker {
     while (!finished) {
       const row = this.createElement("tr", {
         className: "calender-day-row",
-        id: `calender-day-row-${rowCount}`,
+        id: `calender-day-row-${rowCount}-${this.id}`, // Scoped ID per calendar instance
       });
       let weekHasCurrentMonthDay = false;
 
       for (let j = 0; j < 7; j++) {
         const cell = this.createElement("td", {
           className: "calender-day-data",
-          id: `calender-day-data-${j}`,
+          id: `calender-day-data-${j}-${this.id}`, // Scoped ID per calendar instance
         });
 
         if (rowCount === 0 && j < firstDay) {
@@ -175,13 +176,14 @@ class DatePicker {
           day: selectedDate.getDate(),
           year: selectedDate.getFullYear(),
         };
-        this.callback(this.id, fixedDate);
 
-        const selectedDay = document.querySelector(".calender-day-selected");
+        this.callback(this.id, fixedDate);
+        const selectedDay = dateParent.querySelector(".calender-day-selected");
         if (selectedDay) {
           selectedDay.classList.remove("calender-day-selected");
         }
         target.classList.add("calender-day-selected");
+        this.selectedDate = selectedDate;
       }
     });
 
