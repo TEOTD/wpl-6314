@@ -53,45 +53,52 @@ class DatePicker {
       id: `picker-calender-header-${this.id}`,
     });
 
-    const title = this.createElement("div", {
-      className: "calender-header-title",
-      id: `picker-calender-header-title-${this.id}`,
-      textContent: "SELECT DATE",
-    });
-
     const dayMonthYear = this.createElement("div", {
       className: "calender-header-day-month-year",
       id: `picker-calender-header-day-month-year-${this.id}`,
-      textContent: `${this.shortDayNames[date.getDay()]}, ${
-        this.shortMonthNames[date.getMonth()]
-      } ${date.getFullYear().toString().slice(-2)}`,
+      textContent: `${
+        this.monthNames[date.getMonth()]
+      } ${date.getFullYear()}`,
     });
 
-    header.appendChild(title);
+    const prevMonth = this.createElement("div", {
+      className: "calender-header-prev-month",
+      id: `picker-calender-header-prev-month-${this.id}`,
+      textContent: "<"
+    });
+
+    const nextMonth = this.createElement("div", {
+      className: "calender-header-next-month",
+      id: `picker-calender-header-next-month-${this.id}`,
+      textContent: ">"
+    });
+
     header.appendChild(dayMonthYear);
+    header.appendChild(prevMonth);
+    header.appendChild(nextMonth);
     return header;
   }
 
-  renderCalendarArea() {
+  renderCalendarArea(date) {
     const calenderArea = this.createElement("div", {
       className: "calender-area",
       id: `picker-calender-area-${this.id}`,
     });
 
-    calenderArea.appendChild(this.renderCalendar());
+    calenderArea.appendChild(this.renderCalendar(date));
     return calenderArea;
   }
 
-  renderCalendar() {
-    const calenderTable = this.createElement("table", {
+  renderCalendar(date) {
+    const calenderTable= this.createElement("table", {
       className: "calender-area-table",
     });
 
-    const calenderThread = this.createElement("thead", {
+    const calenderThread= this.createElement("thead", {
       className: "calender-area-thread",
     });
 
-    const calenderDaysRow = this.createElement("tr", {
+    const calenderDaysRow= this.createElement("tr", {
       className: "calender-area-days-row",
     });
 
@@ -106,7 +113,70 @@ class DatePicker {
 
     calenderThread.appendChild(calenderDaysRow);
     calenderTable.appendChild(calenderThread);
+    calenderTable.appendChild(this.getCalendarGrid(date));
     return calenderTable;
+  }
+
+
+  getCalendarGrid(date) {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const daysInPrevMonth = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+
+    const calendarBody = this.createElement("tbody", {
+      id: "calendarBody",
+    });
+
+    let current_date = 1;
+    let next_month_date = 1;
+
+    let prevMonthDaysStart = daysInPrevMonth - firstDay + 1;
+
+    let rowCount = 0;
+    let finished = false;
+
+    while (!finished) {
+      const row = this.createElement("tr");
+      let weekHasCurrentMonthDay = false;
+
+      for (let j = 0; j < 7; j++) {
+        const cell = this.createElement("td", {
+          className: "calender-area-day",
+        });
+
+        if (rowCount === 0 && j < firstDay) {
+          cell.textContent = prevMonthDaysStart++;
+          cell.classList.add("calender-day-dimmed");
+        } else if (current_date > daysInMonth) {
+          cell.textContent = next_month_date++;
+          cell.classList.add("calender-day-dimmed");
+        } else {
+          cell.textContent = current_date;
+
+          const today = new Date();
+          if (
+              current_date === today.getDate() &&
+              date.getMonth() === today.getMonth() &&
+              date.getFullYear() === today.getFullYear()
+          ) {
+            cell.classList.add("calender-day-today");
+          }
+
+          weekHasCurrentMonthDay = true;
+          current_date++;
+        }
+        row.appendChild(cell);
+      }
+
+      calendarBody.appendChild(row);
+
+      rowCount++;
+
+      if (current_date > daysInMonth && weekHasCurrentMonthDay) {
+        finished = true;
+      }
+    }
+    return calendarBody;
   }
 
   render(date) {
@@ -117,7 +187,7 @@ class DatePicker {
     const fragment = document.createDocumentFragment();
 
     fragment.appendChild(this.renderHeader(date));
-    fragment.appendChild(this.renderCalendarArea());
+    fragment.appendChild(this.renderCalendarArea(date));
     dateParent.appendChild(fragment);
   }
 }
