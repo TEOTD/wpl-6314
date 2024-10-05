@@ -1,5 +1,5 @@
 * {
-    margin: 20;
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
@@ -101,7 +101,7 @@ td:hover {
     color: #000000;
 }
 
-.calender-day-today {
+.calender-day-selected {
     background-color: #5213d8;
     color: #ffffff;
     border-radius: 50%;
@@ -111,6 +111,10 @@ td:hover {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+}
+
+.calender-day-dimmed {
+    background-color: #d8d8dc;
 }
 
 .calender-header-prev-month:hover,
