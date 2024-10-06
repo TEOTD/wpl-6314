@@ -56,15 +56,47 @@ class DatePicker {
       textContent: ">",
     });
 
+    prevMonth.addEventListener("click", () => this.updateCalendar(date, -1));
+    nextMonth.addEventListener("click", () => this.updateCalendar(date, 1));
+
     header.append(dayMonthYear, prevMonth, nextMonth);
-    return { header, prevMonth, nextMonth };
+    return header;
   }
 
-  renderCalendarArea(date) {
+  renderCalendarArea(date, dateParent) {
     const calenderArea = this.createElement("div", {
       className: "calender-area",
     });
     calenderArea.appendChild(this.renderCalendar(date));
+
+    calenderArea.addEventListener("click", (event) => {
+      const target = event.target;
+      if (
+          target.classList.contains("calender-day-data") &&
+          !target.classList.contains("calender-day-dimmed")
+      ) {
+        const selectedDate = new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            target.textContent
+        );
+        const fixedDate = {
+          month: selectedDate.getMonth() + 1,
+          day: selectedDate.getDate(),
+          year: selectedDate.getFullYear(),
+        };
+
+        this.callback(this.id, fixedDate);
+        const selectedDay = dateParent.querySelector(".calender-day-selected");
+        if (selectedDay) {
+          selectedDay.classList.remove("calender-day-selected");
+        }
+
+        target.classList.add("calender-day-selected");
+        this.selectedDate = selectedDate;
+      }
+    });
+
     return calenderArea;
   }
 
@@ -112,8 +144,8 @@ class DatePicker {
       id: `calendarBody-${this.id}`,
     });
 
-    let current_date = 1;
-    let next_month_date = 1;
+    let currentDate = 1;
+    let nextMonthDate = 1;
 
     let prevMonthDaysStart = daysInPrevMonth - firstDay + 1;
 
@@ -137,24 +169,25 @@ class DatePicker {
           cell.textContent = `${prevMonthDaysStart}`;
           prevMonthDaysStart++;
           cell.classList.add("calender-day-dimmed");
-        } else if (current_date > daysInMonth) {
-          cell.textContent = `${next_month_date}`;
-          next_month_date++;
+        } else if (currentDate > daysInMonth) {
+          cell.textContent = `${nextMonthDate}`;
+          nextMonthDate++;
           cell.classList.add("calender-day-dimmed");
         } else {
-          cell.textContent = `${current_date}`;
+          cell.textContent = `${currentDate}`;
 
           const today = new Date();
           if (
-            current_date === today.getDate() &&
+            currentDate === today.getDate() &&
             date.getMonth() === today.getMonth() &&
             date.getFullYear() === today.getFullYear()
           ) {
             cell.classList.add("calender-day-selected");
+            this.selectedDate = cell;
           }
 
           weekHasCurrentMonthDay = true;
-          current_date++;
+          currentDate++;
         }
         row.appendChild(cell);
       }
@@ -163,11 +196,19 @@ class DatePicker {
 
       rowCount++;
 
-      if (current_date > daysInMonth && weekHasCurrentMonthDay) {
+      if (currentDate > daysInMonth && weekHasCurrentMonthDay) {
         finished = true;
       }
     }
     return calendarBody;
+  }
+
+  updateCalendar(date, monthChange) {
+    const newDate = new Date(
+        date.getFullYear(),
+        date.getMonth() + monthChange
+    );
+    this.render(newDate);
   }
 
   render(date) {
@@ -176,46 +217,8 @@ class DatePicker {
     dateParent.className = "picker-parent";
 
     const fragment = document.createDocumentFragment();
-    const { header, prevMonth, nextMonth } = this.renderHeader(date);
-
-    const updateCalendar = (monthChange) => {
-      const newDate = new Date(
-        date.getFullYear(),
-        date.getMonth() + monthChange
-      );
-      this.render(newDate);
-    };
-
-    prevMonth.addEventListener("click", () => updateCalendar(-1));
-    nextMonth.addEventListener("click", () => updateCalendar(1));
-
-    const calendarArea = this.renderCalendarArea(date);
-    calendarArea.addEventListener("click", (event) => {
-      const target = event.target;
-      if (
-        target.classList.contains("calender-day-data") &&
-        !target.classList.contains("calender-day-dimmed")
-      ) {
-        const selectedDate = new Date(
-          date.getFullYear(),
-          date.getMonth(),
-          target.textContent
-        );
-        const fixedDate = {
-          month: selectedDate.getMonth() + 1,
-          day: selectedDate.getDate(),
-          year: selectedDate.getFullYear(),
-        };
-
-        this.callback(this.id, fixedDate);
-        const selectedDay = dateParent.querySelector(".calender-day-selected");
-        if (selectedDay) {
-          selectedDay.classList.remove("calender-day-selected");
-        }
-        target.classList.add("calender-day-selected");
-        this.selectedDate = selectedDate;
-      }
-    });
+    const header= this.renderHeader(date);
+    const calendarArea = this.renderCalendarArea(date, dateParent);
 
     fragment.append(header, calendarArea);
     dateParent.innerHTML = "";

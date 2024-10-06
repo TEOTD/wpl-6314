@@ -13,6 +13,9 @@ body {
     min-height: 100vh;
     background-color: #f3f3f3;
     font-family: Arial, Helvetica, sans-serif;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    flex-wrap: nowrap;
 }
 
 .picker-parent {
@@ -83,6 +86,7 @@ th, td {
     font-weight: bold;
     color: #373737;
     border: 1px solid #ccc;
+    vertical-align: middle;
 }
 
 th {
@@ -93,7 +97,9 @@ th {
 
 td {
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    line-height: 35px;
 }
 
 td:hover {
@@ -105,12 +111,28 @@ td:hover {
     background-color: #5213d8;
     color: #ffffff;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
+    display: inline-block;
+    width: 90%;
+    height: 80%;
+    line-height: normal;
+    text-align: center;
+    padding: 15px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+.calender-day-selected::before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: #5213d8;
+    z-index: -1;
 }
 
 .calender-day-dimmed {
