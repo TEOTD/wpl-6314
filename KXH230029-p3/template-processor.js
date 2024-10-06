@@ -15,8 +15,8 @@ class TemplateProcessor {
       // Extracts the key name between the curly braces {{key}}
       const key = filler.slice(2, -2);
       // If the key exists in the dictionary, then
-      // return the corresponding value; otherwise, keep the string as is
-      return key in dictionary ? dictionary[key] : filler;
+      // return the corresponding value; otherwise, return empty string
+      return key in dictionary ? dictionary[key] : '';
     });
   }
 }
