@@ -102,8 +102,8 @@ td {
 }
 
 td:hover {
-    background-color: #d1d1d1;
-    color: #000000;
+    background-color: #5213d8;
+    color: #ffffff;
 }
 
 .calender-day-selected {
@@ -135,7 +135,13 @@ td:hover {
 }
 
 .calender-day-dimmed {
-    background-color: #d8d8dc;
+    background-color: #bdbdbd;
+    color: #737373;
+}
+
+.calender-day-dimmed:hover {
+    background-color: #bdbdbd;
+    color: #737373;
 }
 
 .calender-header-prev-month:hover,
