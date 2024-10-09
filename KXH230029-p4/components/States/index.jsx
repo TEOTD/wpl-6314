@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import "./styles.css";
 
 /**
@@ -6,12 +6,27 @@ import "./styles.css";
  * data for this view (the state names) is available at
  * window.models.statesModel().
  */
-const States = () =>{
+function States() {
   console.log(
     "window.models.statesModel()",
     window.models.statesModel()
   );
 
-  return <>Replace this with the code for Project 4, Problem 2</>
+  const originalStates = window.models.statesModel();
+  const [states, setStates] = useState(originalStates);
+  function updateStates(state) {
+    const filteredStates = originalStates.filter((str) => str.toLowerCase().includes(state.toLowerCase()));
+    setStates(filteredStates);
+  }
+
+  return (
+      <>
+        <input onChange={event => updateStates(event.target.value)}></input>
+        <ul>
+          {states.map((state, index) => (<li key={index}>{state}</li>))}
+        </ul>
+      </>
+  );
 }
+
 export default States;
