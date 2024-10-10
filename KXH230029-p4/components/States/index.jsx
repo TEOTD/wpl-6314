@@ -14,19 +14,32 @@ function States() {
 
   const originalStates = window.models.statesModel();
   const [states, setStates] = useState(originalStates);
+  const [stateToFilter, setStateToFilter] = useState("");
   function updateStates(state) {
-    const filteredStates = originalStates.filter((str) => str.toLowerCase().includes(state.toLowerCase()));
+    setStateToFilter(state);
+    let filteredStates = originalStates.filter((str) => str.toLowerCase().includes(state.toLowerCase()));
     setStates(filteredStates);
   }
 
-  return (
-      <>
-        <input onChange={event => updateStates(event.target.value)}></input>
-        <ul>
-          {states.map((state, index) => (<li key={index}>{state}</li>))}
-        </ul>
-      </>
-  );
+    return (
+        <div className={"container"}>
+            <p className={"heading"}>STOOGLE</p>
+            <p className={"sub-heading"}>THE STATES GOOGLE</p>
+            <p className={"filter-info"}>SHOWING RESULTS FOR: <span>{stateToFilter}</span></p>
+            <input
+                placeholder={"Enter your Search"}
+                onChange={event => updateStates(event.target.value)}
+                className={"input-box"}
+            />
+            {states.length === 0 ? (
+                <p className={"not-found"}>NO MATCHING STATE FOUND</p>
+            ) : (
+                <ul className={"list-parent"}>
+                    {states.map((state, index) => (<li key={index} className={"list"}>{state}</li>))}
+                </ul>
+            )}
+        </div>
+    );
 }
 
 export default States;
