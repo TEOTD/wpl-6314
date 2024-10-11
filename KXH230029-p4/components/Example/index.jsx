@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import "./styles.css";
 
 /**
@@ -14,8 +14,8 @@ import "../../node_modules/prismjs/themes/prism.css";
 /* eslint no-plusplus: ["error", { "allowForLoopAfterthoughts": true }] */
 
 // React Components are now written as functional components with hooks
-const Example = () => {
-  const [name, setName] = useState(window.models.exampleModel().name);
+function Example() {
+  const [name] = useState(window.models.exampleModel().name);
   const [motto, setMotto] = useState(window.models.exampleModel().motto);
   const [counter, setCounter] = useState(0);
   const [inputValue, setInputValue] = useState("");
@@ -44,7 +44,7 @@ const Example = () => {
   };
 
   // Method called when the button is pushed
-  const handleButtonClick = (buttonName, event) => {
+  const handleButtonClick = (buttonName) => {
     setButtonWasClicked(buttonName);
   };
 
@@ -65,7 +65,7 @@ const Example = () => {
         <ul>{listItems}</ul>
       </>
     );
-  }
+  };
 
 return (
     <div className="container Example">
@@ -348,18 +348,18 @@ return (
   </p>
   <button
     type="button"
-    onClick={(e) => handleButtonClick("one", e)}
+    onClick={() => handleButtonClick("one")}
   >
     Call handleButtonClick function with one
   </button>
   <button
     type="button"
-    onClick={(e) => handleButtonClick("two", e)}
+    onClick={() => handleButtonClick("two")}
   >
     Call handleButtonClick function with two
   </button>
 </div>
-</div>
+    </div>
 );
 }
 
