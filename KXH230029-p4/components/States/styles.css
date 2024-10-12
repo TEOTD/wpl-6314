@@ -10,19 +10,15 @@
     padding: 0;
 }
 
-body {
-    margin: 0;
+.container {
+    text-align: center;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #f0f0f0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.container {
-    text-align: center;
-    width: 400px;
+    flex-direction: column;
 }
 
 .heading, .sub-heading, .filter-info, .not-found {
@@ -43,7 +39,7 @@ body {
 }
 
 .input-box {
-    width: 100%;
+    width: 20%;
     padding: 12px;
     font-size: 1.1rem;
     border: 2px solid #ccc;
