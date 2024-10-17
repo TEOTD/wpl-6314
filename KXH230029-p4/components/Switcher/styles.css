@@ -1,0 +1,23 @@
+.toggle-button {
+    margin: 20px 0;
+    display: flex;
+    justify-content: right;
+}
+
+.toggle-button button {
+    background-color: #4a4a4a;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.toggle-button button:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

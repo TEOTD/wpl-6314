@@ -2,7 +2,7 @@
   "name": "project4",
   "version": "1.0.0",
   "private": true,
-  "description": "Project 4 - Learn ReactJS",
+  "description": "Project 4 - Learn React",
   "main": "webServer.js",
   "scripts": {
     "build": "webpack --devtool eval-cheap-module-source-map --output-pathinfo",

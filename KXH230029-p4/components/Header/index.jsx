@@ -1,67 +1,32 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React from "react";
 import "./styles.css";
 
-function Header() {
-    const [isNavOpen, setIsNavOpen] = useState(false);
-    const navigate = useHistory();
-
-    const toggleNav = () => {
-        setIsNavOpen(!isNavOpen);
-    };
-
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            toggleNav();
-        }
-    };
-
-    const handleNavigation = (event) => {
-        switch (event.target.innerHTML) {
-            case "Problem 1":
-                navigate.push("/getting-started.html");
-                break;
-            case "Problem 2":
-                navigate.push("/problem2.html");
-                break;
-            case "Problem 3":
-                navigate.push("/problem2.html");
-                break;
-            case "Problem 4":
-                navigate.push("/problem4.html");
-                break;
-            case "Problem 5":
-                navigate.push("/problem5.html");
-                break;
-            default:
-                break;
-        }
-        setIsNavOpen(false);
-    };
+function Header({button}) {
+    const logoDirectory = "../assets/logo-white.png";
+    const name = "Kiran Hegde";
+    const motto = "Exploring the Depths of Technology";
+    const quote = "Code is like humor. When you have to explain it, it’s bad.";
+    const socialLinks = [
+        {name: "GitHub", url: "https://github.com/TEOTD", icon: "../assets/github.png"},
+        {name: "LinkedIn", url: "https://linkedin.com/in/hegdeki18", icon: "../assets/linkedin.png"},
+    ];
 
     return (
-        <div className={`header ${isNavOpen ? 'expanded' : ''}`}>
-            <div className="logo">KH</div>
-            <div
-                className={`hamburger ${isNavOpen ? 'open' : ''}`}
-                onClick={toggleNav}
-                onKeyDown={handleKeyDown}
-                role="button"
-                tabIndex="0"
-                aria-expanded={isNavOpen}
-                aria-label="Toggle navigation"
-            >
-                <div className="bar"></div>
-                <div className="bar"></div>
-                <div className="bar"></div>
+        <div className="header">
+            <img alt="KH Logo" src={logoDirectory} className="logo"/>
+            <div className="header-content">
+                <h1 className="header-title">{name}</h1>
+                <p className="header-motto">{motto}</p>
+                <p className="header-quote">{quote}</p>
+                {button && <div className="switcher-button">{button}</div>}
             </div>
-            <ul className={`nav ${isNavOpen ? 'show' : ''}`} onClick={event => handleNavigation(event)}>
-                <li className="problem">Problem 1</li>
-                <li className="problem">Problem 2</li>
-                <li className="problem">Problem 3</li>
-                <li className="problem">Problem 4</li>
-                <li className="problem">Problem 5</li>
-            </ul>
+            <div className="social-links">
+                {socialLinks.map(link => (
+                    <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
+                        <img alt={`${link.name} icon`} src={link.icon} className="social-icon"/>
+                    </a>
+                ))}
+            </div>
         </div>
     );
 }

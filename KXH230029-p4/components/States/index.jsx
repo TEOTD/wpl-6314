@@ -7,22 +7,23 @@ import "./styles.css";
  * window.models.statesModel().
  */
 function States() {
-  console.log(
-    "window.models.statesModel()",
-    window.models.statesModel()
-  );
+    console.log(
+        "window.models.statesModel()",
+        window.models.statesModel()
+    );
 
-  const originalStates = window.models.statesModel();
-  const [states, setStates] = useState(originalStates);
-  const [stateToFilter, setStateToFilter] = useState("");
-  function updateStates(state) {
-    setStateToFilter(state);
-    let filteredStates = originalStates.filter((str) => str.toLowerCase().includes(state.toLowerCase()));
-    setStates(filteredStates);
-  }
+    const originalStates = window.models.statesModel();
+    const [states, setStates] = useState(originalStates);
+    const [stateToFilter, setStateToFilter] = useState("");
+
+    function updateStates(state) {
+        setStateToFilter(state);
+        let filteredStates = originalStates.filter((str) => str.toLowerCase().includes(state.toLowerCase()));
+        setStates(filteredStates);
+    }
 
     return (
-        <div className={"container"}>
+        <div className={"container-states"}>
             <p className={"heading"}>STOOGLE</p>
             <p className={"sub-heading"}>THE STATES GOOGLE</p>
             <p className={"filter-info"}>SHOWING RESULTS FOR: <span>{stateToFilter}</span></p>

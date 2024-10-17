@@ -2,6 +2,7 @@ module.exports = {
   entry: {
     gettingStarted: "./gettingStarted.jsx",
     problem2: "./problem2.jsx",
+    problem4: "./problem4.jsx",
   },
   module: {
     rules: [
