@@ -5,8 +5,6 @@ import Example from "../Example";
 import States from "../States";
 
 function Switcher() {
-
-
     const [showExample, setShowExample] = useState(true);
     const toggleView = () => {
         setShowExample((prevShowExample) => !prevShowExample);
