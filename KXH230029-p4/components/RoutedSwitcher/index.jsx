@@ -16,10 +16,7 @@ function RoutedSwitcher() {
 function RoutedContent() {
     const location = useLocation();
     const isStatesActive = location.pathname === "/states";
-    const isExampleActive =
-        location.pathname === "/example"
-        || location.pathname === "/";
-
+    const isExampleActive = location.pathname === "/example";
     const toggleButton = (
         <div className="toggle-button">
             <Link
