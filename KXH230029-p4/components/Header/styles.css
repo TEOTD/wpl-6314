@@ -18,15 +18,9 @@
     animation: slideIn 1s ease-out;
 }
 
-.default {
-    background-color: #1e1e1e;
-    color: white;
-}
-
 .naruto {
     background-size: 100% auto;
     background-position-y: 57%;
-    color: black;
     opacity: 90%;
 }
 
@@ -163,7 +157,6 @@
 }
 
 body.naruto {
-    background: url('/assets/naruto-background.png') no-repeat center center fixed;
     background-size: cover;
     position: relative;
 }

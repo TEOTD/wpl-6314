@@ -12,7 +12,7 @@ function Header({button}) {
     const banner = "/assets/naruto-banner.jpg";
     const background = "/assets/naruto-background.png";
 
-    const [theme, setTheme] = useState("naruto");
+    const [theme, setTheme] = useState("default");
     const [videoSupported, setVideoSupported] = useState(true);
     const [fade, setFade] = useState(false);
 
