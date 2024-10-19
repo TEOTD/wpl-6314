@@ -1,27 +1,3 @@
-.toggle-button {
-    margin: 10px 0;
-}
-
-.toggle-button a {
-    background-color: #4a4a4a;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-family: 'Poppins', sans-serif;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-    margin-left: 10px;
-}
-
-.toggle-button a:hover {
-    background-color: #333333;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
 .toggle-button .disabled-link {
     cursor: not-allowed;
     opacity: 0.5;

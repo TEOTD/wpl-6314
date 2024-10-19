@@ -21,14 +21,14 @@ function RoutedContent() {
         <div className="toggle-button">
             <Link
                 to="/states"
-                className={isStatesActive ? "disabled-link" : ""}
+                className={isStatesActive ? "generic-button disabled-link" : "generic-button"}
                 onClick={(e) => isStatesActive && e.preventDefault()}
             >
                 Switch to States
             </Link>
             <Link
                 to="/example"
-                className={isExampleActive ? "disabled-link" : ""}
+                className={isExampleActive ? "generic-button disabled-link" : "generic-button"}
                 onClick={(e) => isExampleActive && e.preventDefault()}
             >
                 Switch to Example

@@ -10,10 +10,8 @@ function Switcher() {
         setShowExample((prevShowExample) => !prevShowExample);
     };
     const toggleButton = (
-        <div className="toggle-button">
-            <button onClick={toggleView}>
-                {showExample ? "Switch to States" : "Switch to Example"}
-            </button>
+        <div className="generic-button toggle-button" onClick={toggleView} role="button" tabIndex={0}>
+            {showExample ? "Switch to States" : "Switch to Example"}
         </div>
     );
 
