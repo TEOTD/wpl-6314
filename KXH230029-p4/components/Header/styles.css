@@ -3,13 +3,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
-    background-color: #1e1e1e;
-    background-image: linear-gradient(45deg, #1e1e1e, #333, #4a4a4a);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 1);
     position: relative;
+    transition: background-image 1s ease-in-out;
+    z-index: 2;
 }
 
 .header-content {
+    margin: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,13 +18,45 @@
     animation: slideIn 1s ease-out;
 }
 
+.default {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+.naruto {
+    background-size: 100% auto;
+    background-position-y: 57%;
+    color: black;
+    opacity: 90%;
+}
+
+.theme-specific {
+    transition: opacity 0.5s ease;
+}
+
+.fade {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.visible {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
 .logo {
-    width: 80px;
+    width: 120px;
     height: auto;
-    margin-bottom: 10px;
+    filter: invert(100%);
+    cursor: pointer;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .header-title {
+    margin: 2px;
     font-size: 24px;
     color: #ffffff;
     font-family: 'Poppins', sans-serif;
@@ -32,17 +65,17 @@
 }
 
 .header-motto {
+    margin: 2px;
     font-size: 16px;
     color: #d1d1d1;
-    margin: 5px 0;
     font-style: italic;
 }
 
 .header-quote {
+    margin: 2px;
     font-size: 14px;
     color: #a1a1a1;
     font-style: italic;
-    margin-top: 5px;
 }
 
 .social-links {
@@ -60,23 +93,6 @@
     transform: scale(1.1);
 }
 
-.switcher-button {
-    padding: 10px 20px;
-    border: none;
-}
-
-@keyframes squiggle {
-    0% {
-        transform: translateY(0%);
-    }
-    50% {
-        transform: translateY(-10%);
-    }
-    100% {
-        transform: translateY(0%);
-    }
-}
-
 @keyframes slideIn {
     from {
         transform: translateY(-100%);
@@ -89,7 +105,9 @@
 }
 
 .generic-button {
-    margin: 10px 5px;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
     background-color: #4a4a4a;
     color: #ffffff;
     border: 2px solid #ffffff;
@@ -105,4 +123,58 @@
     background-color: #333333;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.right-side-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    width: 150px;
+    height: 150px;
+}
+
+.naruto-video-container {
+    width: 100%;
+    height: 100%;
+}
+
+.tv-container {
+    position: relative;
+    width: 180px;
+    height: 150px;
+    overflow: hidden;
+}
+
+.tv-frame {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.giphy-embed {
+    position: absolute;
+    top: 14%;
+    left: 5%;
+    width: 70%;
+    height: 62%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+body.naruto {
+    background: url('/assets/naruto-background.png') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+}
+
+body.naruto::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: -1;
 }
