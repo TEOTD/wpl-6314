@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo} from "react";
 import {HashRouter, Link, Redirect, Route, Switch, useLocation} from "react-router-dom";
 import Header from "../Header";
 import Example from "../Example";
@@ -15,34 +15,31 @@ function RoutedSwitcher() {
 
 function RoutedContent() {
     const location = useLocation();
-    const isStatesActive = location.pathname === "/states";
-    const isExampleActive = location.pathname === "/example";
-    const toggleButton = (
+    const {paths, pathLabelMapping} = window.models.switcherModel();
+    const isActive = (path) => location.pathname === path;
+
+    const toggleButton = useMemo(() => (
         <div className="toggle-button">
-            <Link
-                to="/states"
-                className={isStatesActive ? "generic-button disabled-link" : "generic-button"}
-                onClick={(e) => isStatesActive && e.preventDefault()}
-            >
-                Switch to States
-            </Link>
-            <Link
-                to="/example"
-                className={isExampleActive ? "generic-button disabled-link" : "generic-button"}
-                onClick={(e) => isExampleActive && e.preventDefault()}
-            >
-                Switch to Example
-            </Link>
+            {pathLabelMapping.map(({path, label}) => (
+                <Link
+                    key={path}
+                    to={path}
+                    className={isActive(path) ? "generic-button disabled-link" : "generic-button"}
+                    onClick={(e) => isActive(path) && e.preventDefault()}
+                >
+                    {label}
+                </Link>
+            ))}
         </div>
-    );
+    ), [pathLabelMapping, isActive]);
 
     return (
         <div>
-            {location.pathname === "/" && <Redirect to="/example"/>}
             <Header button={toggleButton}/>
             <Switch>
-                <Route path="/states" component={States}/>
-                <Route path="/example" component={Example}/>
+                <Redirect exact from={paths.defaultPath} to={paths.examplePath}/>
+                <Route path={paths.statesPath} component={States}/>
+                <Route path={paths.examplePath} component={Example}/>
             </Switch>
         </div>
     );

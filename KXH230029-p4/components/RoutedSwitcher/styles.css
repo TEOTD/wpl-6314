@@ -6,4 +6,12 @@
 
 .toggle-button {
     margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+@media only screen and (max-width: 335px) {
+    .toggle-button {
+        display: flex;
+        flex-direction: column;
+    }
 }

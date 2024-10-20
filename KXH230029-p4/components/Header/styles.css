@@ -56,6 +56,7 @@
     font-family: 'Poppins', sans-serif;
     letter-spacing: 1px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
 }
 
 .header-motto {
@@ -63,6 +64,7 @@
     font-size: 16px;
     color: #d1d1d1;
     font-style: italic;
+    white-space: nowrap;
 }
 
 .header-quote {
@@ -70,6 +72,7 @@
     font-size: 14px;
     color: #a1a1a1;
     font-style: italic;
+    white-space: nowrap;
 }
 
 .social-links {
@@ -111,6 +114,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    white-space: nowrap;
 }
 
 .generic-button:hover {
@@ -171,3 +175,166 @@ body.naruto::before {
     background-color: rgba(255, 255, 255, 0.5);
     z-index: -1;
 }
+
+@media only screen and (max-width: 335px) {
+    body {
+        height: 100%;
+        overflow-y: scroll;
+    }
+
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        width: 100%;
+        z-index: 100;
+    }
+
+    .header-content {
+        overflow: hidden;
+    }
+
+    .logo {
+        width: 50px;
+    }
+
+    .header-title {
+        font-size: 14px;
+    }
+
+    .header-motto, .header-quote {
+        font-size: 10px;
+    }
+
+    .social-links, .right-side-container, .tv-container {
+        display: none;
+    }
+
+    .generic-button {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+
+    .naruto-video-container {
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+    }
+
+
+    .content {
+        margin-top: 60px;
+        padding: 10px;
+        width: 100vw;
+        height: calc(100vh - 60px);
+        overflow-y: scroll;
+    }
+
+    html, body {
+        height: 100%;
+    }
+}
+
+
+@media only screen and (max-width: 600px) {
+    .header {
+        padding: 10px 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .logo {
+        width: 80px;
+    }
+
+    .header-title {
+        font-size: 20px;
+    }
+
+    .header-motto, .header-quote {
+        font-size: 12px;
+    }
+
+    .social-links {
+        gap: 10px;
+    }
+
+    .social-icon {
+        width: 40px;
+    }
+
+    .generic-button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+
+    .right-side-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .tv-container {
+        margin-top: 5px;
+        width: 120px;
+        height: 100px;
+    }
+
+    .giphy-embed {
+        top: 12%;
+        left: 8%;
+        width: 65%;
+        height: 60%;
+    }
+}
+
+@media only screen and (min-width: 680px) and (max-width: 1024px) {
+    .header {
+        padding: 15px 30px;
+    }
+
+    .logo {
+        width: 100px;
+    }
+
+    .header-title {
+        font-size: 22px;
+    }
+
+    .header-motto, .header-quote {
+        font-size: 14px;
+    }
+
+    .social-links {
+        gap: 12px;
+    }
+
+    .social-icon {
+        width: 45px;
+    }
+
+    .generic-button {
+        font-size: 15px;
+        padding: 9px 18px;
+    }
+
+    .right-side-container {
+        width: 130px;
+        height: 130px;
+    }
+
+    .tv-container {
+        margin-top: 5px;
+        width: 150px;
+        height: 130px;
+    }
+
+    .giphy-embed {
+        top: 13%;
+        left: 6%;
+        width: 68%;
+        height: 61%;
+    }
+}
+
