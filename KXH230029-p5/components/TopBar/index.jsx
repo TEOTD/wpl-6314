@@ -1,16 +1,21 @@
 import React, {useEffect, useState} from "react";
-import {AppBar, Toolbar, Typography} from "@mui/material";
+import {AppBar, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import "./styles.css";
+import {blue} from "@mui/material/colors";
 import fetchModel from "../../lib/fetchModelData";
 
-function TopBar() {
+function TopBar({
+                    enableAdvancedFeatures,
+                    setEnableAdvancedFeatures
+                }) {
     const {pathname} = useLocation();
     const userId = pathname.split('/')
         .pop();
     const [user, setUser] = useState(null);
     const [title, setTitle] = useState('PhotoApp');
     const [version, setVersion] = useState('');
+    const label = "Advanced Features";
 
     useEffect(() => {
         fetchModel('/test/info')
@@ -45,6 +50,23 @@ function TopBar() {
                 <Typography variant="h6" className="topbar-version">
                     Version: {version}
                 </Typography>
+                <FormGroup>
+                    <FormControlLabel
+                        control={(
+                            <Checkbox
+                                sx={{
+                                    color: blue[50],
+                                    '&.Mui-checked': {
+                                        color: blue[50],
+                                    },
+                                }}
+                                checked={enableAdvancedFeatures}
+                                onChange={() => setEnableAdvancedFeatures(prev => !prev)}
+                            />
+                        )}
+                        label={label}
+                    />
+                </FormGroup>
             </Toolbar>
         </AppBar>
     );

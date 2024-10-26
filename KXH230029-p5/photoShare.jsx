@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import ReactDOM from "react-dom/client";
 import {Grid, Paper} from "@mui/material";
 import {HashRouter, Route, Routes, useParams} from "react-router-dom";
@@ -16,18 +16,20 @@ function UserDetailRoute() {
 }
 
 
-function UserPhotosRoute() {
+function UserPhotosRoute({enableAdvancedFeatures}) {
     const {userId} = useParams();
-    return <UserPhotos userId={userId}/>;
+    return <UserPhotos userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>;
 }
 
 function PhotoShare() {
+    const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
     return (
         <HashRouter>
             <div>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TopBar/>
+                        <TopBar enableAdvancedFeatures={enableAdvancedFeatures}
+                                setEnableAdvancedFeatures={setEnableAdvancedFeatures}/>
                     </Grid>
                     <div className="main-topbar-buffer"/>
                     <Grid item sm={3}>
@@ -40,7 +42,8 @@ function PhotoShare() {
                             <Routes>
                                 <Route path="/"/>
                                 <Route path="/users/:userId" element={<UserDetailRoute/>}/>
-                                <Route path="/photos/:userId" element={<UserPhotosRoute/>}/>
+                                <Route path="/photos/:userId"
+                                       element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}/>
                                 <Route path="/users" element={<UserList/>}/>
                             </Routes>
                         </Paper>

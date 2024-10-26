@@ -22,10 +22,16 @@ function Comment({comment}) {
     );
 }
 
-function Photo({photo}) {
+function Photo({
+                   photo,
+                   index,
+                   totalPhotos,
+                   onStep,
+                   enableAdvancedFeatures
+               }) {
     return (
         <div key={photo._id}>
-            <img src={`/images/${photo.file_name}`} alt={`Photo of ${photo.file_name}`}/>
+            <img src={`/images/${photo.file_name}`} alt={`${photo.file_name}`}/>
             <p>{new Date(photo.date_time).toLocaleString()}</p>
             {photo.comments && photo.comments.length > 0 && (
                 <div>
@@ -34,13 +40,23 @@ function Photo({photo}) {
                     ))}
                 </div>
             )}
+            {enableAdvancedFeatures && (
+                <div>
+                    <button onClick={() => onStep(-1)} disabled={index === 0}>Previous</button>
+                    <button onClick={() => onStep(1)} disabled={index === totalPhotos - 1}>Next</button>
+                </div>
+            )}
         </div>
     );
 }
 
-function UserPhotos({userId}) {
+function UserPhotos({
+                        userId,
+                        enableAdvancedFeatures
+                    }) {
     const [photos, setPhotos] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
     useEffect(() => {
         if (userId) {
@@ -51,14 +67,30 @@ function UserPhotos({userId}) {
                     setLoading(false);
                 })
                 .catch((error) => {
-                    console.error("Failed to fetch user:", error);
+                    console.error("Failed to fetch user photos:", error);
                     setLoading(false);
                 });
         }
     }, [userId]);
 
+    const handleStep = (direction) => {
+        setCurrentPhotoIndex(prevIndex => Math.min(Math.max(prevIndex + direction, 0), photos.length - 1));
+    };
+
     if (loading) return <p>Loading...</p>;
     if (!photos) return <p>Photos not found.</p>;
+
+    if (enableAdvancedFeatures) {
+        return (
+            <Photo
+                photo={photos[currentPhotoIndex]}
+                index={currentPhotoIndex}
+                totalPhotos={photos.length}
+                onStep={handleStep}
+                enableAdvancedFeatures={enableAdvancedFeatures}
+            />
+        );
+    }
 
     return (
         <div>
