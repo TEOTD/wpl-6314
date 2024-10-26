@@ -1,11 +1,28 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useState} from "react";
 import {List, ListItem, ListItemText} from "@mui/material";
 import {Link} from "react-router-dom";
 import "./styles.css";
+import fetchModel from "../../lib/fetchModelData";
 
 function UserList() {
-    const users = useMemo(() => window.models.userListModel(), []);
+    const [users, setUsers] = useState(null);
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        setLoading(true);
+        fetchModel('/user/list')
+            .then((result) => {
+                setUsers(result.data);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Failed to fetch user:", error);
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+    if (!users) return <p>Users not found.</p>;
     return (
         <List>
             {users.map(user => (

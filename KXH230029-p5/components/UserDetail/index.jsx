@@ -1,9 +1,30 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import "./styles.css";
+import fetchModel from "../../lib/fetchModelData";
 
 function UserDetail({userId}) {
-    const user = useMemo(() => window.models.userModel(userId), [userId]);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (userId) {
+            setLoading(true);
+            fetchModel(`/user/${userId}`)
+                .then((result) => {
+                    setUser(result.data);
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch user:", error);
+                    setLoading(false);
+                });
+        }
+    }, [userId]);
+
+    if (loading) return <p>Loading...</p>;
+    if (!user) return <p>User not found.</p>;
+
     const {
         first_name,
         last_name,

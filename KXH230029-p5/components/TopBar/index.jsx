@@ -1,27 +1,36 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {AppBar, Toolbar, Typography} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import "./styles.css";
+import fetchModel from "../../lib/fetchModelData";
 
 function TopBar() {
     const {pathname} = useLocation();
     const userId = pathname.split('/')
         .pop();
-    const user = useMemo(() => window.models.userModel(userId), [userId]);
+    const [user, setUser] = useState(null);
     const [title, setTitle] = useState('PhotoApp');
+    const [version, setVersion] = useState('');
 
     useEffect(() => {
-        if (user) {
-            if (pathname.startsWith('/users/')) {
-                setTitle(`${user.first_name} ${user.last_name}`);
-            } else if (pathname.startsWith('/photos/')) {
-                setTitle(`Photos of ${user.first_name} ${user.last_name}`);
-            } else {
-                setTitle('PhotoApp');
-            }
-        } else {
-            setTitle('PhotoApp');
+        fetchModel('/test/info')
+            .then((result) => setVersion(result.data.__v))
+            .catch((error) => console.error('Failed to fetch version:', error));
+
+        if (userId) {
+            fetchModel(`/user/${userId}`)
+                .then((result) => setUser(result.data))
+                .catch((error) => console.error('Failed to fetch user:', error));
         }
+    }, [userId]);
+
+    useEffect(() => {
+        setTitle(() => {
+            if (!user) return 'PhotoApp';
+            if (pathname.startsWith('/users/')) return `${user.first_name} ${user.last_name}`;
+            if (pathname.startsWith('/photos/')) return `Photos of ${user.first_name} ${user.last_name}`;
+            return 'PhotoApp';
+        });
     }, [pathname, user]);
 
     return (
@@ -32,6 +41,9 @@ function TopBar() {
                 </Typography>
                 <Typography variant="h6" className="topbar-title">
                     {title}
+                </Typography>
+                <Typography variant="h6" className="topbar-version">
+                    Version: {version}
                 </Typography>
             </Toolbar>
         </AppBar>

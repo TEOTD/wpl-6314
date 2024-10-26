@@ -1,6 +1,7 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
+import fetchModel from "../../lib/fetchModelData";
 
 function Comment({comment}) {
     const {
@@ -38,7 +39,26 @@ function Photo({photo}) {
 }
 
 function UserPhotos({userId}) {
-    const photos = useMemo(() => window.models.photoOfUserModel(userId), [userId]);
+    const [photos, setPhotos] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (userId) {
+            setLoading(true);
+            fetchModel(`/photosOfUser/${userId}`)
+                .then((result) => {
+                    setPhotos(result.data);
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch user:", error);
+                    setLoading(false);
+                });
+        }
+    }, [userId]);
+
+    if (loading) return <p>Loading...</p>;
+    if (!photos) return <p>Photos not found.</p>;
 
     return (
         <div>
