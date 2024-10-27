@@ -8,7 +8,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/compiled/photoShare.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/compiled/photoShare.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/TopBar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/TopBar/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/UserPhotos/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/fetchModelData.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/fetchModelData.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/photoShare.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/photoShare.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/README.md" beforeDir="false" />
@@ -84,7 +86,7 @@
       <workItem from="1729624804716" duration="7143000" />
       <workItem from="1729787477409" duration="356000" />
       <workItem from="1729799860894" duration="5631000" />
-      <workItem from="1729883048383" duration="8235000" />
+      <workItem from="1729883048383" duration="24428000" />
     </task>
     <servers />
   </component>

@@ -11,25 +11,40 @@ import UserPhotos from "./components/UserPhotos";
 
 function UserDetailRoute() {
     const {userId} = useParams();
-    console.log("UserDetailRoute: userId is:", userId);
     return <UserDetail userId={userId}/>;
 }
 
-
-function UserPhotosRoute({enableAdvancedFeatures}) {
+function UserPhotosRoute({
+                             enableAdvancedFeatures,
+                             photoIndex,
+                             setPhotoIndex
+                         }) {
     const {userId} = useParams();
-    return <UserPhotos userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>;
+    return (
+        <UserPhotos
+            userId={userId}
+            enableAdvancedFeatures={enableAdvancedFeatures}
+            photoIndex={photoIndex}
+            setPhotoIndex={setPhotoIndex}
+        />
+    );
 }
 
 function PhotoShare() {
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
+    const [photoIndex, setPhotoIndex] = useState(0);
+
     return (
         <HashRouter>
             <div>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TopBar enableAdvancedFeatures={enableAdvancedFeatures}
-                                setEnableAdvancedFeatures={setEnableAdvancedFeatures}/>
+                        <TopBar
+                            enableAdvancedFeatures={enableAdvancedFeatures}
+                            setEnableAdvancedFeatures={setEnableAdvancedFeatures}
+                            photoIndex={photoIndex}
+                            setPhotoIndex={setPhotoIndex}
+                        />
                     </Grid>
                     <div className="main-topbar-buffer"/>
                     <Grid item sm={3}>
@@ -42,8 +57,20 @@ function PhotoShare() {
                             <Routes>
                                 <Route path="/"/>
                                 <Route path="/users/:userId" element={<UserDetailRoute/>}/>
-                                <Route path="/photos/:userId"
-                                       element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}/>
+                                <Route
+                                    path="/photos/:userId"
+                                    element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}
+                                />
+                                <Route
+                                    path="/photos/:userId/:photoIndex"
+                                    element={(
+                                        <UserPhotosRoute
+                                            enableAdvancedFeatures={enableAdvancedFeatures}
+                                            photoIndex={photoIndex}
+                                            setPhotoIndex={setPhotoIndex}
+                                        />
+                                    )}
+                                />
                                 <Route path="/users" element={<UserList/>}/>
                             </Routes>
                         </Paper>

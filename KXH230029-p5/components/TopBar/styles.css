@@ -1,4 +1,15 @@
-.topbar-appBar{
-  height: 60;
-  justify-content: "center";
+.topbar-appBar {
+    height: 60px;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.topbar-toolbar {
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.topbar-name, .topbar-title, .topbar-version {
+    margin: 0 10px;
 }

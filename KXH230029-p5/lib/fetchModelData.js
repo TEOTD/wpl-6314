@@ -27,6 +27,8 @@ function fetchModel(url) {
             .catch(() => {
                 reject(new Error("Network error occurred"));
             });
+
+        setTimeout(() => reject(new Error("Request timeout")), 500);
     });
 }
 

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import "./styles.css";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {Button} from "@mui/material";
 import fetchModel from "../../lib/fetchModelData";
 
 function Comment({comment}) {
@@ -42,8 +43,20 @@ function Photo({
             )}
             {enableAdvancedFeatures && (
                 <div>
-                    <button onClick={() => onStep(-1)} disabled={index === 0}>Previous</button>
-                    <button onClick={() => onStep(1)} disabled={index === totalPhotos - 1}>Next</button>
+                    <Button
+                        onClick={() => onStep(-1)}
+                        disabled={index === 0}
+                        variant="contained"
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        onClick={() => onStep(1)}
+                        disabled={index === totalPhotos - 1}
+                        variant="contained"
+                    >
+                        Next
+                    </Button>
                 </div>
             )}
         </div>
@@ -52,12 +65,13 @@ function Photo({
 
 function UserPhotos({
                         userId,
-                        enableAdvancedFeatures
+                        enableAdvancedFeatures,
+                        photoIndex,
+                        setPhotoIndex
                     }) {
-    const [photos, setPhotos] = useState(null);
+    const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-
+    const navigate = useNavigate();
     useEffect(() => {
         if (userId) {
             setLoading(true);
@@ -73,29 +87,33 @@ function UserPhotos({
         }
     }, [userId]);
 
+    useEffect(() => {
+        if (enableAdvancedFeatures && photoIndex !== null) {
+            navigate(`/photos/${userId}/${photoIndex}`);
+        }
+    }, [photoIndex, enableAdvancedFeatures, userId, navigate]);
+
     const handleStep = (direction) => {
-        setCurrentPhotoIndex(prevIndex => Math.min(Math.max(prevIndex + direction, 0), photos.length - 1));
+        const newIndex = Math.min(Math.max(photoIndex + direction, 0), photos.length - 1);
+        setPhotoIndex(newIndex);
     };
 
     if (loading) return <p>Loading...</p>;
-    if (!photos) return <p>Photos not found.</p>;
+    if (!photos.length) return <p>Photos not found.</p>;
+    if (enableAdvancedFeatures && photoIndex >= 0 && photos[photoIndex] == null) return <p>Photo not found.</p>;
 
-    if (enableAdvancedFeatures) {
-        return (
-            <Photo
-                photo={photos[currentPhotoIndex]}
-                index={currentPhotoIndex}
-                totalPhotos={photos.length}
-                onStep={handleStep}
-                enableAdvancedFeatures={enableAdvancedFeatures}
-            />
-        );
-    }
-
-    return (
+    return enableAdvancedFeatures && photoIndex >= 0 ? (
+        <Photo
+            photo={photos[photoIndex]}
+            index={photoIndex}
+            totalPhotos={photos.length}
+            onStep={handleStep}
+            enableAdvancedFeatures={enableAdvancedFeatures}
+        />
+    ) : (
         <div>
-            {photos.map(photo => (
-                <Photo key={photo._id} photo={photo}/>
+            {photos.map((photo, idx) => (
+                <Photo key={photo._id} photo={photo} index={idx}/>
             ))}
         </div>
     );
