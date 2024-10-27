@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import "./styles.css";
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {Button} from "@mui/material";
 import fetchModel from "../../lib/fetchModelData";
 
@@ -71,7 +71,6 @@ function UserPhotos({
                     }) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
     useEffect(() => {
         if (userId) {
             setLoading(true);
@@ -86,12 +85,6 @@ function UserPhotos({
                 });
         }
     }, [userId]);
-
-    useEffect(() => {
-        if (enableAdvancedFeatures && photoIndex !== null) {
-            navigate(`/photos/${userId}/${photoIndex}`);
-        }
-    }, [photoIndex, enableAdvancedFeatures, userId, navigate]);
 
     const handleStep = (direction) => {
         const newIndex = Math.min(Math.max(photoIndex + direction, 0), photos.length - 1);
