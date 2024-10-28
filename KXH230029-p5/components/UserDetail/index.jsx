@@ -24,7 +24,7 @@ function UserDetail({userId}) {
     }, [userId]);
 
     if (loading) return <CircularProgress className="loadingSpinner"/>;
-    if (!user) return <Typography variant="h6">User not found.</Typography>;
+    if (!user) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
 
     const {
         first_name,

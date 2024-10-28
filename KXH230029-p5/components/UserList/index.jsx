@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {List, ListItem, ListItemText} from "@mui/material";
+import {CircularProgress, List, ListItem, ListItemText, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
 import "./styles.css";
 import fetchModel from "../../lib/fetchModelData";
@@ -22,8 +22,8 @@ function UserList() {
             });
     }, []);
 
-    if (loading) return <p className="loadingMessage">Loading...</p>;
-    if (!users) return <p className="notFoundMessage">Users not found.</p>;
+    if (loading) return <CircularProgress className="loadingSpinner"/>;
+    if (!users) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
 
     return (
         <List className="userList">

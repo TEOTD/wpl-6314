@@ -42,3 +42,11 @@ body {
     color: var(--text-color);
     font-family: 'Star Jedi', sans-serif; /* Optional: Use a Star Wars-like font */
 }
+
+.notFoundMessage {
+    color: var(--secondary-hover-color);
+    text-align: center;
+    font-size: 3em;
+    margin: 20px 10px;
+    font-weight: bold;
+}
