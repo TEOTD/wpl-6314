@@ -1,0 +1,50 @@
+.photoContainer {
+    background-color: var(--background-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.photoImage {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.photoDate {
+    color: var(--secondary-color);
+    margin: 10px 0;
+}
+
+.comment {
+    color: var(--text-color-hover);
+}
+
+.commentsSection {
+    margin-top: 10px;
+}
+
+.commentContainer {
+    margin: 5px 0;
+}
+
+.commentLink {
+    color: var(--highlight-color); /* Gold color for user links */
+    text-decoration: underline;
+}
+
+.loadingSpinner {
+    display: block;
+    margin: auto;
+    color: var(--highlight-color); /* Gold color for the spinner */
+}
+
+.buttonContainer {
+    display: flex;
+    width: 100%;
+}
+
+.navButton {
+    width: 100%; /* Ensure buttons take the full width of their flex item */
+}

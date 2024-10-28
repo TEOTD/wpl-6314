@@ -1,0 +1,32 @@
+.userDetailContainer {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-radius: 12px; /* Rounded corners */
+    margin: 20px;
+    text-align: center;
+    padding-bottom: 0px;
+    padding-top: 20px;
+}
+
+.userName {
+    color: var(--highlight-color); /* Gold color for the name */
+    margin-bottom: 15px;
+    font-weight: bold; /* Make it stand out */
+}
+
+.userDescription {
+    margin: 10px 0;
+    font-style: italic; /* Italic style for description */
+    color: var(--text-color-hover); /* Default text color */
+}
+
+.userLocation,
+.userOccupation {
+    color: var(--secondary-color);
+}
+
+.loadingSpinner {
+    display: block;
+    margin: auto;
+    color: var(--highlight-color); /* Gold color for the spinner */
+}

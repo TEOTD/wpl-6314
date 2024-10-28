@@ -1,9 +1,8 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {AppBar, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
 import {useLocation} from "react-router-dom";
-import "./styles.css";
-import {blue} from "@mui/material/colors";
 import fetchModel from "../../lib/fetchModelData";
+import "./styles.css";
 
 function TopBar({
                     enableAdvancedFeatures,
@@ -35,28 +34,53 @@ function TopBar({
     }, [user, pathname]);
 
     return (
-        <AppBar className="topbar-appBar" position="static">
-            <Toolbar className="topbar-toolbar">
-                <Typography variant="h6" className="topbar-name">Kiran Hegde</Typography>
-                <Typography variant="h6" className="topbar-version">Version: {version}</Typography>
-                <FormGroup className="topbar-version">
-                    <FormControlLabel
-                        control={(
-                            <Checkbox
-                                sx={{
-                                    color: blue[50],
-                                    '&.Mui-checked': {
-                                        color: blue[50],
-                                    },
-                                }}
-                                checked={enableAdvancedFeatures}
-                                onChange={() => setEnableAdvancedFeatures(prev => !prev)}
-                            />
-                        )}
-                        label="Advanced Features"
-                    />
-                </FormGroup>
-                <Typography variant="h6" className="topbar-title">{title}</Typography>
+        <AppBar position="static" className="topBar" sx={{backgroundColor: 'var(--primary-color)'}}>
+            <Toolbar sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}>
+                <Box sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1
+                }}>
+                    <Typography variant="h6" className="myName">
+                        Kiran Hegde
+                    </Typography>
+                    <Box className="separator"/>
+                    <Typography variant="caption" className="version">
+                        Version: {version}
+                    </Typography>
+                </Box>
+
+                <Box sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2
+                }}>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={(
+                                <Checkbox
+                                    sx={{
+                                        color: 'var(--text-color)',
+                                        '&.Mui-checked': {
+                                            color: 'var(--text-color)',
+                                        },
+                                    }}
+                                    checked={enableAdvancedFeatures}
+                                    onChange={() => setEnableAdvancedFeatures(prev => !prev)}
+                                />
+                            )}
+                            label="Advanced Features"
+                            className="advancedFeatures"
+                        />
+                    </FormGroup>
+                    <Typography variant="h6" className="title">
+                        {title}
+                    </Typography>
+                </Box>
             </Toolbar>
         </AppBar>
     );

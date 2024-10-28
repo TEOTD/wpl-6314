@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import "./styles.css";
+import {Button, CircularProgress, Typography} from "@mui/material";
+import "./styles.css"; // Ensure this is the correct path
 import fetchModel from "../../lib/fetchModelData";
 
 function UserDetail({userId}) {
@@ -22,8 +23,8 @@ function UserDetail({userId}) {
         }
     }, [userId]);
 
-    if (loading) return <p>Loading...</p>;
-    if (!user) return <p>User not found.</p>;
+    if (loading) return <CircularProgress className="loadingSpinner"/>;
+    if (!user) return <Typography variant="h6">User not found.</Typography>;
 
     const {
         first_name,
@@ -34,12 +35,31 @@ function UserDetail({userId}) {
     } = user;
 
     return (
-        <div>
-            <h1>{`${first_name} ${last_name}`}</h1>
-            <p>{description}</p>
-            <p>{location}</p>
-            <p>{occupation}</p>
-            <Link to={`/photos/${userId}`}>View Photos</Link>
+        <div className="userDetailContainer">
+            <Typography variant="h4" className="userName">{`${first_name} ${last_name}`}</Typography>
+            <Typography variant="body1" className="userDescription">{description}</Typography>
+            <Typography variant="body1" className="userLocation"><strong>Location:</strong> {location}
+            </Typography>
+            <Typography variant="body1" className="userOccupation"
+                        marginBottom="10px"><strong>Occupation:</strong> {occupation}
+            </Typography>
+            <Button
+                component={Link}
+                to={`/photos/${userId}`}
+                className="viewPhotosButton"
+                variant="contained"
+                fullWidth
+                sx={{
+                    backgroundColor: "var(--accent-color)",
+                    color: "var(--text-color)",
+                    '&:hover': {
+                        backgroundColor: "var(--accent-hover-color)",
+                        color: "var(--hover-text-color)"
+                    }
+                }}
+            >
+                View Photos
+            </Button>
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Button} from "@mui/material";
+import {Button, CircularProgress, Typography} from "@mui/material";
 import fetchModel from "../../lib/fetchModelData";
 
 function Comment({comment}) {
@@ -10,15 +10,16 @@ function Comment({comment}) {
         date_time
     } = comment;
     return (
-        <div key={comment._id}>
-            <p>{comment.comment}</p>
-            <p>
-                <Link to={`/users/${user._id}`}>
+        <div key={comment._id} className="commentContainer">
+            <Typography variant="body1" className="comment">{comment.comment}
+            </Typography>
+            <Typography variant="caption">
+                <Link to={`/users/${user._id}`} className="commentLink">
                     {user.first_name} {user.last_name}
                 </Link>
                 {' - '}
-                {new Date(date_time).toLocaleString()}
-            </p>
+                <Typography variant="caption" className="photoDate">{new Date(date_time).toLocaleString()}</Typography>
+            </Typography>
         </div>
     );
 }
@@ -31,22 +32,33 @@ function Photo({
                    enableAdvancedFeatures
                }) {
     return (
-        <div key={photo._id}>
-            <img src={`/images/${photo.file_name}`} alt={`${photo.file_name}`}/>
-            <p>{new Date(photo.date_time).toLocaleString()}</p>
+        <div key={photo._id} className="photoContainer">
+            <img src={`/images/${photo.file_name}`} alt={`${photo.file_name}`} className="photoImage"/>
+            <Typography variant="body2" className="photoDate">{new Date(photo.date_time).toLocaleString()}</Typography>
             {photo.comments && photo.comments.length > 0 && (
-                <div>
+                <div className="commentsSection">
                     {photo.comments.map(comment => (
                         <Comment key={comment._id} comment={comment}/>
                     ))}
                 </div>
             )}
             {enableAdvancedFeatures && (
-                <div>
+                <div className="buttonContainer">
                     <Button
                         onClick={() => onStep(-1)}
                         disabled={index === 0}
                         variant="contained"
+                        className="navButton"
+                        sx={{
+                            flex: 1,
+                            backgroundColor: "var(--accent-color)",
+                            color: "var(--text-color)",
+                            marginRight: "2px",
+                            '&:hover': {
+                                backgroundColor: "var(--accent-hover-color)",
+                                color: "var(--hover-text-color)",
+                            }
+                        }}
                     >
                         Previous
                     </Button>
@@ -54,10 +66,22 @@ function Photo({
                         onClick={() => onStep(1)}
                         disabled={index === totalPhotos - 1}
                         variant="contained"
+                        className="navButton"
+                        sx={{
+                            flex: 1,
+                            backgroundColor: "var(--accent-color)",
+                            color: "var(--text-color)",
+                            marginLeft: "2px",
+                            '&:hover': {
+                                backgroundColor: "var(--accent-hover-color)",
+                                color: "var(--hover-text-color)"
+                            }
+                        }}
                     >
                         Next
                     </Button>
                 </div>
+
             )}
         </div>
     );
@@ -91,9 +115,15 @@ function UserPhotos({
         setPhotoIndex(newIndex);
     };
 
-    if (loading) return <p>Loading...</p>;
-    if (!photos.length) return <p>Photos not found.</p>;
-    if (enableAdvancedFeatures && photoIndex >= 0 && photos[photoIndex] == null) return <p>Photo not found.</p>;
+    if (loading) return <CircularProgress className="loadingSpinner"/>;
+    if (!photos.length) return <Typography variant="body1">Photos not found.</Typography>;
+    if (enableAdvancedFeatures && photoIndex >= 0 && photos[photoIndex] == null) {
+        return (
+            <Typography variant="body1">Photo
+                not found.
+            </Typography>
+        );
+    }
 
     return enableAdvancedFeatures && photoIndex >= 0 ? (
         <Photo

@@ -35,52 +35,52 @@ function PhotoShare() {
     const [photoIndex, setPhotoIndex] = useState(0);
 
     return (
-        <HashRouter>
-            <div>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <TopBar
-                            enableAdvancedFeatures={enableAdvancedFeatures}
-                            setEnableAdvancedFeatures={setEnableAdvancedFeatures}
-                            photoIndex={photoIndex}
-                            setPhotoIndex={setPhotoIndex}
-                        />
-                    </Grid>
-                    <div className="main-topbar-buffer"/>
-                    <Grid item sm={3}>
-                        <Paper className="main-grid-item">
-                            <UserList/>
-                        </Paper>
-                    </Grid>
-                    <Grid item sm={9}>
-                        <Paper className="main-grid-item">
-                            <Routes>
-                                <Route path="/"/>
-                                <Route path="/users/:userId" element={<UserDetailRoute/>}/>
-                                <Route
-                                    path="/photos/:userId"
-                                    element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}
-                                />
-                                <Route
-                                    path="/photos/:userId/:photoIndex"
-                                    element={(
-                                        <UserPhotosRoute
-                                            enableAdvancedFeatures={enableAdvancedFeatures}
-                                            photoIndex={photoIndex}
-                                            setPhotoIndex={setPhotoIndex}
-                                        />
-                                    )}
-                                />
-                                <Route path="/users" element={<UserList/>}/>
-                            </Routes>
-                        </Paper>
-                    </Grid>
+        <div>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <TopBar
+                        enableAdvancedFeatures={enableAdvancedFeatures}
+                        setEnableAdvancedFeatures={setEnableAdvancedFeatures}
+                    />
                 </Grid>
-            </div>
-        </HashRouter>
+                <div className="main-topbar-buffer"/>
+                <Grid item sm={3}>
+                    <Paper className="main-grid-item">
+                        <UserList/>
+                    </Paper>
+                </Grid>
+                <Grid item sm={9}>
+                    <Paper className="main-grid-item">
+                        <Routes>
+                            <Route path="/"/>
+                            <Route path="/users/:userId" element={<UserDetailRoute/>}/>
+                            <Route
+                                path="/photos/:userId"
+                                element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}
+                            />
+                            <Route
+                                path="/photos/:userId/:photoIndex"
+                                element={(
+                                    <UserPhotosRoute
+                                        enableAdvancedFeatures={enableAdvancedFeatures}
+                                        photoIndex={photoIndex}
+                                        setPhotoIndex={setPhotoIndex}
+                                    />
+                                )}
+                            />
+                            <Route path="/users" element={<UserList/>}/>
+                        </Routes>
+                    </Paper>
+                </Grid>
+            </Grid>
+        </div>
     );
 }
 
 
 const root = ReactDOM.createRoot(document.getElementById("photoshareapp"));
-root.render(<PhotoShare/>);
+root.render(
+    <HashRouter>
+        <PhotoShare/>
+    </HashRouter>
+);

@@ -7,6 +7,7 @@ import fetchModel from "../../lib/fetchModelData";
 function UserList() {
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [hoveredIndexes, setHoveredIndexes] = useState({});
 
     useEffect(() => {
         setLoading(true);
@@ -21,15 +22,27 @@ function UserList() {
             });
     }, []);
 
-    if (loading) return <p>Loading...</p>;
-    if (!users) return <p>Users not found.</p>;
+    if (loading) return <p className="loadingMessage">Loading...</p>;
+    if (!users) return <p className="notFoundMessage">Users not found.</p>;
+
     return (
-        <List>
-            {users.map(user => (
-                <ListItem key={user._id}>
-                    <Link to={`/users/${user._id}`}>
-                        <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
-                    </Link>
+        <List className="userList">
+            {users.map((user, index) => (
+                <ListItem
+                    key={user._id}
+                    className={`userListItem ${hoveredIndexes[index] ? 'hovered' : ''}`}
+                    component={Link}
+                    to={`/users/${user._id}`}
+                    onMouseEnter={() => setHoveredIndexes(prev => ({
+                        ...prev,
+                        [index]: true
+                    }))}
+                    onMouseLeave={() => setHoveredIndexes(prev => ({
+                        ...prev,
+                        [index]: false
+                    }))}
+                >
+                    <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
                 </ListItem>
             ))}
         </List>

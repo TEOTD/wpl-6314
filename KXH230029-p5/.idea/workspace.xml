@@ -8,7 +8,15 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/compiled/photoShare.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/compiled/photoShare.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/TopBar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/TopBar/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserDetail/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserDetail/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserList/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserList/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserList/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserList/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/UserPhotos/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserPhotos/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/photoShare.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/photoShare.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/main.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/eslint.config.js" beforeDir="false" />
@@ -47,24 +55,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;code.cleanup.on.save&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;rearrange.code.on.save&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;actions.on.save&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/home/teotd/.local/share/JetBrains/Toolbox/apps/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "code.cleanup.on.save": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/teotd/Documents/Classes/utd-wpl/KXH230029-p5/components",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "rearrange.code.on.save": "true",
+    "settings.editor.selected.configurable": "actions.on.save",
+    "ts.external.directory.path": "/home/teotd/.local/share/JetBrains/Toolbox/apps/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/components" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -83,7 +97,7 @@
       <workItem from="1729624804716" duration="7143000" />
       <workItem from="1729787477409" duration="356000" />
       <workItem from="1729799860894" duration="5631000" />
-      <workItem from="1729883048383" duration="27196000" />
+      <workItem from="1729883048383" duration="63280000" />
     </task>
     <servers />
   </component>

@@ -5,11 +5,40 @@
  * starting with "main-" here.
  */
 
-.main-topbar-buffer {
-  margin-top: 70px;
+:root {
+    --primary-color: #87CEEB; /* Sky Blue */
+    --primary-hover-color: #00A3E0; /* Darker Sky Blue */
+    --secondary-color: #ffaba3; /* Soft Coral */
+    --secondary-hover-color: #FF4F3D; /* Darker Coral */
+    --accent-color: #B19CD9; /* Light Purple */
+    --accent-hover-color: #9B7BCA; /* Darker Light Purple */
+    --background-color: #111; /* Light Gray */
+    --text-color: #333333; /* Dark Charcoal */
+    --text-color-hover: #f3f3f3; /* Dark Charcoal */
+    --highlight-color: #FFD700; /* Golden Yellow */
+    --highlight-hover-color: #FFC300;
+    --shadow-color: rgba(0, 0, 0, 0.5); /* Shadow for Depth */
 }
 
-.main-grid-item{
-  height: calc(100vh - 64px);
-  padding: 10px;
+.main-topbar-buffer {
+    margin-top: 70px;
+}
+
+.main-grid-item {
+    height: calc(100vh - 135px);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+@media (max-height: calc(100vh - 135px)) {
+    .main-grid-item {
+        height: auto;
+    }
+}
+
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Star Jedi', sans-serif; /* Optional: Use a Star Wars-like font */
 }

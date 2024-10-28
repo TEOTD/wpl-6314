@@ -1,15 +1,25 @@
-.topbar-appBar {
-    height: 60px;
-    justify-content: center;
-    transition: background-color 0.3s ease;
+.topBar {
+    padding: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.topbar-toolbar {
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
+.separator {
+    width: 2px;
+    height: 24px;
+    background-color: var(--text-color);
+    margin: 0 8px;
 }
 
-.topbar-name, .topbar-title, .topbar-version {
-    margin: 0 10px;
+.myName {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.version, .advancedFeatures {
+    color: var(--text-color);
+}
+
+.title {
+    font-weight: bold;
+    color: var(--text-color);
 }
