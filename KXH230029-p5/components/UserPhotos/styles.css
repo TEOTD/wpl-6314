@@ -13,7 +13,7 @@
 }
 
 .photoDate {
-    color: var(--secondary-color);
+    color: var(--text-color-hover);
 }
 
 .comment {
@@ -26,11 +26,12 @@
 
 .commentContainer {
     margin: 5px 0;
+    padding: 10px;
 }
 
 .commentLink {
     color: var(--highlight-color);
-    text-decoration: underline;
+    text-decoration: none;
     font-weight: bold;
 }
 
@@ -47,4 +48,18 @@
 
 .navButton {
     width: 100%;
+}
+
+.comments-heading {
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    padding: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+.no-comments {
+    color: var(--text-color-hover);
+    background-color: var(--secondary-hover-color);
+    padding: 10px;
 }
