@@ -4,10 +4,13 @@ import {Link} from "react-router-dom";
 import "./styles.css";
 import fetchModel from "../../lib/fetchModelData";
 
+// UserList component displays a list of users fetched from an API
 function UserList() {
+    // State to store user data and loading status
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Fetch user list data on component mount
     useEffect(() => {
         setLoading(true);
         fetchModel('/user/list')
@@ -22,6 +25,8 @@ function UserList() {
             });
     }, []);
 
+    // Memoized function to render user list only when `users` state changes
+    // Return null if there are no users
     const renderedUserList = useMemo(() => {
         if (!users) return null;
         return (
@@ -40,9 +45,12 @@ function UserList() {
         );
     }, [users]);
 
+    // Display loading spinner if data is still loading
     if (loading) return <CircularProgress className="loadingSpinner"/>;
+    // Display message if no users are found
     if (!users) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
 
+    // Render the list of users if data is available and loading is complete
     return renderedUserList;
 }
 
