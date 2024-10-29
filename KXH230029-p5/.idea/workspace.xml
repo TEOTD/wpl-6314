@@ -7,10 +7,8 @@
     <list default="true" id="7da046de-c2f7-4f7b-8562-ee38a46bea7e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/compiled/photoShare.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/compiled/photoShare.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/TopBar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserDetail/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserPhotos/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/UserDetail/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/photoShare.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/photoShare.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/eslint.config.js" beforeDir="false" />
@@ -91,7 +89,7 @@
       <workItem from="1729624804716" duration="7143000" />
       <workItem from="1729787477409" duration="356000" />
       <workItem from="1729799860894" duration="5631000" />
-      <workItem from="1729883048383" duration="83840000" />
+      <workItem from="1729883048383" duration="87794000" />
     </task>
     <servers />
   </component>

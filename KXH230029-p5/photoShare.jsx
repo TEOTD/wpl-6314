@@ -11,9 +11,9 @@ import UserPhotos from "./components/UserPhotos";
 
 //todo: fix backspace and forward
 
-function UserDetailRoute() {
+function UserDetailRoute(enableAdvancedFeatures) {
     const {userId} = useParams();
-    return <UserDetail userId={userId}/>;
+    return <UserDetail userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>;
 }
 
 function UserPhotosRoute({
@@ -42,11 +42,10 @@ function PhotoShare() {
     //Run only once during initial render
     useEffect(() => {
         const routes = pathname.split("/");
+        setFirstLoad(false);
         if (routes[1] === "photos") {
             if (routes.length === 4) {
                 setEnableAdvancedFeatures(true);
-            } else {
-                setEnableAdvancedFeatures(false);
             }
         }
     }, []);
@@ -54,33 +53,31 @@ function PhotoShare() {
     //Only change when enable features
     useEffect(() => {
         const routes = pathname.split("/");
-        if (enableAdvancedFeatures) {
-            if (photoIndex === -1 && routes.length === 4) {
-                setPhotoIndex(routes[3]);
+        if (routes.length >= 3) {
+            if (enableAdvancedFeatures) {
+                setPhotoIndex(photoIndex < 0 ? 0 : photoIndex);
             } else {
-                setPhotoIndex(photoIndex >= 0 ? photoIndex : 0);
+                setPhotoIndex(-1);
             }
-        } else {
-            setPhotoIndex(-1);
         }
     }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
 
     //run on stepper
     useEffect(() => {
         const routes = pathname.split("/");
-        if (firstLoad) {
-            setFirstLoad(false);
-        } else if (photoIndex === -1) {
-            navigate(`/photos/${routes[2]}`);
-        } else {
-            navigate(`/photos/${routes[2]}/${photoIndex}`);
+        if (!firstLoad && routes[1] === "photos") {
+            if (photoIndex === -1) {
+                navigate(`/photos/${routes[2]}`);
+            } else {
+                navigate(`/photos/${routes[2]}/${photoIndex}`);
+            }
         }
     }, [photoIndex, setPhotoIndex]);
 
     useEffect(() => {
         const routes = pathname.split("/");
         if (routes.length === 4 && routes[3] !== photoIndex) {
-            setPhotoIndex(routes[3]);
+            setPhotoIndex(parseInt(routes[3], 10));
         }
     }, [pathname]);
 
@@ -103,7 +100,8 @@ function PhotoShare() {
                     <Paper className="main-grid-item">
                         <Routes>
                             <Route path="/"/>
-                            <Route path="/users/:userId" element={<UserDetailRoute/>}/>
+                            <Route path="/users/:userId"
+                                   element={<UserDetailRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}/>
                             <Route
                                 path="/photos/:userId"
                                 element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}

@@ -4,9 +4,13 @@ import {Button, CircularProgress, Typography} from "@mui/material";
 import "./styles.css"; // Ensure this is the correct path
 import fetchModel from "../../lib/fetchModelData";
 
-function UserDetail({userId}) {
+function UserDetail({
+                        userId,
+                        enableAdvancedFeatures
+                    }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [path, setPath] = useState(`/photos/${userId}`);
 
     useEffect(() => {
         if (userId) {
@@ -22,6 +26,10 @@ function UserDetail({userId}) {
                 });
         }
     }, [userId]);
+
+    useEffect(() => {
+        setPath(enableAdvancedFeatures.enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`);
+    }, [enableAdvancedFeatures]);
 
     if (loading) return <CircularProgress className="loadingSpinner"/>;
     if (!user) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
@@ -45,7 +53,7 @@ function UserDetail({userId}) {
             </Typography>
             <Button
                 component={Link}
-                to={`/photos/${userId}`}
+                to={path}
                 className="viewPhotosButton"
                 variant="contained"
                 fullWidth
