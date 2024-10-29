@@ -1,4 +1,4 @@
-.photoContainer {
+.photo-container {
     background-color: var(--background-color);
     border-radius: 12px;
     padding: 20px;
@@ -7,12 +7,12 @@
     transition: transform 0.3s ease;
 }
 
-.photoImage {
+.photo-image {
     width: 100%;
     border-radius: 8px;
 }
 
-.photoDate {
+.photo-date {
     color: var(--text-color-hover);
 }
 
@@ -20,33 +20,27 @@
     color: var(--text-color-hover);
 }
 
-.commentsSection {
+.comments-section {
     margin-top: 10px;
 }
 
-.commentContainer {
+.comment-container {
     margin: 5px 0;
     padding: 10px;
 }
 
-.commentLink {
+.comment-link {
     color: var(--highlight-color);
     text-decoration: none;
     font-weight: bold;
 }
 
-.loadingSpinner {
-    display: block;
-    margin: auto;
-    color: var(--highlight-color);
-}
-
-.buttonContainer {
+.button-container {
     display: flex;
     width: 100%;
 }
 
-.navButton {
+.nav-button {
     width: 100%;
 }
 

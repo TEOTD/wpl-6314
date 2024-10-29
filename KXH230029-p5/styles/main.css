@@ -20,7 +20,7 @@
     --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
-.main-topbar-buffer {
+.main-top-bar-buffer {
     margin-top: 70px;
 }
 
@@ -43,10 +43,16 @@ body {
     font-family: 'Star Jedi', sans-serif;
 }
 
-.notFoundMessage {
+.not-found-message {
     color: var(--secondary-hover-color);
     text-align: center;
     font-size: 3em;
     margin: 20px 10px;
     font-weight: bold;
+}
+
+.loading-spinner {
+    display: block;
+    margin: auto;
+    color: var(--highlight-color);
 }

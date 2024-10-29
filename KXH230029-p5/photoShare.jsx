@@ -93,7 +93,7 @@ function PhotoShare() {
                         setEnableAdvancedFeatures={setEnableAdvancedFeatures}
                     />
                 </Grid>
-                <div className="main-topbar-buffer"/>
+                <div className="main-top-bar-buffer"/>
                 <Grid item sm={3}>
                     <Paper className="main-grid-item">
                         <UserList/>

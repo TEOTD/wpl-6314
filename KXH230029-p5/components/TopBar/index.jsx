@@ -46,7 +46,7 @@ function TopBar({
     }, [user, pathname]);
 
     return (
-        <AppBar position="static" className="topBar" sx={{backgroundColor: 'var(--primary-color)'}}>
+        <AppBar position="static" className="top-bar" sx={{backgroundColor: 'var(--primary-color)'}}>
             <Toolbar sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -58,7 +58,7 @@ function TopBar({
                     alignItems: "center",
                     gap: 1
                 }}>
-                    <Typography variant="h6" className="myName">
+                    <Typography variant="h6" className="my-name">
                         Kiran Hegde
                     </Typography>
                     <Box className="separator"/>
@@ -87,7 +87,7 @@ function TopBar({
                                 />
                             )}
                             label="Advanced Features"
-                            className="advancedFeatures"
+                            className="advanced-features"
                         />
                     </FormGroup>
                     {/* Dynamic title based on user and path */}

@@ -20,16 +20,16 @@ const formatDateTime = (date) => {
 // Component to render individual comments for a photo
 function Comment({comment}) {
     return (
-        <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="commentContainer">
+        <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
             {/* Display the comment text */}
             <Typography variant="body1" className="comment">{comment.comment}</Typography>
             <Typography variant="caption">
                 {/* Link to the user who posted the comment */}
                 <Link to={`/users/${comment.user._id}`}
-                      className="commentLink">{comment.user.first_name} {comment.user.last_name}
+                      className="comment-link">{comment.user.first_name} {comment.user.last_name}
                 </Link>
                 {/* Display the formatted comment date */}
-                <span className="photoDate">{' - '}{formatDateTime(comment.date_time)}</span>
+                <span className="photo-date">{' - '}{formatDateTime(comment.date_time)}</span>
             </Typography>
         </Paper>
     );
@@ -76,18 +76,18 @@ function Photo({
     }, [index, totalPhotos]);
 
     return (
-        <div key={photo._id} className="photoContainer">
+        <div key={photo._id} className="photo-container">
             {/* Display photo */}
-            <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photoImage"/>
+            <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
             {/* Display formatted date */}
             <Typography variant="body2" sx={{margin: "10px 0"}}
-                        className="photoDate">{formatDateTime(photo.date_time)}
+                        className="photo-date">{formatDateTime(photo.date_time)}
             </Typography>
             {/* Comments section heading */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
             {/* Render comments or display a message if there are none */}
             {photo.comments && photo.comments.length > 0 ? (
-                <div className="commentsSection">
+                <div className="comments-section">
                     {photo.comments.map((comment) => (
                         <Comment key={comment._id} comment={comment}/>
                     ))}
@@ -97,7 +97,7 @@ function Photo({
             )}
             {/* Navigation buttons for advanced features */}
             {enableAdvancedFeatures && (
-                <div className="buttonContainer">
+                <div className="button-container">
                     <Button onClick={() => onStep(-1)} disabled={buttonState.left} variant="contained"
                             sx={navButtonStyles("left")}>
                         Previous
@@ -139,12 +139,12 @@ function UserPhotos({
     }, [photos.length, setPhotoIndex]);
 
     // Show loading spinner while data is loading
-    if (loading) return <CircularProgress className="loadingSpinner"/>;
+    if (loading) return <CircularProgress className="loading-spinner"/>;
     // Display message if no photos are found
-    if (!photos.length) return <Typography variant="h6" className="notFoundMessage">Photos not found.</Typography>;
+    if (!photos.length) return <Typography variant="h6" className="not-found-message">Photos not found.</Typography>;
     // Display message if the selected photo in advanced mode is invalid
     if (enableAdvancedFeatures && photoIndex >= 0 && !photos[photoIndex]) {
-        return <Typography variant="h6" className="notFoundMessage">Photo not found.</Typography>;
+        return <Typography variant="h6" className="not-found-message">Photo not found.</Typography>;
     }
 
     // Render a single photo in advanced mode or a list of photos otherwise

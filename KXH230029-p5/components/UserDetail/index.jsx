@@ -32,12 +32,12 @@ function UserDetail({
 
     // Show a loading spinner while data is being fetched
     if (loading) {
-        return <CircularProgress className="loadingSpinner"/>;
+        return <CircularProgress className="loading-spinner"/>;
     }
 
     // Display message if no user data is found
     if (!user) {
-        return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
+        return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
     }
 
     // Destructure user details from fetched data
@@ -50,20 +50,20 @@ function UserDetail({
     } = user;
 
     return (
-        <div className="userDetailContainer">
+        <div className="user-detail-container">
             {/* Display user's name */}
-            <Typography variant="h4" className="userName">{`${first_name} ${last_name}`}</Typography>
+            <Typography variant="h4" className="user-name">{`${first_name} ${last_name}`}</Typography>
 
             {/* Display user description */}
-            <Typography variant="body1" className="userDescription">{description}</Typography>
+            <Typography variant="body1" className="user-description">{description}</Typography>
 
             {/* Display user's location */}
-            <Typography variant="body1" className="userLocation">
+            <Typography variant="body1" className="user-location">
                 <strong>Location:</strong> {location}
             </Typography>
 
             {/* Display user's occupation */}
-            <Typography variant="body1" className="userOccupation" marginBottom="10px">
+            <Typography variant="body1" className="user-occupation" marginBottom="10px">
                 <strong>Occupation:</strong> {occupation}
             </Typography>
 

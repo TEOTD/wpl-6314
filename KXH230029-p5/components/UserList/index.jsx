@@ -30,11 +30,11 @@ function UserList() {
     const renderedUserList = useMemo(() => {
         if (!users) return null;
         return (
-            <List className="userList">
+            <List className="user-list">
                 {users.map((user) => (
                     <ListItem
                         key={user._id}
-                        className="userListItem"
+                        className="user-list-item"
                         component={Link}
                         to={`/users/${user._id}`}
                     >
@@ -46,9 +46,9 @@ function UserList() {
     }, [users]);
 
     // Display loading spinner if data is still loading
-    if (loading) return <CircularProgress className="loadingSpinner"/>;
+    if (loading) return <CircularProgress className="loading-spinner"/>;
     // Display message if no users are found
-    if (!users) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
+    if (!users) return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
 
     // Render the list of users if data is available and loading is complete
     return renderedUserList;

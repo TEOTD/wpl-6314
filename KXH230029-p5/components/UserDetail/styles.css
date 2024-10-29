@@ -1,4 +1,4 @@
-.userDetailContainer {
+.user-detail-container {
     background-color: var(--background-color);
     color: var(--text-color);
     border-radius: 12px;
@@ -8,25 +8,19 @@
     padding-top: 20px;
 }
 
-.userName {
+.user-name {
     color: var(--highlight-color);
     margin-bottom: 15px;
     font-weight: bold;
 }
 
-.userDescription {
+.user-description {
     margin: 10px 0;
     font-style: italic;
     color: var(--text-color-hover);
 }
 
-.userLocation,
-.userOccupation {
+.user-location,
+.user-occupation {
     color: var(--secondary-color);
-}
-
-.loadingSpinner {
-    display: block;
-    margin: auto;
-    color: var(--highlight-color);
 }
