@@ -4,6 +4,7 @@ import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import fetchModel from "../../lib/fetchModelData";
 
+// Utility function to format date and time for display
 const formatDateTime = (date) => {
     return new Date(date).toLocaleString('en-US', {
         day: '2-digit',
@@ -16,20 +17,25 @@ const formatDateTime = (date) => {
     });
 };
 
+// Component to render individual comments for a photo
 function Comment({comment}) {
     return (
         <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="commentContainer">
+            {/* Display the comment text */}
             <Typography variant="body1" className="comment">{comment.comment}</Typography>
             <Typography variant="caption">
+                {/* Link to the user who posted the comment */}
                 <Link to={`/users/${comment.user._id}`}
                       className="commentLink">{comment.user.first_name} {comment.user.last_name}
                 </Link>
+                {/* Display the formatted comment date */}
                 <span className="photoDate">{' - '}{formatDateTime(comment.date_time)}</span>
             </Typography>
         </Paper>
     );
 }
 
+// Component to display a single photo along with navigation buttons and comments
 function Photo({
                    photo,
                    index,
@@ -37,11 +43,13 @@ function Photo({
                    onStep,
                    enableAdvancedFeatures
                }) {
+    // State to manage the enabled/disabled state of navigation buttons
     const [buttonState, setButtonState] = useState({
         left: false,
         right: false
     });
 
+    // Styles for navigation buttons
     const navButtonStyles = (side) => ({
         flex: 1,
         backgroundColor: "var(--accent-color)",
@@ -59,6 +67,7 @@ function Photo({
         }
     });
 
+    // Update button states when the photo index or total photo count changes
     useEffect(() => {
         setButtonState({
             left: index <= 0,
@@ -68,11 +77,15 @@ function Photo({
 
     return (
         <div key={photo._id} className="photoContainer">
+            {/* Display photo */}
             <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photoImage"/>
+            {/* Display formatted date */}
             <Typography variant="body2" sx={{margin: "10px 0"}}
                         className="photoDate">{formatDateTime(photo.date_time)}
             </Typography>
+            {/* Comments section heading */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
+            {/* Render comments or display a message if there are none */}
             {photo.comments && photo.comments.length > 0 ? (
                 <div className="commentsSection">
                     {photo.comments.map((comment) => (
@@ -82,6 +95,7 @@ function Photo({
             ) : (
                 <Typography variant="h6" sx={{margin: "10px 0"}} className="no-comments">No Comments Yet</Typography>
             )}
+            {/* Navigation buttons for advanced features */}
             {enableAdvancedFeatures && (
                 <div className="buttonContainer">
                     <Button onClick={() => onStep(-1)} disabled={buttonState.left} variant="contained"
@@ -98,15 +112,18 @@ function Photo({
     );
 }
 
+// Component to display all photos of a user, with advanced step-through functionality if enabled
 function UserPhotos({
                         userId,
                         enableAdvancedFeatures,
                         photoIndex,
                         setPhotoIndex
                     }) {
+    // State to hold the user's photos and loading state
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Fetch photos when userId changes
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
@@ -116,16 +133,21 @@ function UserPhotos({
             .finally(() => setLoading(false));
     }, [userId]);
 
+    // Handle navigation in advanced mode by updating photoIndex
     const handleStep = useCallback((direction) => {
         setPhotoIndex((prevIndex) => Math.min(Math.max(prevIndex + direction, 0), photos.length - 1));
     }, [photos.length, setPhotoIndex]);
 
+    // Show loading spinner while data is loading
     if (loading) return <CircularProgress className="loadingSpinner"/>;
+    // Display message if no photos are found
     if (!photos.length) return <Typography variant="h6" className="notFoundMessage">Photos not found.</Typography>;
+    // Display message if the selected photo in advanced mode is invalid
     if (enableAdvancedFeatures && photoIndex >= 0 && !photos[photoIndex]) {
         return <Typography variant="h6" className="notFoundMessage">Photo not found.</Typography>;
     }
 
+    // Render a single photo in advanced mode or a list of photos otherwise
     return enableAdvancedFeatures && photoIndex >= 0 ? (
         <Photo
             photo={photos[photoIndex]}
