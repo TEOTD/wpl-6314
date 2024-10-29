@@ -8,9 +8,12 @@ function UserDetail({
                         userId,
                         enableAdvancedFeatures
                     }) {
+    // State to hold user data and loading status
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Fetch user data when component mounts or when userId changes
+    // Set loading state to true while fetching and set to false after fetch completes
     useEffect(() => {
         if (userId) {
             setLoading(true);
@@ -27,14 +30,17 @@ function UserDetail({
         }
     }, [userId]);
 
+    // Show a loading spinner while data is being fetched
     if (loading) {
         return <CircularProgress className="loadingSpinner"/>;
     }
 
+    // Display message if no user data is found
     if (!user) {
         return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
     }
 
+    // Destructure user details from fetched data
     const {
         first_name,
         last_name,
@@ -45,14 +51,23 @@ function UserDetail({
 
     return (
         <div className="userDetailContainer">
+            {/* Display user's name */}
             <Typography variant="h4" className="userName">{`${first_name} ${last_name}`}</Typography>
+
+            {/* Display user description */}
             <Typography variant="body1" className="userDescription">{description}</Typography>
+
+            {/* Display user's location */}
             <Typography variant="body1" className="userLocation">
                 <strong>Location:</strong> {location}
             </Typography>
+
+            {/* Display user's occupation */}
             <Typography variant="body1" className="userOccupation" marginBottom="10px">
                 <strong>Occupation:</strong> {occupation}
             </Typography>
+
+            {/* Button to view user's photos, links to either advanced or standard view based on enableAdvancedFeatures */}
             <Button
                 component={Link}
                 to={enableAdvancedFeatures.enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
