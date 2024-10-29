@@ -1,0 +1,59 @@
+.photo-container {
+    background-color: var(--background-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.photo-image {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.photo-date {
+    color: var(--text-color-hover);
+}
+
+.comment {
+    color: var(--text-color-hover);
+}
+
+.comments-section {
+    margin-top: 10px;
+}
+
+.comment-container {
+    margin: 5px 0;
+    padding: 10px;
+}
+
+.comment-link {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.button-container {
+    display: flex;
+    width: 100%;
+}
+
+.nav-button {
+    width: 100%;
+}
+
+.comments-heading {
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    padding: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+.no-comments {
+    color: var(--text-color-hover);
+    background-color: var(--secondary-hover-color);
+    padding: 10px;
+}

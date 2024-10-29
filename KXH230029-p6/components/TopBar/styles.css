@@ -1,0 +1,25 @@
+.top-bar {
+    padding: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.separator {
+    width: 2px;
+    height: 24px;
+    background-color: var(--text-color);
+    margin: 0 8px;
+}
+
+.my-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.version, .advanced-features {
+    color: var(--text-color);
+}
+
+.title {
+    font-weight: bold;
+    color: var(--text-color);
+}

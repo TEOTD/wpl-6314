@@ -1,0 +1,26 @@
+.user-detail-container {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    margin: 20px;
+    text-align: center;
+    padding-bottom: 0px;
+    padding-top: 20px;
+}
+
+.user-name {
+    color: var(--highlight-color);
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.user-description {
+    margin: 10px 0;
+    font-style: italic;
+    color: var(--text-color-hover);
+}
+
+.user-location,
+.user-occupation {
+    color: var(--secondary-color);
+}
