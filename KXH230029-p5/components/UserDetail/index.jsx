@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Typography} from "@mui/material";
-import "./styles.css"; // Ensure this is the correct path
+import "./styles.css";
 import fetchModel from "../../lib/fetchModelData";
 
 function UserDetail({
@@ -10,7 +10,6 @@ function UserDetail({
                     }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [path, setPath] = useState(`/photos/${userId}`);
 
     useEffect(() => {
         if (userId) {
@@ -18,21 +17,23 @@ function UserDetail({
             fetchModel(`/user/${userId}`)
                 .then((result) => {
                     setUser(result.data);
-                    setLoading(false);
                 })
                 .catch((error) => {
                     console.error("Failed to fetch user:", error);
+                })
+                .finally(() => {
                     setLoading(false);
                 });
         }
     }, [userId]);
 
-    useEffect(() => {
-        setPath(enableAdvancedFeatures.enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`);
-    }, [enableAdvancedFeatures]);
+    if (loading) {
+        return <CircularProgress className="loadingSpinner"/>;
+    }
 
-    if (loading) return <CircularProgress className="loadingSpinner"/>;
-    if (!user) return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
+    if (!user) {
+        return <Typography variant="h6" className="notFoundMessage">User not found.</Typography>;
+    }
 
     const {
         first_name,
@@ -46,14 +47,15 @@ function UserDetail({
         <div className="userDetailContainer">
             <Typography variant="h4" className="userName">{`${first_name} ${last_name}`}</Typography>
             <Typography variant="body1" className="userDescription">{description}</Typography>
-            <Typography variant="body1" className="userLocation"><strong>Location:</strong> {location}
+            <Typography variant="body1" className="userLocation">
+                <strong>Location:</strong> {location}
             </Typography>
-            <Typography variant="body1" className="userOccupation"
-                        marginBottom="10px"><strong>Occupation:</strong> {occupation}
+            <Typography variant="body1" className="userOccupation" marginBottom="10px">
+                <strong>Occupation:</strong> {occupation}
             </Typography>
             <Button
                 component={Link}
-                to={path}
+                to={enableAdvancedFeatures.enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
                 className="viewPhotosButton"
                 variant="contained"
                 fullWidth
