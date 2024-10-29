@@ -4,19 +4,26 @@ import {useLocation} from "react-router-dom";
 import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
+// TopBar component for displaying application title, user information, version number, and a toggle for advanced features
 function TopBar({
                     enableAdvancedFeatures,
                     setEnableAdvancedFeatures
                 }) {
+    // Retrieve current URL pathname to determine the context
     const {pathname} = useLocation();
+
+    // State variables for user and application version
     const [user, setUser] = useState(null);
     const [version, setVersion] = useState('');
 
+    // Extracts the user ID from the URL based on path pattern
     const userId = useMemo(() => {
         const match = pathname.match(/\/photos\/([A-Za-z\d]+)|\/users\/([A-Za-z\d]+)/);
         return match ? match[1] || match[2] : null;
     }, [pathname]);
 
+    // Fetches user data and app version when userId changes
+    /*It also fetches user data if userId is present, fetches app version, and log any errors during data fetching*/
     useEffect(() => {
         Promise.all([
             userId ? fetchModel(`/user/${userId}`)
@@ -27,6 +34,10 @@ function TopBar({
             .catch((error) => console.error('Failed to fetch data:', error));
     }, [userId]);
 
+    // Generates the page title which represents context based on the current path and fetched user data
+    // Default title when no user or other paths - Home Page
+    // User-specific title like Peregrin Took
+    // Photo-specific title like Photos of Peregrin Took
     const title = useMemo(() => {
         if (!user) return 'Home Page';
         if (pathname.startsWith('/users/')) return `${user.first_name} ${user.last_name}`;
@@ -41,6 +52,7 @@ function TopBar({
                 justifyContent: "space-between",
                 alignItems: "center"
             }}>
+                {/* Left section: User name and app version */}
                 <Box sx={{
                     display: "flex",
                     alignItems: "center",
@@ -55,12 +67,14 @@ function TopBar({
                     </Typography>
                 </Box>
 
+                {/* Right section: Advanced Features toggle and dynamic title */}
                 <Box sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: 2
                 }}>
                     <FormGroup>
+                        {/* Checkbox to toggle advanced features */}
                         <FormControlLabel
                             control={(
                                 <Checkbox
@@ -76,6 +90,7 @@ function TopBar({
                             className="advancedFeatures"
                         />
                     </FormGroup>
+                    {/* Dynamic title based on user and path */}
                     <Typography variant="h6" className="title">
                         {title}
                     </Typography>
