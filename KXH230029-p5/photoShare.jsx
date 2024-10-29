@@ -51,7 +51,7 @@ function PhotoShare() {
     //Only change when enable features
     useEffect(() => {
         const routes = pathname.split("/");
-        if (routes.length >= 3) {
+        if (routes.length >= 3 && routes[1] === "photos") {
             if (enableAdvancedFeatures) {
                 setPhotoIndex(photoIndex < 0 ? 0 : photoIndex);
             } else {
@@ -74,10 +74,13 @@ function PhotoShare() {
 
     useEffect(() => {
         const routes = pathname.split("/");
-        if (routes.length === 4 && routes[3] !== photoIndex) {
-            setPhotoIndex(parseInt(routes[3], 10));
-        } else if (routes.length === 3) {
-            setPhotoIndex(-1);
+        if (routes[1] === "photos") {
+            if (routes.length === 4 && routes[3] !== photoIndex) {
+                setPhotoIndex(parseInt(routes[3], 10));
+                setEnableAdvancedFeatures(true);
+            } else if (routes.length === 3) {
+                setEnableAdvancedFeatures(false);
+            }
         }
     }, [pathname]);
 
