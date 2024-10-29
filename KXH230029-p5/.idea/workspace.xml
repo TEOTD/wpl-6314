@@ -8,15 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/compiled/photoShare.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/compiled/photoShare.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/TopBar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/TopBar/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/TopBar/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserDetail/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserDetail/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserDetail/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserList/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserList/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserList/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserList/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserPhotos/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/UserPhotos/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/components/UserPhotos/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/photoShare.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/photoShare.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/main.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../todo-list/todo-react/eslint.config.js" beforeDir="false" />
@@ -99,7 +91,8 @@
       <workItem from="1729799860894" duration="5631000" />
       <workItem from="1729883048383" duration="93799000" />
       <workItem from="1730212033615" duration="8922000" />
-      <workItem from="1730222272890" duration="430000" />
+      <workItem from="1730222272890" duration="1841000" />
+      <workItem from="1730224122636" duration="176000" />
     </task>
     <servers />
   </component>

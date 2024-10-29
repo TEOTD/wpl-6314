@@ -52,7 +52,7 @@ function TopBar({
                 justifyContent: "space-between",
                 alignItems: "center"
             }}>
-                {/* Left section: User name and app version */}
+                {/* Left section: Username and app version */}
                 <Box sx={{
                     display: "flex",
                     alignItems: "center",
