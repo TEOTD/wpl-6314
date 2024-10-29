@@ -9,8 +9,6 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 
-//todo: fix backspace and forward
-
 function UserDetailRoute(enableAdvancedFeatures) {
     const {userId} = useParams();
     return <UserDetail userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>;
@@ -78,6 +76,8 @@ function PhotoShare() {
         const routes = pathname.split("/");
         if (routes.length === 4 && routes[3] !== photoIndex) {
             setPhotoIndex(parseInt(routes[3], 10));
+        } else if (routes.length === 3) {
+            setPhotoIndex(-1);
         }
     }, [pathname]);
 

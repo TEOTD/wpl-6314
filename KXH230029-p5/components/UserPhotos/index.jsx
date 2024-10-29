@@ -35,7 +35,9 @@ function Comment({comment}) {
                         {user.first_name} {user.last_name}
                     </Link> {' - '}
                     <Typography variant="caption"
-                                className="photoDate">{formatDateTime(new Date(date_time))}
+                                className="photoDate" sx={{
+                        color: "var(--text-color-hover)"
+                    }}>{formatDateTime(new Date(date_time))}
                     </Typography>
                 </Typography>
             </Paper>
@@ -54,7 +56,10 @@ function Photo({
     const [buttonRightDisabled, setButtonRightDisabled] = useState(false);
 
     useEffect(() => {
-        if (index <= 0) {
+        if (index <= 0 && index >= totalPhotos - 1) {
+            setButtonLeftDisabled(true);
+            setButtonRightDisabled(true);
+        } else if (index <= 0) {
             setButtonLeftDisabled(true);
             setButtonRightDisabled(false);
         } else if (index >= totalPhotos - 1) {
@@ -80,6 +85,7 @@ function Photo({
                             padding: "5px",
                             borderTopRightRadius: 5,
                             borderTopLeftRadius: 5,
+                            fontWeight: "bold"
                         }}>COMMENTS
             </Typography>
             {photo.comments && photo.comments.length > 0 ? (
