@@ -1,7 +1,7 @@
 .userDetailContainer {
     background-color: var(--background-color);
     color: var(--text-color);
-    border-radius: 12px; /* Rounded corners */
+    border-radius: 12px;
     margin: 20px;
     text-align: center;
     padding-bottom: 0px;
@@ -9,15 +9,15 @@
 }
 
 .userName {
-    color: var(--highlight-color); /* Gold color for the name */
+    color: var(--highlight-color);
     margin-bottom: 15px;
-    font-weight: bold; /* Make it stand out */
+    font-weight: bold;
 }
 
 .userDescription {
     margin: 10px 0;
-    font-style: italic; /* Italic style for description */
-    color: var(--text-color-hover); /* Default text color */
+    font-style: italic;
+    color: var(--text-color-hover);
 }
 
 .userLocation,
@@ -28,5 +28,5 @@
 .loadingSpinner {
     display: block;
     margin: auto;
-    color: var(--highlight-color); /* Gold color for the spinner */
+    color: var(--highlight-color);
 }

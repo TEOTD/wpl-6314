@@ -27,7 +27,7 @@ function TopBar({
     }, [pathname]);
 
     const title = useMemo(() => {
-        if (!user) return 'PhotoApp';
+        if (!user) return 'Home Page';
         if (pathname.startsWith('/users/')) return `${user.first_name} ${user.last_name}`;
         if (pathname.startsWith('/photos/')) return `Photos of ${user.first_name} ${user.last_name}`;
         return 'PhotoApp';

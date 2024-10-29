@@ -29,14 +29,14 @@
 }
 
 .commentLink {
-    color: var(--highlight-color); /* Gold color for user links */
+    color: var(--highlight-color);
     text-decoration: underline;
 }
 
 .loadingSpinner {
     display: block;
     margin: auto;
-    color: var(--highlight-color); /* Gold color for the spinner */
+    color: var(--highlight-color);
 }
 
 .buttonContainer {
@@ -45,5 +45,5 @@
 }
 
 .navButton {
-    width: 100%; /* Ensure buttons take the full width of their flex item */
+    width: 100%;
 }
