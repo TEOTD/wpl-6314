@@ -12,19 +12,20 @@ function TopBar({
     const [user, setUser] = useState(null);
     const [version, setVersion] = useState('');
 
-    useEffect(() => {
+    const userId = useMemo(() => {
         const match = pathname.match(/\/photos\/([A-Za-z\d]+)|\/users\/([A-Za-z\d]+)/);
-        const userId = match ? match[1] || match[2] : null;
-
-        if (userId) {
-            fetchModel(`/user/${userId}`)
-                .then((result) => setUser(result.data))
-                .catch((error) => console.error('Failed to fetch user:', error));
-        }
-        fetchModel('/test/info')
-            .then((result) => setVersion(result.data.__v))
-            .catch((error) => console.error('Failed to fetch version:', error));
+        return match ? match[1] || match[2] : null;
     }, [pathname]);
+
+    useEffect(() => {
+        Promise.all([
+            userId ? fetchModel(`/user/${userId}`)
+                .then((result) => setUser(result.data)) : Promise.resolve(),
+            fetchModel('/test/info')
+                .then((result) => setVersion(result.data.__v))
+        ])
+            .catch((error) => console.error('Failed to fetch data:', error));
+    }, [userId]);
 
     const title = useMemo(() => {
         if (!user) return 'Home Page';
@@ -65,9 +66,7 @@ function TopBar({
                                 <Checkbox
                                     sx={{
                                         color: 'var(--text-color)',
-                                        '&.Mui-checked': {
-                                            color: 'var(--text-color)',
-                                        },
+                                        '&.Mui-checked': {color: 'var(--text-color)'},
                                     }}
                                     checked={enableAdvancedFeatures}
                                     onChange={() => setEnableAdvancedFeatures(prev => !prev)}
