@@ -138,7 +138,7 @@ app.get("/test/:p1", async function (request, response) {
  */
 app.get("/user/list", async function (request, response) {
     try {
-        const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1});
+        const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1}).sort({_id: 1});
         response.status(200).send(users);
     } catch (error) {
         response.status(500).send({error: "An error occurred while fetching users."});
@@ -184,6 +184,9 @@ app.get("/photosOfUser/:id", async function (request, response) {
     const aggregationFunction = [
         {
             $match: {user_id: objectId}
+        },
+        {
+            $sort: {_id: 1}
         },
         {
             $unwind: {
