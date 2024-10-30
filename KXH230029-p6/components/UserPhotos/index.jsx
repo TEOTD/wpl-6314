@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
-import fetchModel from "../../lib/fetchModelData";
+import axios from "axios";
 
 // Utility function to format date and time for display
 const formatDateTime = (date) => {
@@ -127,7 +127,7 @@ function UserPhotos({
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
-        fetchModel(`/photosOfUser/${userId}`)
+        axios.get(`/photosOfUser/${userId}`)
             .then((result) => setPhotos(result.data))
             .catch((error) => console.error("Failed to fetch user photos:", error))
             .finally(() => setLoading(false));

@@ -40,17 +40,17 @@ const express = require("express");
 const app = express();
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
+const {Types} = require("mongoose");
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
-const models = require("./modelData/photoApp.js").models;
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/project6", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 });
 
 // We have the express static module
@@ -58,14 +58,14 @@ mongoose.connect("mongodb://127.0.0.1/project6", {
 app.use(express.static(__dirname));
 
 app.get("/", function (request, response) {
-  response.send("Simple web server of files from " + __dirname);
+    response.send("Simple web server of files from " + __dirname);
 });
 
 /**
  * Use express to handle argument passing in the URL. This .get will cause
  * express to accept URLs with /test/<something> and return the something in
  * request.params.p1.
- * 
+ *
  * If implement the get as follows:
  * /test        - Returns the SchemaInfo object of the database in JSON format.
  *                This is good for testing connectivity with MongoDB.
@@ -74,106 +74,211 @@ app.get("/", function (request, response) {
  *                in JSON format.
  */
 app.get("/test/:p1", async function (request, response) {
-  // Express parses the ":p1" from the URL and returns it in the request.params
-  // objects.
-  console.log("/test called with param1 = ", request.params.p1);
+    // Express parses the ":p1" from the URL and returns it in the request.params
+    // objects.
+    console.log("/test called with param1 = ", request.params.p1);
 
-  const param = request.params.p1 || "info";
+    const param = request.params.p1 || "info";
 
-  if (param === "info") {
-    // Fetch the SchemaInfo. There should only one of them. The query of {} will
-    // match it.
-    try{
+    if (param === "info") {
+        // Fetch the SchemaInfo. There should only one of them. The query of {} will
+        // match it.
+        try {
 
-      const info = await SchemaInfo.find({});
-      if (info.length === 0) {
-            // No SchemaInfo found - return 500 error
-            return response.status(500).send("Missing SchemaInfo");
-      }
-      console.log("SchemaInfo", info[0]);
-      return response.json(info[0]); // Use `json()` to send JSON responses
-    } catch(err){
-      // Handle any errors that occurred during the query
-      console.error("Error in /test/info:", err);
-      return response.status(500).json(err); // Send the error as JSON
-    }
+            const info = await SchemaInfo.find({});
+            if (info.length === 0) {
+                // No SchemaInfo found - return 500 error
+                return response.status(500).send("Missing SchemaInfo");
+            }
+            console.log("SchemaInfo", info[0]);
+            return response.json(info[0]); // Use `json()` to send JSON responses
+        } catch (err) {
+            // Handle any errors that occurred during the query
+            console.error("Error in /test/info:", err);
+            return response.status(500).json(err); // Send the error as JSON
+        }
 
-  } else if (param === "counts") {
-   // If the request parameter is "counts", we need to return the counts of all collections.
+    } else if (param === "counts") {
+        // If the request parameter is "counts", we need to return the counts of all collections.
 // To achieve this, we perform asynchronous calls to each collection using `Promise.all`.
 // We store the collections in an array and use `Promise.all` to execute each `.countDocuments()` query concurrently.
-   
-    
-const collections = [
-  { name: "user", collection: User },
-  { name: "photo", collection: Photo },
-  { name: "schemaInfo", collection: SchemaInfo },
-];
 
-try {
-  await Promise.all(
-    collections.map(async (col) => {
-      col.count = await col.collection.countDocuments({});
-      return col;
-    })
-  );
 
-  const obj = {};
-  for (let i = 0; i < collections.length; i++) {
-    obj[collections[i].name] = collections[i].count;
-  }
-  return response.end(JSON.stringify(obj));
-} catch (err) {
-  return response.status(500).send(JSON.stringify(err));
-}
-  } else {
-    // If we know understand the parameter we return a (Bad Parameter) (400)
-    // status.
-    return response.status(400).send("Bad param " + param);
-  }
+        const collections = [
+            {name: "user", collection: User},
+            {name: "photo", collection: Photo},
+            {name: "schemaInfo", collection: SchemaInfo},
+        ];
+
+        try {
+            await Promise.all(
+                collections.map(async (col) => {
+                    col.count = await col.collection.countDocuments({});
+                    return col;
+                })
+            );
+
+            const obj = {};
+            for (let i = 0; i < collections.length; i++) {
+                obj[collections[i].name] = collections[i].count;
+            }
+            return response.end(JSON.stringify(obj));
+        } catch (err) {
+            return response.status(500).send(JSON.stringify(err));
+        }
+    } else {
+        // If we know understand the parameter we return a (Bad Parameter) (400)
+        // status.
+        return response.status(400).send("Bad param " + param);
+    }
 });
 
 /**
  * URL /user/list - Returns all the User objects.
  */
-app.get("/user/list", function (request, response) {
-  response.status(200).send(models.userListModel());
+app.get("/user/list", async function (request, response) {
+    try {
+        const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1});
+        response.status(200).send(users);
+    } catch (error) {
+        response.status(500).send({error: "An error occurred while fetching users."});
+    }
 });
 
 /**
  * URL /user/:id - Returns the information for User (id).
  */
-app.get("/user/:id", function (request, response) {
-  const id = request.params.id;
-  const user = models.userModel(id);
-  if (user === null) {
-    console.log("User with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(user);
+app.get("/user/:id", async function (request, response) {
+    const id = request.params.id;
+    if (!Types.ObjectId.isValid(id)) {
+        console.log(`Invalid UserId format: ${id}`);
+        return response.status(400).send(`Invalid UserId: ${id}`);
+    }
+    const objectId = new Types.ObjectId(id);
+    try {
+        const user = await User.findById(objectId, {__v: 0});
+        if (!user) {
+            console.log(`User with _id: ${id} not found.`);
+            return response.status(404).send(`User with _id: ${id} not found.`);
+        }
+        return response.status(200).send(user);
+    } catch (error) {
+        console.log("Error in /user/:id:", error);
+        return response.status(500).send({error: `An error occurred while fetching user with _id: ${id}. ${error.message}`});
+    }
 });
+
 
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
-app.get("/photosOfUser/:id", function (request, response) {
-  const id = request.params.id;
-  const photos = models.photoOfUserModel(id);
-  if (photos.length === 0) {
-    console.log("Photos for user with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(photos);
+app.get("/photosOfUser/:id", async function (request, response) {
+    const id = request.params.id;
+
+    if (!Types.ObjectId.isValid(id)) {
+        console.log(`Invalid ID format: ${id}`);
+        return response.status(400).send(`Invalid ID format: ${id}`);
+    }
+
+    const objectId = new Types.ObjectId(id);
+    const aggregationFunction = [
+        {
+            $match: {user_id: objectId}
+        },
+        {
+            $unwind: {
+                path: "$comments",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "comments.user_id",
+                foreignField: "_id",
+                as: "user_info"
+            }
+        },
+        {
+            $unwind: {
+                path: "$user_info",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $addFields: {
+                "comments.user": {
+                    $cond: {
+                        if: {$ne: [{$type: "$user_info"}, "missing"]},
+                        then: {
+                            _id: "$user_info._id",
+                            first_name: "$user_info.first_name",
+                            last_name: "$user_info.last_name"
+                        },
+                        else: "$$REMOVE"
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                file_name: {$first: "$file_name"},
+                date_time: {$first: "$date_time"},
+                user_id: {$first: "$user_id"},
+                comments: {$push: "$comments"},
+            }
+        },
+        {
+            $addFields: {
+                comments: {
+                    $map: {
+                        input: "$comments",
+                        as: "comment",
+                        in: {
+                            _id: "$$comment._id",
+                            date_time: "$$comment.date_time",
+                            user: "$$comment.user",
+                            comment: "$$comment.comment",
+                            photo_id: "$$comment.photo_id",
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $addFields: {
+                comments: {
+                    $filter: {
+                        input: "$comments",
+                        as: "comment",
+                        cond: {$ne: ["$$comment", {}]}
+                    }
+                }
+            }
+        }
+    ];
+
+    try {
+        const photos = await Photo.aggregate(aggregationFunction);
+        console.log(photos[0], photos[1]);
+        if (!photos.length) {
+            console.log("Photos for user with _id: " + id + " not found.");
+            return response.status(404).send("Photos not found");
+        }
+        return response.status(200).send(photos);
+    } catch (error) {
+        console.log("Error in /photosOfUser/:id:", error);
+        return response.status(500).send({error: `An error occurred while fetching photos for user with _id: ${id}. Error: ${error.message}`});
+    }
 });
 
 const server = app.listen(3000, function () {
-  const port = server.address().port;
-  console.log(
-    "Listening at http://localhost:" +
-      port +
-      " exporting the directory " +
-      __dirname
-  );
+    const port = server.address().port;
+    console.log(
+        "Listening at http://localhost:" +
+        port +
+        " exporting the directory " +
+        __dirname
+    );
 });

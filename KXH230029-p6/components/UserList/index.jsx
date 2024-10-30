@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import {CircularProgress, List, ListItem, ListItemText, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
 import "./styles.css";
-import fetchModel from "../../lib/fetchModelData";
+import axios from "axios";
 
 // UserList component displays a list of users fetched from an API
 function UserList() {
@@ -13,7 +13,7 @@ function UserList() {
     // Fetch user list data on component mount
     useEffect(() => {
         setLoading(true);
-        fetchModel('/user/list')
+        axios.get('/user/list')
             .then((result) => {
                 setUsers(result.data);
             })

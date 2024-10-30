@@ -1,8 +1,8 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {AppBar, Box, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
 import {useLocation} from "react-router-dom";
-import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
+import axios from "axios";
 
 // TopBar component for displaying application title, user information, version number, and a toggle for advanced features
 function TopBar({
@@ -26,9 +26,9 @@ function TopBar({
     /*It also fetches user data if userId is present, fetches app version, and log any errors during data fetching*/
     useEffect(() => {
         Promise.all([
-            userId ? fetchModel(`/user/${userId}`)
+            userId ? axios.get(`/user/${userId}`)
                 .then((result) => setUser(result.data)) : Promise.resolve(),
-            fetchModel('/test/info')
+            axios.get('/test/info')
                 .then((result) => setVersion(result.data.__v))
         ])
             .catch((error) => console.error('Failed to fetch data:', error));

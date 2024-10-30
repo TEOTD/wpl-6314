@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Typography} from "@mui/material";
 import "./styles.css";
-import fetchModel from "../../lib/fetchModelData";
+import axios from "axios";
 
 function UserDetail({
                         userId,
@@ -17,7 +17,7 @@ function UserDetail({
     useEffect(() => {
         if (userId) {
             setLoading(true);
-            fetchModel(`/user/${userId}`)
+            axios.get(`/user/${userId}`)
                 .then((result) => {
                     setUser(result.data);
                 })
