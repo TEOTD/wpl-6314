@@ -15,3 +15,21 @@
     color: var(--text-color);
     box-shadow: 0 4px 8px var(--shadow-color);
 }
+
+.user-list-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-bubble-item {
+    justify-content: flex-end;
+    display: flex;
+    flex-shrink: 2;
+}
+
+.bubble-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: auto;
+}

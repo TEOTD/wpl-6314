@@ -8,6 +8,7 @@ import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
+import UserComments from "./components/UserComments";
 
 // Route component for displaying user details with advanced features toggle passed as a prop
 function UserDetailRoute(enableAdvancedFeatures) {
@@ -29,6 +30,13 @@ function UserPhotosRoute({
             photoIndex={photoIndex}
             setPhotoIndex={setPhotoIndex}
         />
+    );
+}
+
+function UserCommentsRoute() {
+    const {userId} = useParams();
+    return (
+        <UserComments userId={userId}/>
     );
 }
 
@@ -94,7 +102,7 @@ function PhotoShare() {
                 {/* Sidebar listing users */}
                 <Grid item sm={3}>
                     <Paper className="main-grid-item">
-                        <UserList/>
+                        <UserList enableAdvancedFeatures={enableAdvancedFeatures}/>
                     </Paper>
                 </Grid>
                 {/* Main content area displaying user details or photos based on the route */}
@@ -120,7 +128,13 @@ function PhotoShare() {
                                     />
                                 )}
                             />
-                            <Route path="/users" element={<UserList/>}/>
+                            <Route
+                                path="/comments/:userId"
+                                element={(
+                                    <UserCommentsRoute/>
+                                )}
+                            />
+                            <Route path="/users" element={<UserList enableAdvancedFeatures={enableAdvancedFeatures}/>}/>
                         </Routes>
                     </Paper>
                 </Grid>

@@ -285,3 +285,113 @@ const server = app.listen(3000, function () {
         __dirname
     );
 });
+
+app.get("/photos/count", async function (request, response) {
+    const aggregationFunction = [
+        {
+            $group: {
+                _id: "$user_id",
+                photo_count: {$sum: 1}
+            }
+        },
+        {
+            $sort: {_id: 1}
+        },
+        {
+            $project: {
+                user_id: "$_id",
+                photo_count: 1,
+                _id: 0
+            }
+        }
+    ];
+    try {
+        const photoCounts = await Photo.aggregate(aggregationFunction);
+        response.status(200).send(photoCounts);
+    } catch (error) {
+        response.status(500).send({error: "An error occurred while fetching photo count."});
+    }
+});
+
+app.get("/comments/count", async function (request, response) {
+    const aggregationFunction = [
+        {
+            $unwind: {
+                path: "$comments",
+            }
+        },
+        {
+            $group: {
+                _id: "$comments.user_id",
+                comment_count: {$sum: 1}
+            }
+        },
+        {
+            $sort: {_id: 1}
+        },
+        {
+            $project: {
+                user_id: "$_id",
+                comment_count: 1,
+                _id: 0
+            }
+        }
+    ];
+    try {
+        const commentCounts = await Photo.aggregate(aggregationFunction);
+        response.status(200).send(commentCounts);
+    } catch (error) {
+        response.status(500).send({error: "An error occurred while fetching comment count."});
+    }
+});
+
+app.get("/commentsOfUser/:id", async function (request, response) {
+    const id = request.params.id;
+
+    if (!Types.ObjectId.isValid(id)) {
+        console.log(`Invalid ID format: ${id}`);
+        return response.status(400).send(`Invalid ID format: ${id}`);
+    }
+
+    const objectId = new Types.ObjectId(id);
+    const aggregationFunction = [
+        {
+            $unwind: "$comments"
+        },
+        {
+            $match: {"comments.user_id": objectId}
+        },
+        {
+            $sort: {_id: 1}
+        },
+        {
+            $project: {
+                _id: "$comments._id",
+                photo_id: "$_id",
+                file_name: "$file_name",
+                comment: "$comments.comment",
+                date_time: "$comments.date_time"
+            }
+        }
+    ];
+
+    try {
+        const commentsOfUser = await Photo.aggregate(aggregationFunction);
+        console.log(commentsOfUser[0], commentsOfUser[1]);
+        if (!commentsOfUser.length) {
+            console.log("Comments for user with _id: " + id + " not found.");
+            return response.status(404).send("Comments not found");
+        }
+        return response.status(200).send(commentsOfUser);
+    } catch (error) {
+        console.log("Error in /commentsOfUser/:id:", error);
+        return response.status(500).send({error: `An error occurred while fetching comments for user with _id: ${id}. Error: ${error.message}`});
+    }
+});
+
+
+// todo:  In implementing this you are welcome to add new server API calls or enhance existing calls.
+//  If you do so you need to update the Mocha test (test/serverApiTest.js) to test your new functionality.
+//  If you add new APIs, include them in a new describe() block following the pattern used by the other tests.
+//  Make sure that the provided tests still pass before submitting.
+//  You should not add new properties to the Mongoose Schema but you are welcome to add any indexes you need to make this work on larger data sets.

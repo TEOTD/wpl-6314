@@ -12,9 +12,10 @@
   "author": "Mendel Rosenblum <mendel@cs.stanford.edu> ",
   "license": "ISC",
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/material": "^5.14.11",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.6",
+    "@mui/material": "^5.16.7",
     "@mui/styles": "^5.11.7",
     "@mui/system": "^5.11.8",
     "@popperjs/core": "^2.11.5",
