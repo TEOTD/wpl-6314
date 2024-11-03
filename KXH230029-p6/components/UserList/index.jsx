@@ -17,44 +17,50 @@ function UserList({enableAdvancedFeatures}) {
     // Fetch user list data on component mount
     useEffect(() => {
         setLoading(true);
-        axios.get('/user/list')
-            .then((result) => {
-                setUsers(result.data);
-            })
-            .catch((error) => {
-                console.error("Failed to fetch users:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        (async () => {
+            await axios.get('/user/list')
+                .then((result) => {
+                    setUsers(result.data);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch users:", error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        })();
     }, []);
 
     useEffect(() => {
         setLoading(true);
-        axios.get('/photos/count')
-            .then((result) => {
-                setNumberOfPhotosOfUser(result.data);
-            })
-            .catch((error) => {
-                console.error("Failed to fetch users:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        (async () => {
+            await axios.get('/photos/count')
+                .then((result) => {
+                    setNumberOfPhotosOfUser(result.data);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch users:", error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        })();
     }, []);
 
     useEffect(() => {
         setLoading(true);
-        axios.get('/comments/count')
-            .then((result) => {
-                setNumberOfCommentsOfUser(result.data);
-            })
-            .catch((error) => {
-                console.error("Failed to fetch users:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        (async () => {
+            await axios.get('/comments/count')
+                .then((result) => {
+                    setNumberOfCommentsOfUser(result.data);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch users:", error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        })();
     }, []);
 
     function getNumberOfPhotosOfUser(userId) {

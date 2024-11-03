@@ -127,10 +127,12 @@ function UserPhotos({
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
-        axios.get(`/photosOfUser/${userId}`)
-            .then((result) => setPhotos(result.data))
-            .catch((error) => console.error("Failed to fetch user photos:", error))
-            .finally(() => setLoading(false));
+        (async () => {
+            await axios.get(`/photosOfUser/${userId}`)
+                .then((result) => setPhotos(result.data))
+                .catch((error) => console.error("Failed to fetch user photos:", error))
+                .finally(() => setLoading(false));
+        })();
     }, [userId]);
 
     // Handle navigation in advanced mode by updating photoIndex

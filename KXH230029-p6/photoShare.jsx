@@ -54,7 +54,7 @@ function PhotoShare() {
     useEffect(() => {
         const routes = pathname.split("/");
         setFirstLoad(false);
-        if ((routes[1] === "photos" && routes.length === 4) || routes[1] === "comments") {
+        if ((routes[1] === "photos" && routes.length === 4) || (routes[1] === "comments")) {
             setEnableAdvancedFeatures(true);
         }
     }, []);
@@ -62,11 +62,11 @@ function PhotoShare() {
     // Update photoIndex based on enableAdvancedFeatures toggle
     useEffect(() => {
         const routes = pathname.split("/");
+        if (!firstLoad && routes[1] === "comments") {
+            navigate("/");
+        }
         if (routes.length >= 3 && routes[1] === "photos") {
             setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
-        }
-        if (!firstLoad && routes[1] === "comments") {
-            navigate(`/users/${routes[2]}`);
         }
     }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
 

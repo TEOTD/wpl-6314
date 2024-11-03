@@ -17,16 +17,18 @@ function UserDetail({
     useEffect(() => {
         if (userId) {
             setLoading(true);
-            axios.get(`/user/${userId}`)
-                .then((result) => {
-                    setUser(result.data);
-                })
-                .catch((error) => {
-                    console.error("Failed to fetch user:", error);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
+            (async () => {
+                await axios.get(`/user/${userId}`)
+                    .then((result) => {
+                        setUser(result.data);
+                    })
+                    .catch((error) => {
+                        console.error("Failed to fetch user:", error);
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
+            })();
         }
     }, [userId]);
 

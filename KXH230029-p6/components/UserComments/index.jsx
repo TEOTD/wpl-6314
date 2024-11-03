@@ -41,34 +41,37 @@ function UserComments({userId}) {
 
     useEffect(() => {
         if (!userId) return;
-
         setLoadingComments(true);
-        axios.get(`/commentsOfUser/${userId}`)
-            .then((result) => setComments(result.data))
-            .catch((error) => console.error("Failed to fetch user comments:", error))
-            .finally(() => setLoadingComments(false));
+        (async () => {
+            await axios.get(`/commentsOfUser/${userId}`)
+                .then((result) => setComments(result.data))
+                .catch((error) => console.error("Failed to fetch user comments:", error))
+                .finally(() => setLoadingComments(false));
+        })();
     }, [userId]);
 
     useEffect(() => {
         setLoadingPhotos(true);
-        axios.get(`/photos/list`)
-            .then((result) => {
-                const photosByUser = result.data.reduce((acc, photo) => {
-                    if (!acc[photo.user_id]) {
-                        acc[photo.user_id] = [];
-                    }
-                    acc[photo.user_id].push(photo);
-                    return acc;
-                }, {});
+        (async () => {
+            await axios.get(`/photos/list`)
+                .then((result) => {
+                    const photosByUser = result.data.reduce((acc, photo) => {
+                        if (!acc[photo.user_id]) {
+                            acc[photo.user_id] = [];
+                        }
+                        acc[photo.user_id].push(photo);
+                        return acc;
+                    }, {});
 
-                Object.keys(photosByUser).forEach(id => {
-                    photosByUser[id].sort((a, b) => a.id - b.id);
-                });
+                    Object.keys(photosByUser).forEach(id => {
+                        photosByUser[id].sort((a, b) => a.id - b.id);
+                    });
 
-                setPhotos(photosByUser);
-            })
-            .catch((error) => console.error("Failed to fetch photos:", error))
-            .finally(() => setLoadingPhotos(false));
+                    setPhotos(photosByUser);
+                })
+                .catch((error) => console.error("Failed to fetch photos:", error))
+                .finally(() => setLoadingPhotos(false));
+        })();
     }, []);
 
     const renderedComments = useMemo(() => comments.map((comment) => {
