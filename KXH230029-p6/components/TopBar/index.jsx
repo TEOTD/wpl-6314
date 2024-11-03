@@ -42,6 +42,7 @@ function TopBar({
         if (!user) return 'Home Page';
         if (pathname.startsWith('/users/')) return `${user.first_name} ${user.last_name}`;
         if (pathname.startsWith('/photos/')) return `Photos of ${user.first_name} ${user.last_name}`;
+        if (pathname.startsWith('/comments/')) return `Comments of ${user.first_name} ${user.last_name}`;
         return 'Home Page';
     }, [user, pathname]);
 

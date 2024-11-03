@@ -68,28 +68,33 @@ function UserList({enableAdvancedFeatures}) {
     }
 
     const photoBubble = (userId) => {
-        //todo: The first count bubble (colored green).
         const photoCount = getNumberOfPhotosOfUser(userId);
         return (
-            <IconButton aria-label="photos">
-                <Badge badgeContent={photoCount} color="primary">
-                    <PhotoLibrary color="action"/>
-                </Badge>
-            </IconButton>
+            <Link to={`/photos/${userId}/0`} style={{textDecoration: 'none', color: 'inherit'}}>
+                <IconButton aria-label="photos">
+                    <Badge badgeContent={photoCount} color="secondary">
+                        <PhotoLibrary color="action" sx={{
+                            color: 'var(--tertiary-color)',
+                        }}/>
+                    </Badge>
+                </IconButton>
+            </Link>
+
         );
     };
 
     const messageBubble = (userId) => {
-        //todo: The second bubble (colored red)
         const commentCount = getNumberOfCommentsOfUser(userId);
         return (
-            <IconButton aria-label="photos">
-                <Link to={`/comments/${userId}`} style={{textDecoration: 'none', color: 'inherit'}}>
-                    <Badge badgeContent={commentCount} color="primary">
-                        <Message color="action"/>
+            <Link to={`/comments/${userId}`} style={{textDecoration: 'none', color: 'inherit'}}>
+                <IconButton aria-label="photos">
+                    <Badge badgeContent={commentCount} color="secondary">
+                        <Message color="action" sx={{
+                            color: 'var(--secondary-hover-color)'
+                        }}/>
                     </Badge>
-                </Link>
-            </IconButton>
+                </IconButton>
+            </Link>
         );
     };
 
@@ -100,7 +105,7 @@ function UserList({enableAdvancedFeatures}) {
         return (
             <List className="user-list">
                 {users.map((user) => (
-                    <div key={user.id + "user-name"} className="user-list-container">
+                    <div key={user._id + "user-name"} className="user-list-container">
                         <ListItem
                             key={user._id}
                             className="user-list-item"

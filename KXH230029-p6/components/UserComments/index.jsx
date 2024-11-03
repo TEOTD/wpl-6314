@@ -1,7 +1,4 @@
-//todo: Shows all the comments of the user
-//todo: For each of the user's comments the view should show a small thumbnail of the photo on which the comment was made and the text of the comment.
-//todo: Clicking on the comment or photo should switch the view to the photo's detail view containing that photo and all its comments.
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
 import {Link} from "react-router-dom";
@@ -18,15 +15,14 @@ const formatDateTime = (date) => {
     });
 };
 
-function Comment({comment, userId}) {
+function Comment({comment, photoIndex}) {
     return (
-        <Link to={`/photos/${userId}`} style={{textDecoration: 'none', color: 'inherit'}}>
+        <Link to={`/photos/${comment.photo_user_id}/${photoIndex}`} style={{textDecoration: 'none', color: 'inherit'}}>
             <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
                 <img src={`/images/${comment.file_name}`} alt={comment.file_name} className="comment-photo-image"/>
                 <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
                     {formatDateTime(comment.date_time)}
                 </Typography>
-                {/* Display the comment text */}
                 <Typography variant="body1" className="comment">{comment.comment}</Typography>
             </Paper>
         </Link>
@@ -34,29 +30,63 @@ function Comment({comment, userId}) {
 }
 
 function UserComments({userId}) {
+    const [photos, setPhotos] = useState({});
     const [comments, setComments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loadingComments, setLoadingComments] = useState(true);
+    const [loadingPhotos, setLoadingPhotos] = useState(true);
 
     useEffect(() => {
         if (!userId) return;
-        setLoading(true);
+
+        setLoadingComments(true);
         axios.get(`/commentsOfUser/${userId}`)
             .then((result) => setComments(result.data))
             .catch((error) => console.error("Failed to fetch user comments:", error))
-            .finally(() => setLoading(false));
+            .finally(() => setLoadingComments(false));
     }, [userId]);
 
-    if (loading) return <CircularProgress className="loading-spinner"/>;
+    useEffect(() => {
+        setLoadingPhotos(true);
+        axios.get(`/photos/list`)
+            .then((result) => {
+                const photosByUser = result.data.reduce((acc, photo) => {
+                    if (!acc[photo.user_id]) {
+                        acc[photo.user_id] = [];
+                    }
+                    acc[photo.user_id].push(photo);
+                    return acc;
+                }, {});
+
+                Object.keys(photosByUser).forEach(id => {
+                    photosByUser[id].sort((a, b) => a.id - b.id);
+                });
+
+                setPhotos(photosByUser);
+            })
+            .catch((error) => console.error("Failed to fetch photos:", error))
+            .finally(() => setLoadingPhotos(false));
+    }, []);
+
+    const renderedComments = useMemo(() => comments.map((comment) => {
+        const userPhotos = photos[comment.photo_user_id] || [];
+        const photoIndex = userPhotos.findIndex(photo => photo._id === comment.photo_id);
+        return (
+            <Comment
+                key={`${comment._id}-${comment.photo_id}`}
+                comment={comment}
+                photoIndex={photoIndex}
+                userPhoto={userPhotos[photoIndex]}
+            />
+        );
+    }), [comments, photos]);
+
+    if (loadingComments || loadingPhotos) return <CircularProgress className="loading-spinner"/>;
     if (!comments.length) {
         return <Typography variant="h6" className="no-comments">No Comments Yet</Typography>;
     }
 
     return (
-        <div>
-            {comments.map((comment) => (
-                <Comment key={comment._id + comment.photo_id} comment={comment} userId={userId}/>
-            ))}
-        </div>
+        <div>{renderedComments}</div>
     );
 }
 

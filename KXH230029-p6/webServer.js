@@ -186,9 +186,6 @@ app.get("/photosOfUser/:id", async function (request, response) {
             $match: {user_id: objectId}
         },
         {
-            $sort: {_id: 1}
-        },
-        {
             $unwind: {
                 path: "$comments",
                 preserveNullAndEmptyArrays: true
@@ -259,13 +256,15 @@ app.get("/photosOfUser/:id", async function (request, response) {
                     }
                 }
             }
+        },
+        {
+            $sort: {_id: 1}
         }
     ];
 
     try {
         const photos = await Photo.aggregate(aggregationFunction);
-        console.log(photos[0], photos[1]);
-        if (!photos.length) {
+        if (!photos) {
             console.log("Photos for user with _id: " + id + " not found.");
             return response.status(404).send("Photos not found");
         }
@@ -295,14 +294,14 @@ app.get("/photos/count", async function (request, response) {
             }
         },
         {
-            $sort: {_id: 1}
-        },
-        {
             $project: {
                 user_id: "$_id",
                 photo_count: 1,
                 _id: 0
             }
+        },
+        {
+            $sort: {_id: 1}
         }
     ];
     try {
@@ -327,14 +326,14 @@ app.get("/comments/count", async function (request, response) {
             }
         },
         {
-            $sort: {_id: 1}
-        },
-        {
             $project: {
                 user_id: "$_id",
                 comment_count: 1,
                 _id: 0
             }
+        },
+        {
+            $sort: {_id: 1}
         }
     ];
     try {
@@ -362,23 +361,23 @@ app.get("/commentsOfUser/:id", async function (request, response) {
             $match: {"comments.user_id": objectId}
         },
         {
-            $sort: {_id: 1}
-        },
-        {
             $project: {
                 _id: "$comments._id",
                 photo_id: "$_id",
+                photo_user_id: "$user_id",
                 file_name: "$file_name",
                 comment: "$comments.comment",
                 date_time: "$comments.date_time"
             }
+        },
+        {
+            $sort: {_id: 1}
         }
     ];
 
     try {
         const commentsOfUser = await Photo.aggregate(aggregationFunction);
-        console.log(commentsOfUser[0], commentsOfUser[1]);
-        if (!commentsOfUser.length) {
+        if (!commentsOfUser) {
             console.log("Comments for user with _id: " + id + " not found.");
             return response.status(404).send("Comments not found");
         }
@@ -389,9 +388,16 @@ app.get("/commentsOfUser/:id", async function (request, response) {
     }
 });
 
-
-// todo:  In implementing this you are welcome to add new server API calls or enhance existing calls.
-//  If you do so you need to update the Mocha test (test/serverApiTest.js) to test your new functionality.
-//  If you add new APIs, include them in a new describe() block following the pattern used by the other tests.
-//  Make sure that the provided tests still pass before submitting.
-//  You should not add new properties to the Mongoose Schema but you are welcome to add any indexes you need to make this work on larger data sets.
+app.get("/photos/list", async function (request, response) {
+    try {
+        const photos = await Photo.find({}, {_id: 1, user_id: 1}).sort({_id: 1});
+        if (!photos) {
+            console.log("photos not found.");
+            return response.status(404).send("photos not found");
+        }
+        return response.status(200).send(photos);
+    } catch (error) {
+        console.log("Error in /photos/list:", error);
+        return response.status(500).send({error: `An error occurred while fetching photos. Error: ${error.message}`});
+    }
+});
