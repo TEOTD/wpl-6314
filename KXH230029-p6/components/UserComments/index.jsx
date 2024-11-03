@@ -19,7 +19,8 @@ const formatDateTime = (date) => {
 function Comment({comment, photoIndex}) {
     return (
         <Link to={`/photos/${comment.photo_user_id}/${photoIndex}`} style={{textDecoration: 'none', color: 'inherit'}}>
-            <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
+            <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}}
+                   className="comment-container flex-comment-container">
                 <img src={`/images/${comment.file_name}`} alt={comment.file_name} className="comment-photo-image"/>
                 <div>
                     <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">

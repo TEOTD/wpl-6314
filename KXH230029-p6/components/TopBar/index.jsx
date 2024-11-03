@@ -18,8 +18,8 @@ function TopBar({
 
     // Extracts the user ID from the URL based on path pattern
     const userId = useMemo(() => {
-        const match = pathname.match(/\/photos\/([A-Za-z\d]+)|\/users\/([A-Za-z\d]+)/);
-        return match ? match[1] || match[2] : null;
+        const match = pathname.match(/\/(photos|users|comments)\/([A-Za-z\d]+)/);
+        return match ? match[2] : null;  // Extract userId consistently from the second group
     }, [pathname]);
 
     // Fetches user data and app version when userId changes
