@@ -2,6 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import {CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
 import {Link} from "react-router-dom";
+import "./styles.css";
 
 const formatDateTime = (date) => {
     return new Date(date).toLocaleString('en-US', {
@@ -20,10 +21,12 @@ function Comment({comment, photoIndex}) {
         <Link to={`/photos/${comment.photo_user_id}/${photoIndex}`} style={{textDecoration: 'none', color: 'inherit'}}>
             <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
                 <img src={`/images/${comment.file_name}`} alt={comment.file_name} className="comment-photo-image"/>
-                <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
-                    {formatDateTime(comment.date_time)}
-                </Typography>
-                <Typography variant="body1" className="comment">{comment.comment}</Typography>
+                <div>
+                    <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
+                        {formatDateTime(comment.date_time)}
+                    </Typography>
+                    <Typography variant="body1" className="comment">{comment.comment}</Typography>
+                </div>
             </Paper>
         </Link>
     );

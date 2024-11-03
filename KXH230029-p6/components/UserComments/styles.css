@@ -1,0 +1,17 @@
+.comment-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.comment-photo-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+.photo-date {
+    margin-bottom: 5px;
+}
