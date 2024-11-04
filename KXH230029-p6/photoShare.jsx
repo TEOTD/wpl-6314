@@ -33,10 +33,10 @@ function UserPhotosRoute({
     );
 }
 
-function UserCommentsRoute() {
+function UserCommentsRoute({enableAdvancedFeatures}) {
     const {userId} = useParams();
     return (
-        <UserComments userId={userId}/>
+        <UserComments userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>
     );
 }
 
@@ -62,11 +62,11 @@ function PhotoShare() {
     // Update photoIndex based on enableAdvancedFeatures toggle
     useEffect(() => {
         const routes = pathname.split("/");
-        if (!firstLoad && routes[1] === "comments") {
-            navigate("/");
-        }
         if (routes.length >= 3 && routes[1] === "photos") {
             setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
+        }
+        if (firstLoad === false && enableAdvancedFeatures === false && routes[1] === "comments") {
+            navigate(`/users/${routes[2]}`);
         }
     }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
 
@@ -134,7 +134,7 @@ function PhotoShare() {
                             <Route
                                 path="/comments/:userId"
                                 element={(
-                                    <UserCommentsRoute/>
+                                    <UserCommentsRoute enableAdvancedFeatures={enableAdvancedFeatures}/>
                                 )}
                             />
                             <Route path="/users" element={<UserList enableAdvancedFeatures={enableAdvancedFeatures}/>}/>

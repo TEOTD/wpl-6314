@@ -33,7 +33,7 @@ function Comment({comment, photoIndex}) {
     );
 }
 
-function UserComments({userId}) {
+function UserComments({userId, enableAdvancedFeatures}) {
     const [photos, setPhotos] = useState({});
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(true);
@@ -93,6 +93,7 @@ function UserComments({userId}) {
     }
 
     return (
+        enableAdvancedFeatures &&
         <div>{renderedComments}</div>
     );
 }
