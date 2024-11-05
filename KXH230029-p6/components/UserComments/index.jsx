@@ -4,6 +4,7 @@ import axios from "axios";
 import {Link} from "react-router-dom";
 import "./styles.css";
 
+// Helper function to format the date and time for display
 const formatDateTime = (date) => {
     return new Date(date).toLocaleString('en-US', {
         day: '2-digit',
@@ -16,6 +17,7 @@ const formatDateTime = (date) => {
     });
 };
 
+// Component to render each individual comment
 function Comment({comment, photoIndex}) {
     return (
         <Link to={`/photos/${comment.photo_user_id}/${photoIndex}`} style={{textDecoration: 'none', color: 'inherit'}}>
@@ -33,12 +35,14 @@ function Comment({comment, photoIndex}) {
     );
 }
 
+// Main component to fetch and display comments for a specific user
 function UserComments({userId, enableAdvancedFeatures}) {
     const [photos, setPhotos] = useState({});
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(true);
     const [loadingPhotos, setLoadingPhotos] = useState(true);
 
+    // Fetch comments for the specified user
     useEffect(() => {
         if (!userId) return;
         setLoadingComments(true);
@@ -50,11 +54,13 @@ function UserComments({userId, enableAdvancedFeatures}) {
         })();
     }, [userId]);
 
+    // Fetch all photos and organize them by user
     useEffect(() => {
         setLoadingPhotos(true);
         (async () => {
             await axios.get(`/photos/list`)
                 .then((result) => {
+                    // Group photos by user_id for quick lookup later
                     const photosByUser = result.data.reduce((acc, photo) => {
                         if (!acc[photo.user_id]) {
                             acc[photo.user_id] = [];
@@ -63,6 +69,7 @@ function UserComments({userId, enableAdvancedFeatures}) {
                         return acc;
                     }, {});
 
+                    // Sort photos for each user by ID to maintain order
                     Object.keys(photosByUser).forEach(id => {
                         photosByUser[id].sort((a, b) => a.id - b.id);
                     });
@@ -74,6 +81,7 @@ function UserComments({userId, enableAdvancedFeatures}) {
         })();
     }, []);
 
+    // Generate the rendered comments using useMemo for performance optimization
     const renderedComments = useMemo(() => comments.map((comment) => {
         const userPhotos = photos[comment.photo_user_id] || [];
         const photoIndex = userPhotos.findIndex(photo => photo._id === comment.photo_id);
@@ -92,6 +100,7 @@ function UserComments({userId, enableAdvancedFeatures}) {
         return <Typography variant="h6" className="no-comments">No Comments Yet</Typography>;
     }
 
+    // Render comments only if advanced features are enabled
     return (
         enableAdvancedFeatures &&
         <div>{renderedComments}</div>
