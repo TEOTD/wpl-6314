@@ -1,0 +1,59 @@
+/**
+ * CSS for the Project 5 main page.
+ *
+ * Since CSS uses a global name space for classes we should use class names
+ * starting with "main-" here.
+ */
+
+:root {
+    --primary-color: #87CEEB;
+    --primary-hover-color: #00A3E0;
+    --secondary-color: #ffaba3;
+    --secondary-hover-color: #ff4735;
+    --tertiary-color: #7fd860;
+    --accent-color: #B19CD9;
+    --accent-hover-color: #9B7BCA;
+    --background-color: #111;
+    --text-color: #333333;
+    --text-color-hover: #f3f3f3;
+    --highlight-color: #FFD700;
+    --highlight-hover-color: #FFC300;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+.main-top-bar-buffer {
+    margin-top: 70px;
+}
+
+.main-grid-item {
+    height: calc(100vh - 135px);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+@media (max-height: calc(100vh - 135px)) {
+    .main-grid-item {
+        height: auto;
+    }
+}
+
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Star Jedi', sans-serif;
+}
+
+.not-found-message {
+    color: var(--secondary-hover-color);
+    text-align: center;
+    font-size: 3em;
+    margin: 20px 10px;
+    font-weight: bold;
+}
+
+.loading-spinner {
+    display: block;
+    margin: auto;
+    color: var(--highlight-color);
+}
