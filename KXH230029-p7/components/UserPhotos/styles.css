@@ -8,8 +8,16 @@
 }
 
 .photo-image {
-    width: 100%;
+    max-width: 100%;
     border-radius: 8px;
+}
+
+.image-box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    height: 80%;
 }
 
 .photo-date {
