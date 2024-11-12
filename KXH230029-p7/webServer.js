@@ -41,6 +41,7 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo');
 
 const app = express();
+app.use(express.json());
 
 app.use(express.json());
 //todo: generate a public and private key to hash session id
@@ -184,6 +185,32 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
         console.log("Error in /user/:id:", error);
         return response.status(500).send({error: `An error occurred while fetching user with _id: ${id}. ${error.message}`});
     }
+});
+
+app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
+    const photo_id = req.params.photo_id;
+    const comment = req.body.comment;
+    try{
+        const newComment = {
+            comment: comment,
+            user_id: "6722ed1829d9cf37406c5f20",
+            date_time: new Date(),
+        };
+        const result = await Photo.findByIdAndUpdate(
+            photo_id,
+            { $push: { comments: newComment } },
+            { new: true }  // Return the updated document
+        );
+
+        if (!result) {
+            return res.status(404).json({ error: 'Photo not found' });
+        }
+        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: 'Something went wrong...' });
+    } 
 });
 
 

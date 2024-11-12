@@ -7,7 +7,7 @@ import {Message, PhotoLibrary} from "@mui/icons-material";
 import {AdvancedContext } from "../context/appContext";
 
 // UserList component displays a list of users fetched from an API
-function UserList({}) {
+function UserList() {
     // State to store user data and loading status
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
