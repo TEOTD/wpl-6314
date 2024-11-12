@@ -1,16 +1,17 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Typography} from "@mui/material";
 import "./styles.css";
+import {AdvancedContext } from "../context/appContext";
 import axios from "axios";
 
 function UserDetail({
-                        userId,
-                        enableAdvancedFeatures
+                        userId
                     }) {
     // State to hold user data and loading status
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
     // Fetch user data when component mounts or when userId changes
     // Set loading state to true while fetching and set to false after fetch completes
@@ -72,7 +73,7 @@ function UserDetail({
             {/* Button to view user's photos, links to either advanced or standard view based on enableAdvancedFeatures */}
             <Button
                 component={Link}
-                to={enableAdvancedFeatures.enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
+                to={enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
                 className="viewPhotosButton"
                 variant="contained"
                 fullWidth

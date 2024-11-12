@@ -1,17 +1,19 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useContext} from "react";
 import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
+import {AdvancedContext } from "../context/appContext";
 
 // UserList component displays a list of users fetched from an API
-function UserList({enableAdvancedFeatures}) {
+function UserList({}) {
     // State to store user data and loading status
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
     const [numberOfPhotosOfUser, setNumberOfPhotosOfUser] = useState(null);
     const [numberOfCommentsOfUser, setNumberOfCommentsOfUser] = useState(null);
+    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
 
     // Fetch user list data on component mount

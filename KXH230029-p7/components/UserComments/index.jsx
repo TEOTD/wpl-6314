@@ -1,7 +1,8 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useContext} from "react";
 import {CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
 import {Link} from "react-router-dom";
+import {AdvancedContext } from "../context/appContext";
 import "./styles.css";
 
 // Helper function to format the date and time for display
@@ -36,11 +37,12 @@ function Comment({comment, photoIndex}) {
 }
 
 // Main component to fetch and display comments for a specific user
-function UserComments({userId, enableAdvancedFeatures}) {
+function UserComments({userId}) {
     const [photos, setPhotos] = useState({});
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(true);
     const [loadingPhotos, setLoadingPhotos] = useState(true);
+    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
     // Fetch comments for the specified user
     useEffect(() => {
