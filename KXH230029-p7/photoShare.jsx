@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useMemo} from "react";
 import ReactDOM from "react-dom/client";
 import {Grid, Paper} from "@mui/material";
 import {HashRouter, Route, Routes, useLocation, useNavigate, useParams} from "react-router-dom";
@@ -9,16 +9,16 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import UserComments from "./components/UserComments";
+import { AdvancedContext } from "./components/context/appContext";
 
 // Route component for displaying user details with advanced features toggle passed as a prop
-function UserDetailRoute(enableAdvancedFeatures) {
+function UserDetailRoute() {
     const {userId} = useParams();
-    return <UserDetail userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>;
+    return <UserDetail userId={userId}/>;
 }
 
 // Route component for displaying user photos with advanced features and photo index state handling
 function UserPhotosRoute({
-                             enableAdvancedFeatures,
                              photoIndex,
                              setPhotoIndex
                          }) {
@@ -26,17 +26,16 @@ function UserPhotosRoute({
     return (
         <UserPhotos
             userId={userId}
-            enableAdvancedFeatures={enableAdvancedFeatures}
             photoIndex={photoIndex}
             setPhotoIndex={setPhotoIndex}
         />
     );
 }
 
-function UserCommentsRoute({enableAdvancedFeatures}) {
+function UserCommentsRoute({}) {
     const {userId} = useParams();
     return (
-        <UserComments userId={userId} enableAdvancedFeatures={enableAdvancedFeatures}/>
+        <UserComments userId={userId}/>
     );
 }
 
@@ -44,6 +43,11 @@ function UserCommentsRoute({enableAdvancedFeatures}) {
 function PhotoShare() {
     const [firstLoad, setFirstLoad] = useState(true);
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
+
+    // Using memo to store contexts variable and setparameter functions, to avoid reloading on value change.
+    const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
+
+    
     const [photoIndex, setPhotoIndex] = useState(-1);
     const {pathname} = useLocation();
     const navigate = useNavigate();
@@ -94,18 +98,16 @@ function PhotoShare() {
     return (
         <div>
             <Grid container spacing={2}>
+                <AdvancedContext.Provider value={advancedContextValue}>
                 {/* TopBar component with advanced features toggle */}
                 <Grid item xs={12}>
-                    <TopBar
-                        enableAdvancedFeatures={enableAdvancedFeatures}
-                        setEnableAdvancedFeatures={setEnableAdvancedFeatures}
-                    />
+                    <TopBar />
                 </Grid>
                 <div className="main-top-bar-buffer"/>
                 {/* Sidebar listing users */}
                 <Grid item sm={3}>
                     <Paper className="main-grid-item">
-                        <UserList enableAdvancedFeatures={enableAdvancedFeatures}/>
+                        <UserList/>
                     </Paper>
                 </Grid>
                 {/* Main content area displaying user details or photos based on the route */}
@@ -115,17 +117,16 @@ function PhotoShare() {
                             <Route path="/"/>
                             <Route
                                 path="/users/:userId"
-                                element={<UserDetailRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}
+                                element={<UserDetailRoute />}
                             />
                             <Route
                                 path="/photos/:userId"
-                                element={<UserPhotosRoute enableAdvancedFeatures={enableAdvancedFeatures}/>}
+                                element={<UserPhotosRoute />}
                             />
                             <Route
                                 path="/photos/:userId/:photoIndex"
                                 element={(
                                     <UserPhotosRoute
-                                        enableAdvancedFeatures={enableAdvancedFeatures}
                                         photoIndex={photoIndex}
                                         setPhotoIndex={setPhotoIndex}
                                     />
@@ -134,13 +135,14 @@ function PhotoShare() {
                             <Route
                                 path="/comments/:userId"
                                 element={(
-                                    <UserCommentsRoute enableAdvancedFeatures={enableAdvancedFeatures}/>
+                                    <UserCommentsRoute />
                                 )}
                             />
-                            <Route path="/users" element={<UserList enableAdvancedFeatures={enableAdvancedFeatures}/>}/>
+                            <Route path="/users" element={<UserList/>}/>
                         </Routes>
                     </Paper>
                 </Grid>
+                </AdvancedContext.Provider>
             </Grid>
         </div>
     );

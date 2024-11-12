@@ -1,16 +1,17 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useContext} from "react";
 import {AppBar, Box, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import "./styles.css";
+import {AdvancedContext } from "../context/appContext";
 import axios from "axios";
 
 // TopBar component for displaying application title, user information, version number, and a toggle for advanced features
 function TopBar({
-                    enableAdvancedFeatures,
-                    setEnableAdvancedFeatures
                 }) {
     // Retrieve current URL pathname to determine the context
     const {pathname} = useLocation();
+
+    const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useContext(AdvancedContext);
 
     // State variables for user and application version
     const [user, setUser] = useState(null);

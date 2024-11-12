@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState, useContext} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
+import {AdvancedContext } from "../context/appContext";
 
 // Utility function to format date and time for display
 const formatDateTime = (date) => {
@@ -40,14 +41,14 @@ function Photo({
                    photo,
                    index,
                    totalPhotos,
-                   onStep,
-                   enableAdvancedFeatures
+                   onStep
                }) {
     // State to manage the enabled/disabled state of navigation buttons
     const [buttonState, setButtonState] = useState({
         left: false,
         right: false
     });
+    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
     // Styles for navigation buttons
     const navButtonStyles = (side) => ({
@@ -115,13 +116,13 @@ function Photo({
 // Component to display all photos of a user, with advanced step-through functionality if enabled
 function UserPhotos({
                         userId,
-                        enableAdvancedFeatures,
                         photoIndex,
                         setPhotoIndex
                     }) {
     // State to hold the user's photos and loading state
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
     // Fetch photos when userId changes
     useEffect(() => {
