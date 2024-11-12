@@ -37,14 +37,14 @@ function Comment({comment}) {
     );
 }
 
-async function addCommentRequest(image_id, commentText){
-    const response = await axios.post('/commentsOfPhoto/'+image_id, {
+async function addCommentRequest(imageId, commentText){
+    const response = await axios.post(`/commentsOfPhoto/${imageId}`, {
         comment: commentText // key-value pair in JSON
     });
     return response;
 }
 
-function CommentInput({image_id, setReload, reload}){
+function CommentInput({imageId, setReload, reload}){
 
     const [comment, setComment] = useState("");
 
@@ -58,7 +58,7 @@ function CommentInput({image_id, setReload, reload}){
                 />
             
             <Button variant="contained" size="medium" onClick={() => {
-                addCommentRequest(image_id, comment);
+                addCommentRequest(imageId, comment);
                 setReload(!reload);
                 }}
              id="comment-submit-button">
@@ -122,7 +122,7 @@ function Photo({
             </Typography>
             {/* Comments section heading */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
-            <CommentInput image_id={photo._id} setReload={setReload} reload={reload}/>
+            <CommentInput imageId={photo._id} setReload={setReload} reload={reload}/>
             {/* Render comments or display a message if there are none */}
             {photo.comments && photo.comments.length > 0 ? (
                 <div className="comments-section">
