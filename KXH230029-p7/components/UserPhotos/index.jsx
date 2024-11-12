@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Button, CircularProgress, Paper, Typography} from "@mui/material";
+import {Button, Box, CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
 
 // Utility function to format date and time for display
@@ -78,7 +78,9 @@ function Photo({
     return (
         <div key={photo._id} className="photo-container">
             {/* Display photo */}
-            <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
+            <Box className="image-box">
+                <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
+            </Box>
             {/* Display formatted date */}
             <Typography variant="body2" sx={{margin: "10px 0"}}
                         className="photo-date">{formatDateTime(photo.date_time)}
