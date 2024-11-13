@@ -37,7 +37,25 @@ mongoose.Promise = require("bluebird");
 // const async = require("async");
 
 const express = require("express");
+const session = require('express-session');
+const mongoStore = require('connect-mongo');
+
 const app = express();
+
+app.use(express.json());
+//todo: generate a public and private key to hash session id
+app.use(session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {secure: false},
+    store: new mongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
+}))
+
+function isAuthenticated(request, response, next) {
+    if (request.session.user) next()
+    else response.status(401).send('Unauthorized');
+}
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const {Types} = require("mongoose");
@@ -48,7 +66,7 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
 mongoose.set("strictQuery", false);
-mongoose.connect("mongodb://127.0.0.1/project6", {
+mongoose.connect("mongodb://127.0.0.1/project7", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -136,7 +154,7 @@ app.get("/test/:p1", async function (request, response) {
 /**
  * URL /user/list - Returns all the User objects.
  */
-app.get("/user/list", async function (request, response) {
+app.get("/user/list", isAuthenticated, async function (request, response) {
     try {
         const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1}).sort({_id: 1});
         response.status(200).send(users);
@@ -148,7 +166,7 @@ app.get("/user/list", async function (request, response) {
 /**
  * URL /user/:id - Returns the information for User (id).
  */
-app.get("/user/:id", async function (request, response) {
+app.get("/user/:id", isAuthenticated, async function (request, response) {
     const id = request.params.id;
     if (!Types.ObjectId.isValid(id)) {
         console.log(`Invalid UserId format: ${id}`);
@@ -172,7 +190,7 @@ app.get("/user/:id", async function (request, response) {
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
-app.get("/photosOfUser/:id", async function (request, response) {
+app.get("/photosOfUser/:id", isAuthenticated, async function (request, response) {
     const id = request.params.id;
 
     if (!Types.ObjectId.isValid(id)) {
@@ -285,7 +303,7 @@ const server = app.listen(3000, function () {
     );
 });
 
-app.get("/photos/count", async function (request, response) {
+app.get("/photos/count", isAuthenticated, async function (request, response) {
     const aggregationFunction = [
         {
             $group: {
@@ -312,7 +330,7 @@ app.get("/photos/count", async function (request, response) {
     }
 });
 
-app.get("/comments/count", async function (request, response) {
+app.get("/comments/count", isAuthenticated, async function (request, response) {
     const aggregationFunction = [
         {
             $unwind: {
@@ -344,7 +362,7 @@ app.get("/comments/count", async function (request, response) {
     }
 });
 
-app.get("/commentsOfUser/:id", async function (request, response) {
+app.get("/commentsOfUser/:id", isAuthenticated, async function (request, response) {
     const id = request.params.id;
 
     if (!Types.ObjectId.isValid(id)) {
@@ -388,7 +406,7 @@ app.get("/commentsOfUser/:id", async function (request, response) {
     }
 });
 
-app.get("/photos/list", async function (request, response) {
+app.get("/photos/list", isAuthenticated, async function (request, response) {
     try {
         const photos = await Photo.find({}, {_id: 1, user_id: 1}).sort({_id: 1});
         if (!photos) {
@@ -401,3 +419,113 @@ app.get("/photos/list", async function (request, response) {
         return response.status(500).send({error: `An error occurred while fetching photos. Error: ${error.message}`});
     }
 });
+
+const crypto = require('crypto');
+
+/**
+ * Return a salted and hashed password entry from a clear text password.
+ * @param {string} clearTextPassword
+ * @return {object} passwordEntry where passwordEntry is an object with two
+ * string properties:
+ *    salt - The salt used for the password.
+ *    hash - The sha1 hash of the password and salt.
+ */
+function makePasswordEntry(clearTextPassword) {
+    const salt = crypto.randomBytes(8).toString('hex');
+    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
+
+    return {salt, hash};
+}
+
+
+/**
+ * Return true if the specified clear text password and salt generates the
+ * specified hash.
+ * @param {string} hash
+ * @param {string} salt
+ * @param {string} clearTextPassword
+ * @return {boolean}
+ */
+function doesPasswordMatch(hash, salt, clearTextPassword) {
+    const generatedHash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
+    return generatedHash === hash;
+}
+
+
+app.post('/admin/login', async function (request, response, next) {
+    const {username, password} = request.body;
+    try {
+        const user = await User.findOne({login_name: username}, {
+            password_digest: 1,
+            salt: 1,
+            first_name: 1,
+            _id: 1
+        });
+
+        if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
+            return response.status(400).send('Invalid username or password');
+        }
+
+        request.session.regenerate(function (err) {
+            if (err) {
+                return next(err);
+            }
+            request.session.user = {_id: user._id, first_name: user.first_name};
+            request.session.save(function (err) {
+                if (err) {
+                    return next(err);
+                }
+                response.status(200).json({_id: user._id, first_name: user.first_name});
+            });
+        });
+    } catch (error) {
+        response.status(500).send('Internal server error');
+    }
+});
+
+
+app.post('/admin/logout', async function (request, response) {
+    if (request.session.user) {
+        request.session.destroy(() => response.sendStatus(200));
+    } else {
+        response.status(400).send('No user is logged in');
+    }
+});
+
+app.post('/user', async function (request, response, next) {
+    try {
+        const passwordEntry = makePasswordEntry(request.body.password);
+
+        const body = {
+            login_name: request.body.username,
+            password_digest: passwordEntry.hash,
+            salt: passwordEntry.salt,
+            first_name: request.body.firstName,
+            last_name: request.body.lastName,
+            location: request.body.location,
+            description: request.body.description,
+            occupation: request.body.occupation,
+        };
+
+        const user = await User.create(body);
+        if (!user) {
+            return response.status(400).send('Failed to create user');
+        }
+
+        request.session.regenerate(function (err) {
+            if (err) {
+                return next(err);
+            }
+            request.session.user = {_id: user._id, first_name: user.first_name};
+            request.session.save(function (err) {
+                if (err) {
+                    return next(err);
+                }
+                response.status(200).json({_id: user._id, first_name: user.first_name});
+            });
+        });
+    } catch (error) {
+        response.status(500).send('Internal server error');
+    }
+});
+
