@@ -423,6 +423,7 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
 app.post('/admin/login', async function (request, response, next) {
     const {username, password} = request.body;
     try {
+        //todo:  only send what is needed.
         const user = await User.findOne({login_name: username}, {_v: 0});
         if (!user) {
             return response.status(400).send('Invalid username or password');
