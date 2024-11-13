@@ -23,3 +23,7 @@
     font-weight: bold;
     color: var(--text-color);
 }
+
+.logout-button {
+    color: var(--text-color) !important;
+}
