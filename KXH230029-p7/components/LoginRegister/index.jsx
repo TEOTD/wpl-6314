@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
 import {LoggedInUserContext, LoginContext} from '../context/appContext';
 import axios from 'axios';
@@ -70,6 +70,9 @@ function LoginRegister() {
 
         try {
             const result = await axios.post(url, data);
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('loggedInUser', JSON.stringify(result.data));
+            console.log(result.data)
             setIsLoggedIn(true);
             setLoggedInUser(result.data);
         } catch (error) {
@@ -78,6 +81,30 @@ function LoginRegister() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const loggedInFlag = localStorage.getItem('isLoggedIn');
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (loggedInFlag === 'true') {
+            axios.get('/admin/check-session', {withCredentials: true})
+                .then(response => {
+                    if (response.status === 200) {
+                        setIsLoggedIn(true);
+                        console.log(loggedInUser)
+                        setLoggedInUser(loggedInUser)
+                    } else {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('loggedInUser');
+                        setIsLoggedIn(false);
+                    }
+                })
+                .catch(() => {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('loggedInUser');
+                    setIsLoggedIn(false);
+                });
+        }
+    }, []);
 
     return (
         <Paper style={{padding: '20px', maxWidth: '400px', margin: '20px auto'}}>
