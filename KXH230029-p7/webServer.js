@@ -41,7 +41,6 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo');
 
 const app = express();
-app.use(express.json());
 
 app.use(express.json());
 //todo: generate a public and private key to hash session id
@@ -49,7 +48,11 @@ app.use(session({
     secret: "secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {secure: false},
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
+    },
     store: new mongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
 }))
 
@@ -187,30 +190,29 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
 });
 
-app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
+app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
     const photo_id = req.params.photo_id;
     const comment = req.body.comment;
-    try{
+    try {
         const newComment = {
             comment: comment,
-            user_id: "6722ed1829d9cf37406c5f20",
+            user_id: req.session.user._id,
             date_time: new Date(),
         };
         const result = await Photo.findByIdAndUpdate(
             photo_id,
-            { $push: { comments: newComment } },
-            { new: true }  // Return the updated document
+            {$push: {comments: newComment}},
+            {new: true}
         );
 
         if (!result) {
-            return res.status(404).json({ error: 'Photo not found' });
+            return res.status(404).json({error: 'Photo not found'});
         }
-        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
-    }
-    catch (error) {
+        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+    } catch (error) {
         console.error(error);
-        return res.status(400).json({ error: 'Something went wrong...' });
-    } 
+        return res.status(400).json({error: 'Something went wrong...'});
+    }
 });
 
 
@@ -553,6 +555,14 @@ app.post('/user', async function (request, response, next) {
         });
     } catch (error) {
         response.status(500).send('Internal server error');
+    }
+});
+
+app.get('/admin/check-session', (request, response) => {
+    if (request.session && request.session.user) {
+        response.sendStatus(200);
+    } else {
+        response.sendStatus(401);
     }
 });
 

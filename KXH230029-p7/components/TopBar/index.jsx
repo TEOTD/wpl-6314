@@ -51,6 +51,8 @@ function TopBar() {
     const handleLogout = async () => {
         try {
             await axios.post('/admin/logout');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('loggedInUser');
             setIsLoggedIn(false);
             setLoggedInUser(null);
         } catch (error) {
