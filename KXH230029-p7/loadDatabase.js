@@ -26,6 +26,7 @@ const models = require("./modelData/photoApp.js").models;
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
+const crypto = require("crypto");
 
 const versionString = "1.0";
 
@@ -36,6 +37,13 @@ const removePromises = [
     SchemaInfo.deleteMany({}),
 ];
 
+function makePasswordEntry(clearTextPassword) {
+    const salt = crypto.randomBytes(8).toString('hex');
+    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
+
+    return {salt, hash};
+}
+
 Promise.all(removePromises)
     .then(function () {
         // Load the users into the User. Mongo assigns ids to objects so we record
@@ -44,6 +52,7 @@ Promise.all(removePromises)
 
         const userModels = models.userListModel();
         const mapFakeId2RealId = {};
+        const passwordEntry = makePasswordEntry('weak');
         const userPromises = userModels.map(function (user) {
             return User.create({
                 first_name: user.first_name,
@@ -52,7 +61,8 @@ Promise.all(removePromises)
                 description: user.description,
                 occupation: user.occupation,
                 login_name: user.last_name.toLowerCase(),
-                password: "weak",
+                password_digest: passwordEntry.hash,
+                salt: passwordEntry.salt
             })
                 .then(function (userObj) {
                     // Set the unique ID of the object. We use the MongoDB generated _id

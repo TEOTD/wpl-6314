@@ -420,12 +420,49 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
     }
 });
 
+const crypto = require('crypto');
+
+/**
+ * Return a salted and hashed password entry from a clear text password.
+ * @param {string} clearTextPassword
+ * @return {object} passwordEntry where passwordEntry is an object with two
+ * string properties:
+ *    salt - The salt used for the password.
+ *    hash - The sha1 hash of the password and salt.
+ */
+function makePasswordEntry(clearTextPassword) {
+    const salt = crypto.randomBytes(8).toString('hex');
+    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
+
+    return {salt, hash};
+}
+
+
+/**
+ * Return true if the specified clear text password and salt generates the
+ * specified hash.
+ * @param {string} hash
+ * @param {string} salt
+ * @param {string} clearTextPassword
+ * @return {boolean}
+ */
+function doesPasswordMatch(hash, salt, clearTextPassword) {
+    const generatedHash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
+    return generatedHash === hash;
+}
+
+
 app.post('/admin/login', async function (request, response, next) {
     const {username, password} = request.body;
     try {
-        //todo:  only send what is needed.
-        const user = await User.findOne({login_name: username}, {_v: 0});
-        if (!user) {
+        const user = await User.findOne({login_name: username}, {
+            password_digest: 1,
+            salt: 1,
+            first_name: 1,
+            _id: 1
+        });
+
+        if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
             return response.status(400).send('Invalid username or password');
         }
 
@@ -433,12 +470,12 @@ app.post('/admin/login', async function (request, response, next) {
             if (err) {
                 return next(err);
             }
-            request.session.user = user;
+            request.session.user = {_id: user._id, first_name: user.first_name};
             request.session.save(function (err) {
                 if (err) {
                     return next(err);
                 }
-                response.json(user);
+                response.status(200).json({_id: user._id, first_name: user.first_name});
             });
         });
     } catch (error) {
@@ -454,3 +491,41 @@ app.post('/admin/logout', async function (request, response) {
         response.status(400).send('No user is logged in');
     }
 });
+
+app.post('/user', async function (request, response, next) {
+    try {
+        const passwordEntry = makePasswordEntry(request.body.password);
+
+        const body = {
+            login_name: request.body.username,
+            password_digest: passwordEntry.hash,
+            salt: passwordEntry.salt,
+            first_name: request.body.firstName,
+            last_name: request.body.lastName,
+            location: request.body.location,
+            description: request.body.description,
+            occupation: request.body.occupation,
+        };
+
+        const user = await User.create(body);
+        if (!user) {
+            return response.status(400).send('Failed to create user');
+        }
+
+        request.session.regenerate(function (err) {
+            if (err) {
+                return next(err);
+            }
+            request.session.user = {_id: user._id, first_name: user.first_name};
+            request.session.save(function (err) {
+                if (err) {
+                    return next(err);
+                }
+                response.status(200).json({_id: user._id, first_name: user.first_name});
+            });
+        });
+    } catch (error) {
+        response.status(500).send('Internal server error');
+    }
+});
+
