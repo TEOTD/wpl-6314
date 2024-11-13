@@ -33,7 +33,7 @@ function UserPhotosRoute({
     );
 }
 
-function UserCommentsRoute({}) {
+function UserCommentsRoute() {
     const {userId} = useParams();
     return (
         <UserComments userId={userId}/>

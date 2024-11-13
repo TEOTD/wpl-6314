@@ -2,8 +2,8 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Typography} from "@mui/material";
 import "./styles.css";
-import {AdvancedContext } from "../context/appContext";
 import axios from "axios";
+import {AdvancedContext } from "../context/appContext";
 
 function UserDetail({
                         userId

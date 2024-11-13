@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useState, useContext} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Button, CircularProgress, Paper, Typography} from "@mui/material";
+import {Button, Box, CircularProgress, Paper, Typography} from "@mui/material";
+import TextField from '@mui/material/TextField';
 import axios from "axios";
 import {AdvancedContext } from "../context/appContext";
 
@@ -36,12 +37,47 @@ function Comment({comment}) {
     );
 }
 
+async function addCommentRequest(imageId, commentText){
+    const response = await axios.post(`/commentsOfPhoto/${imageId}`, {
+        comment: commentText // key-value pair in JSON
+    });
+    return response;
+}
+
+function CommentInput({imageId, setReload, reload}){
+
+    const [comment, setComment] = useState("");
+
+    return(
+    <Paper elevation={1} className="comment-input-container" >
+        <Box className="flex-display">
+          <Box className="comment-input-box">
+            
+                <TextField id="standard-multiline-flexible" multiline label="Add your Comment" variant="filled" 
+                    onChange={(e) => setComment(e.target.value)} maxRows={10}
+                />
+            
+            <Button variant="contained" size="medium" onClick={() => {
+                addCommentRequest(imageId, comment);
+                setReload(!reload);
+                }}
+             id="comment-submit-button">
+             Comment
+            </Button>
+          </Box>
+        </Box>  
+    </Paper>
+    );
+}
+
 // Component to display a single photo along with navigation buttons and comments
 function Photo({
                    photo,
                    index,
                    totalPhotos,
-                   onStep
+                   onStep,
+                   setReload,
+                   reload
                }) {
     // State to manage the enabled/disabled state of navigation buttons
     const [buttonState, setButtonState] = useState({
@@ -86,11 +122,12 @@ function Photo({
             </Typography>
             {/* Comments section heading */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
+            <CommentInput imageId={photo._id} setReload={setReload} reload={reload}/>
             {/* Render comments or display a message if there are none */}
             {photo.comments && photo.comments.length > 0 ? (
                 <div className="comments-section">
                     {photo.comments.map((comment) => (
-                        <Comment key={comment._id} comment={comment}/>
+                        <Comment key={comment._id} comment={comment} />
                     ))}
                 </div>
             ) : (
@@ -123,6 +160,7 @@ function UserPhotos({
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    const [reload, setReload] = useState(false);
 
     // Fetch photos when userId changes
     useEffect(() => {
@@ -134,7 +172,7 @@ function UserPhotos({
                 .catch((error) => console.error("Failed to fetch user photos:", error))
                 .finally(() => setLoading(false));
         })();
-    }, [userId]);
+    }, [userId, reload]);
 
     // Handle navigation in advanced mode by updating photoIndex
     const handleStep = useCallback((direction) => {
@@ -158,9 +196,11 @@ function UserPhotos({
             totalPhotos={photos.length}
             onStep={handleStep}
             enableAdvancedFeatures={enableAdvancedFeatures}
+            setReload={setReload}
+            reload={reload}
         />
     ) : (
-        <div>{photos.map((photo, idx) => <Photo key={photo._id} photo={photo} index={idx}/>)}</div>
+        <div>{photos.map((photo, idx) => <Photo key={photo._id} photo={photo} index={idx} setReload={setReload} reload={reload}/>)}</div>
     );
 }
 
