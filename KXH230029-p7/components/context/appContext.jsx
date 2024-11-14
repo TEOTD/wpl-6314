@@ -1,5 +1,9 @@
-import { createContext } from "react";
+import {createContext} from "react";
 
 // Creating context to select advanced features and to display the page title.
-export const PageContext = createContext(["Home Page", () => {}]);
-export const AdvancedContext = createContext([true, () => {}]);
+export const AdvancedContext = createContext([true, p => {
+}]);
+export const LoginContext = createContext([true, b => {
+}]);
+export const LoggedInUserContext = createContext([null, b => {
+}]);

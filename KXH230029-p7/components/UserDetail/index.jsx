@@ -12,7 +12,6 @@ function UserDetail({
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
-    const [uploadInput, setUploadInput] = useState();
 
     // Fetch user data when component mounts or when userId changes
     // Set loading state to true while fetching and set to false after fetch completes
@@ -88,37 +87,6 @@ function UserDetail({
                 }}
             >
                 View Photos
-            </Button>
-            <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }}
-            />
-            <Button
-            variant="contained"
-            fullWidth
-            sx={{
-                backgroundColor: "var(--accent-color)",
-                color: "var(--text-color)",
-                '&:hover': {
-                    backgroundColor: "var(--accent-hover-color)",
-                    color: "var(--hover-text-color)"
-                }
-            }}
-            onClick={
-                (e) => {
-                    e.preventDefault();
-                    if (uploadInput.files.length > 0) {
-                      // Create a DOM form and add the file to it under the name uploadedphoto
-                      const domForm = new FormData();
-                      domForm.append('uploadedphoto', uploadInput.files[0]);
-                      axios.post('/photos/new', domForm)
-                        .then((res) => {
-                          console.log(res);
-                        })
-                        .catch(err => console.log(`POST ERR: ${err}`));
-                    }
-                  }
-            }
-            >
-                Upload Photo
             </Button>
         </div>
     );
