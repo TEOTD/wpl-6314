@@ -1,0 +1,36 @@
+.login-register-container {
+    background-color: var(--background-color) !important;
+    color: var(--text-color);
+    border-radius: 12px;
+    margin: 20px;
+    text-align: center;
+    padding-bottom: 0px;
+    padding-top: 20px;
+}
+
+.login-heading {
+    color: var(--highlight-color) !important;
+    margin-bottom: 15px !important;
+    font-weight: bold !important;
+}
+
+.login-text-fields {
+    border: 5px solid var(--text-color-hover) !important;
+    border-radius: 12px;
+    margin: 10px 50px 10px 50px !important;
+    display: block !important;
+}
+
+.login-button-container {
+    display: flex !important;
+}
+
+.login-button {
+    background-color: var(--accent-color) !important;
+    color: var(--text-color-hover) !important;
+    margin-top: 20px !important;
+}
+
+.login-button:hover {
+    background-color: var(--accent-hover-color) !important;
+}

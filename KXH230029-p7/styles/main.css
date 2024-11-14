@@ -45,11 +45,11 @@ body {
 }
 
 .not-found-message {
-    color: var(--secondary-hover-color);
-    text-align: center;
+    color: var(--secondary-hover-color) !important;
+    text-align: center !important;
     font-size: 3em;
-    margin: 20px 10px;
-    font-weight: bold;
+    margin: 20px 10px !important;
+    font-weight: bold !important;
 }
 
 .loading-spinner {

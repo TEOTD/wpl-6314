@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
+import "./styles.css";
+import {Button, CircularProgress, TextField, Typography} from '@mui/material';
 import {LoggedInUserContext, LoginContext} from '../context/appContext';
 import axios from 'axios';
 
@@ -67,53 +68,56 @@ function LoginRegister() {
         const data = isLogin
             ? {username: credentials.username, password: credentials.password}
             : credentials;
-
-        try {
-            const result = await axios.post(url, data);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('loggedInUser', JSON.stringify(result.data));
-            console.log(result.data)
-            setIsLoggedIn(true);
-            setLoggedInUser(result.data);
-        } catch (error) {
-            setError(`Failed to ${isLogin ? 'login' : 'register'}`);
-        } finally {
-            setLoading(false);
-        }
+        await axios.post(url, data)
+            .then((result) => {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loggedInUser', JSON.stringify(result.data));
+                console.log(result.data)
+                setIsLoggedIn(true);
+                setLoggedInUser(result.data);
+            }).catch((error) => {
+                const errorMessage = error.response?.data || 'Unexpected error occurred';
+                setError(`Failed to ${isLogin ? 'login' : 'register'} error: ${errorMessage}`);
+            }).finally(() => {
+                    setLoading(false);
+                }
+            );
     };
 
     useEffect(() => {
         const loggedInFlag = localStorage.getItem('isLoggedIn');
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (loggedInFlag === 'true') {
-            axios.get('/admin/check-session', {withCredentials: true})
-                .then(response => {
-                    if (response.status === 200) {
-                        setIsLoggedIn(true);
-                        console.log(loggedInUser)
-                        setLoggedInUser(loggedInUser)
-                    } else {
+            (async () => {
+                await axios.get('/admin/check-session', {withCredentials: true})
+                    .then(response => {
+                        if (response.status === 200) {
+                            setIsLoggedIn(true);
+                            console.log(loggedInUser)
+                            setLoggedInUser(loggedInUser)
+                        } else {
+                            localStorage.removeItem('isLoggedIn');
+                            localStorage.removeItem('loggedInUser');
+                            setIsLoggedIn(false);
+                        }
+                    })
+                    .catch(() => {
                         localStorage.removeItem('isLoggedIn');
                         localStorage.removeItem('loggedInUser');
                         setIsLoggedIn(false);
-                    }
-                })
-                .catch(() => {
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('loggedInUser');
-                    setIsLoggedIn(false);
-                });
+                    });
+            })();
         }
     }, []);
 
     return (
-        <Paper style={{padding: '20px', maxWidth: '400px', margin: '20px auto'}}>
+        <div className="login-register-container">
             {loading ? (
                 <CircularProgress style={{display: 'block', margin: '20px auto'}}/>
             ) : (
                 <>
-                    <Typography variant="h6" color="textPrimary" gutterBottom>
-                        {isLoginView ? 'Please Login' : 'Please Register'}
+                    <Typography variant="h4" color="textPrimary" gutterBottom className="login-heading">
+                        {isLoginView ? 'Login' : 'Register'}
                     </Typography>
 
                     {!isLoginView && (
@@ -122,25 +126,23 @@ function LoginRegister() {
                                 label="First Name"
                                 name="firstName"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
                                 value={credentials.firstName}
                                 onChange={handleChange}
-                                error={fieldErrors.firstName}
+                                error={!!fieldErrors.firstName}
                                 helperText={fieldErrors.firstName}
                                 required
+                                className="login-text-fields"
                             />
                             <TextField
                                 label="Last Name"
                                 name="lastName"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
                                 value={credentials.lastName}
                                 onChange={handleChange}
-                                error={fieldErrors.lastName}
+                                error={!!fieldErrors.lastName}
                                 helperText={fieldErrors.lastName}
                                 required
+                                className="login-text-fields"
                             />
                         </>
                     )}
@@ -148,27 +150,25 @@ function LoginRegister() {
                         label="Username"
                         name="username"
                         variant="outlined"
-                        fullWidth
-                        margin="normal"
                         value={credentials.username}
                         onChange={handleChange}
-                        error={fieldErrors.username}
+                        error={!!fieldErrors.username}
                         helperText={fieldErrors.username}
                         required
+                        className="login-text-fields"
                     />
                     <TextField
                         label="Password"
                         name="password"
                         type="password"
                         variant="outlined"
-                        fullWidth
-                        margin="normal"
                         value={credentials.password}
                         onChange={handleChange}
-                        error={fieldErrors.password || (error && error.includes('least 8 characters long')) && !isLoginView}
+                        error={!!fieldErrors.password || (!!error && error.includes('least 8 characters long')) && !isLoginView}
                         helperText={!isLoginView && (error.includes('least 8 characters long') ? error : null) ||
-                            (fieldErrors.password ? fieldErrors.password : null)}
+                            (!!fieldErrors.password ? fieldErrors.password : null)}
                         required
+                        className="login-text-fields"
                     />
                     {!isLoginView && (
                         <>
@@ -177,26 +177,24 @@ function LoginRegister() {
                                 name="confirmPassword"
                                 type="password"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
                                 value={credentials.confirmPassword}
                                 onChange={handleChange}
-                                error={fieldErrors.password || (error && error.includes('match'))}
+                                error={!!fieldErrors.password || (!!error && error.includes('match'))}
                                 helperText={(error.includes('match') ? error : null) ||
-                                    (fieldErrors.password ? fieldErrors.password : null)}
-                                disabled={credentials.password.length <= 0 || (error && error.includes('least 8 characters long'))
-                                    || fieldErrors.password
+                                    (!!fieldErrors.password ? fieldErrors.password : null)}
+                                disabled={credentials.password.length <= 0 || (!!error && error.includes('least 8 characters long'))
+                                    || !!fieldErrors.password
                                     && !isLoginView}
                                 required
+                                className="login-text-fields"
                             />
                             <TextField
                                 label="Location"
                                 name="location"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
                                 value={credentials.location}
                                 onChange={handleChange}
+                                className="login-text-fields"
                             />
                             <TextField
                                 label="Description"
@@ -204,66 +202,67 @@ function LoginRegister() {
                                 variant="outlined"
                                 multiline
                                 rows={3}
-                                fullWidth
-                                margin="normal"
                                 value={credentials.description}
                                 onChange={handleChange}
+                                className="login-text-fields"
                             />
                             <TextField
                                 label="Occupation"
                                 name="occupation"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
                                 value={credentials.occupation}
                                 onChange={handleChange}
+                                className="login-text-fields"
                             />
                         </>
                     )}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        style={{marginTop: '20px'}}
-                        onClick={() => handleAuth(isLoginView)}
-                    >
-                        {isLoginView ? 'Login' : 'Register'}
-                    </Button>
-                    <Button
-                        variant="text"
-                        color="secondary"
-                        fullWidth
-                        style={{marginTop: '10px'}}
-                        onClick={() => {
-                            setCredentials({
-                                firstName: '',
-                                lastName: '',
-                                username: '',
-                                password: '',
-                                confirmPassword: '',
-                                location: '',
-                                description: '',
-                                occupation: '',
-                            });
-                            setFieldErrors({})
-                            setError('')
-                            setIsLoginView(!isLoginView)
-                        }}
-                    >
-                        {isLoginView ? 'Create an Account' : 'Go to Login'}
-                    </Button>
-                    {error && error.includes('Failed to') && (
+                    <div className="login-button-container">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            onClick={() => handleAuth(isLoginView)}
+                            className="login-button"
+                        >
+                            {isLoginView ? 'Login' : 'Register'}
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            onClick={() => {
+                                setCredentials({
+                                    firstName: '',
+                                    lastName: '',
+                                    username: '',
+                                    password: '',
+                                    confirmPassword: '',
+                                    location: '',
+                                    description: '',
+                                    occupation: '',
+                                });
+                                setFieldErrors({})
+                                setError('')
+                                setIsLoginView(!isLoginView)
+                            }}
+                            className="login-button"
+                        >
+                            {isLoginView ? 'Create an Account' : 'Go to Login'}
+                        </Button>
+                    </div>
+                    {!!error && error.includes('Failed to') && (
                         <Typography
                             variant="body2"
                             color="error"
                             style={{marginTop: '10px', textAlign: 'center'}}
+                            className="not-found-message"
                         >
                             {error}
                         </Typography>
                     )}
                 </>
             )}
-        </Paper>
+        </div>
     );
 }
 
