@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
 import {useLocation} from "react-router-dom";
+import CheckIcon from '@mui/icons-material/Check';
 import "./styles.css";
 import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
 import axios from "axios";
@@ -11,9 +12,43 @@ function TopBar() {
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useContext(AdvancedContext);
     const [isLoggedIn, setIsLoggedIn] = useContext(LoginContext);
     const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
+    const [imageUploadShow, setImageUploadShow] = React.useState(false);
+    const [uploadInput, setUploadInput] = useState();
+    const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState(false);
+
+    const handleClickOpen = () => {
+        setImageUploadShow(true);
+    };
+
+    const handleClose = () => {
+        setImageUploadShow(false);
+    };
+
+    const handleFileUpload = () => {
+        if (uploadInput.files.length > 0) {
+            // Create a DOM form and add the file to it under the name uploadedphoto
+            const domForm = new FormData();
+            domForm.append('uploadedphoto', uploadInput.files[0]);
+            axios.post('/photos/new', domForm)
+              .then((res) => {
+                console.log(res);
+              })
+              .catch(err => console.log(`POST ERR: ${err}`));
+        }
+        handleClose();
+        showSuccessAlert();
+    }
 
     const [user, setUser] = useState(null);
     const [version, setVersion] = useState('');
+    const showSuccessAlert = () => {
+        setShowPhotoUploadSuccess(true);
+    
+        // Hide alert after 3 seconds
+        setTimeout(() => {
+            setShowPhotoUploadSuccess(false);
+        }, 3000);
+    };
 
     const userId = useMemo(() => {
         const match = pathname.match(/\/(photos|users|comments)\/([A-Za-z\d]+)/);
@@ -71,6 +106,36 @@ function TopBar() {
                     <Typography variant="caption" className="version">
                         Version: {version}
                     </Typography>
+                    {isLoggedIn && (
+                        <>
+                            <Button color="inherit" onClick={handleClickOpen} className="add-photo-button">
+                                Add Photo
+                            </Button>
+                            <Dialog
+                            open={imageUploadShow}
+                            keepMounted
+                            onClose={handleClose}
+                            aria-describedby="alert-dialog-slide-description"
+                        >
+                            <DialogTitle>{"Please select An image File"}</DialogTitle>
+                            <DialogContent>
+                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }}/>
+                            </DialogContent>
+                            <DialogActions>
+                            <Button onClick={handleClose}>Cancel</Button>
+                            <Button onClick={handleFileUpload}>Upload</Button>
+                            </DialogActions>
+                            </Dialog>
+                            {
+                                (showPhotoUploadSuccess &&
+                                    <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+                                        Here is a gentle confirmation that your action was successful.
+                                    </Alert>
+                                )
+                            }
+                        </>
+                    )}
+                    
                 </Box>
                 <Box sx={{display: "flex", alignItems: "center", gap: 3}}>
                     {isLoggedIn && (

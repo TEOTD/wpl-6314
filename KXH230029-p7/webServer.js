@@ -41,6 +41,12 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo');
 
 const app = express();
+app.use(express.json());
+
+
+const multer = require("multer");
+const fs = require("fs");
+const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
 
 app.use(express.json());
 //todo: generate a public and private key to hash session id
@@ -213,6 +219,83 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         console.error(error);
         return res.status(400).json({error: 'Something went wrong...'});
     }
+});
+
+
+/**
+ * URL /photos/new - Acccepts an image file in the body.
+ */
+app.post('/photos/new', (req, res) => {
+    processFormBody(req, res, (err) => {
+      if (err || !req.file) {
+        console.error('File upload error:', err);
+        return res.status(400).send({ error: 'File upload failed' });
+      }
+  
+      // Validate file type and size
+      const allowedMimeTypes = ['image/jpeg', 'image/png'];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).send({ error: 'Invalid file type' });
+      }
+  
+      const timestamp = Date.now();
+      const fileName = `U${timestamp}_${req.file.originalname}`;
+      const filePath = './images/'+ fileName;
+  
+      // Write the file to the "images" directory
+      fs.writeFile(filePath, req.file.buffer, (err1) => {
+        if (err1) {
+          console.error('Error saving file:', err1);
+          return res.status(500).send({ error: 'File save failed' });
+        }
+
+        try{
+            const image = {
+                file_name: fileName,
+                user_id: req.session.user._id,
+                date_time: timestamp,
+                comments: [],
+            };
+            Photo.create(image);
+            return res.status(200).json({ message: 'File uploaded successfully', fileName });
+        } catch(error1){
+            return res.status(400).json({ error: 'Could not save image to the table.' });
+        }
+  
+      });
+
+      return;
+    });
+});
+  
+  
+/**
+ * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
+ */
+app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
+    const photo_id = req.params.photo_id;
+    const comment = req.body.comment;
+    try{
+        const newComment = {
+            comment: comment,
+            user_id: req.session.user._id,
+            date_time: new Date(),
+        };
+        const result = await Photo.findByIdAndUpdate(
+            photo_id,
+            { $push: { comments: newComment } },
+            { new: true }  // Return the updated document
+        );
+
+        if (!result) {
+            return res.status(404).json({ error: 'Photo not found' });
+        }
+        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: 'Something went wrong...' });
+    } 
 });
 
 

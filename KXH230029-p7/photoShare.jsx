@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from "react";
 import ReactDOM from "react-dom/client";
 import {Grid, Paper} from "@mui/material";
 import {HashRouter, Route, Routes, useLocation, useNavigate, useParams} from "react-router-dom";
-
 import "./styles/main.css";
 import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";

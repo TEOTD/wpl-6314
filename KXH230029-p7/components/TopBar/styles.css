@@ -27,3 +27,7 @@
 .logout-button {
     color: var(--text-color) !important;
 }
+
+.add-photo-button{
+    color: var(--text-color) !important;
+}
