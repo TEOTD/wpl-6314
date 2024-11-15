@@ -33,9 +33,6 @@
 
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
-
-// const async = require("async");
-
 const express = require("express");
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -49,7 +46,6 @@ const fs = require("fs");
 const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
 
 app.use(express.json());
-//todo: generate a public and private key to hash session id
 app.use(session({
     secret: "secret",
     resave: false,
@@ -197,13 +193,13 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
 });
 
-app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
-    const photo_id = req.params.photo_id;
-    const comment = req.body.comment;
+app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const comment = request.body.comment;
     try {
         const newComment = {
             comment: comment,
-            user_id: req.session.user._id,
+            user_id: request.session.user._id,
             date_time: new Date(),
         };
         const result = await Photo.findByIdAndUpdate(
@@ -213,12 +209,12 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         );
 
         if (!result) {
-            return res.status(404).json({error: 'Photo not found'});
+            return response.status(404).json('Photo not found');
         }
-        return res.status(200).json({message: 'Comment added successfully', comment: comment});
+        return response.status(200).json({message: 'Comment added successfully', comment: comment});
     } catch (error) {
         console.error(error);
-        return res.status(400).json({error: 'Something went wrong...'});
+        return response.status(400).json('Something went wrong...');
     }
 });
 
@@ -226,44 +222,44 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
 /**
  * URL /photos/new - Acccepts an image file in the body.
  */
-app.post('/photos/new', (req, res) => {
-    processFormBody(req, res, (err) => {
-        if (err || !req.file) {
+app.post('/photos/new', isAuthenticated, async function (request, response) {
+    processFormBody(request, response, (err) => {
+        if (err || !request.file) {
             console.error('File upload error:', err);
-            return res.status(400).send({error: 'File upload failed'});
+            return response.status(400).send('File upload failed');
         }
 
         // Validate file type and size
         const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedMimeTypes.includes(req.file.mimetype)) {
-            return res.status(400).send({error: 'Invalid file type'});
+        if (!allowedMimeTypes.includes(request.file.mimetype)) {
+            return response.status(400).send('Invalid file type');
         }
 
         const timestamp = Date.now();
-        const fileName = `U${timestamp}_${req.file.originalname}`;
+        const fileName = `U${timestamp}_${request.file.originalname}`;
         const filePath = './images/' + fileName;
 
         // Write the file to the "images" directory
-        fs.writeFile(filePath, req.file.buffer, (err1) => {
+        fs.writeFile(filePath, request.file.buffer, (err1) => {
             if (err1) {
                 console.error('Error saving file:', err1);
-                return res.status(500).send({error: 'File save failed'});
+                return response.status(500).send('File save failed');
             }
 
             try {
                 const image = {
                     file_name: fileName,
-                    user_id: req.session.user._id,
+                    user_id: request.session.user._id,
                     date_time: timestamp,
                     comments: [],
                 };
                 Photo.create(image);
-                return res.status(200).json({message: 'File uploaded successfully', fileName});
+                return response.status(200).json({message: 'File uploaded successfully', fileName});
             } catch (error1) {
-                return res.status(400).json({error: 'Could not save image to the table.'});
+                return response.status(400).json('Could not save image to the table.');
             }
         });
-        return res;
+        return response;
     });
 });
 
@@ -271,13 +267,13 @@ app.post('/photos/new', (req, res) => {
 /**
  * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
  */
-app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
-    const photo_id = req.params.photo_id;
-    const comment = req.body.comment;
+app.post("/commentsOfPhoto/:photo_id", async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const comment = request.body.comment;
     try {
         const newComment = {
             comment: comment,
-            user_id: req.session.user._id,
+            user_id: request.session.user._id,
             date_time: new Date(),
         };
         const result = await Photo.findByIdAndUpdate(
@@ -287,12 +283,12 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         );
 
         if (!result) {
-            return res.status(404).json({error: 'Photo not found'});
+            return response.status(404).json('Photo not found');
         }
-        return res.status(200).json({message: 'Comment added successfully', comment: comment});
+        return response.status(200).json({message: 'Comment added successfully', comment: comment});
     } catch (error) {
         console.error(error);
-        return res.status(400).json({error: 'Something went wrong...'});
+        return response.status(400).json('Something went wrong...');
     }
 });
 
@@ -547,7 +543,7 @@ async function regenerateSession(request, response, user, next) {
 }
 
 
-app.post('/admin/login', async (request, response, next) => {
+app.post('/admin/login', async function (request, response, next) {
     const {login_name, password} = request.body;
     try {
         const user = await User.findOne(
@@ -564,15 +560,15 @@ app.post('/admin/login', async (request, response, next) => {
     }
 });
 
-app.post('/admin/logout', (request, response) => {
+app.post('/admin/logout', async function (request, response) {
     if (request.session.user) {
-        request.session.destroy(() => response.sendStatus(200));
+        return request.session.destroy(() => response.sendStatus(200));
     } else {
-        response.status(400).send('No user is logged in');
+        return response.status(400).send('No user is logged in');
     }
 });
 
-app.post('/user', async (request, response, next) => {
+app.post('/user', async function (request, response, next) {
     try {
         const passwordEntry = makePasswordEntry(request.body.password);
 
@@ -600,11 +596,11 @@ app.post('/user', async (request, response, next) => {
     }
 });
 
-app.get('/admin/check-session', (request, response) => {
+app.get('/admin/check-session', async function (request, response) {
     if (request.session && request.session.user) {
-        response.sendStatus(200);
+        return response.sendStatus(200);
     } else {
-        response.sendStatus(401);
+        return response.sendStatus(401);
     }
 });
 

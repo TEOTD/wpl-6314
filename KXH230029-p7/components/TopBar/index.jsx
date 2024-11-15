@@ -1,7 +1,22 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogTitle} from "@mui/material";
+import {
+    Alert,
+    AppBar,
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    FormGroup,
+    Toolbar,
+    Typography
+} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import "./styles.css";
 import axios from "axios";
 import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
@@ -14,7 +29,11 @@ function TopBar() {
     const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
     const [imageUploadShow, setImageUploadShow] = React.useState(false);
     const [uploadInput, setUploadInput] = useState();
-    const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState(false);
+    const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState({
+        message: '',
+        success: false,
+        show: false
+    });
 
     const handleClickOpen = () => {
         setImageUploadShow(true);
@@ -24,12 +43,15 @@ function TopBar() {
         setImageUploadShow(false);
     };
 
-    const showSuccessAlert = () => {
-        setShowPhotoUploadSuccess(true);
+    const showAlert = (data) => {
+        setShowPhotoUploadSuccess(data);
 
-        // Hide alert after 3 seconds
+        // Hide and reset alert after 3 seconds
         setTimeout(() => {
-            setShowPhotoUploadSuccess(false);
+            setShowPhotoUploadSuccess((prev) => ({
+                ...prev,
+                show: false,
+            }));
         }, 3000);
     };
 
@@ -39,11 +61,19 @@ function TopBar() {
             const domForm = new FormData();
             domForm.append('uploadedphoto', uploadInput.files[0]);
             axios.post('/photos/new', domForm)
-              .then((res) => {
-                console.log(res);
-              })
-              .catch(err => console.log(`POST ERR: ${err}`));
-              showSuccessAlert();
+                .then(() => {
+                    showAlert({
+                        message: 'Your Photo has been uploaded successfully!',
+                        success: true,
+                        show: true
+                    });
+                })
+                .catch(err => showAlert(
+                    {
+                        message: `Photo upload failed: ${err.response?.data || 'unexpected error'}`,
+                        success: false,
+                        show: true
+                    }));
         }
         handleClose();
     };
@@ -114,32 +144,36 @@ function TopBar() {
                                 Add Photo
                             </Button>
                             <Dialog
-                            open={imageUploadShow}
-                            keepMounted
-                            onClose={handleClose}
-                            aria-describedby="alert-dialog-slide-description"
-                            id="photo-upload-dialog"
-                            sx={{
-                                '& .MuiPaper-root': {
-                                  background: '#000',
-                                  borderRadius: "10px",
-                                }
-                            }}
+                                open={imageUploadShow}
+                                keepMounted
+                                onClose={handleClose}
+                                aria-describedby="alert-dialog-slide-description"
+                                id="photo-upload-dialog"
+                                sx={{
+                                    '& .MuiPaper-root': {
+                                        background: '#000',
+                                        borderRadius: "10px",
+                                    }
+                                }}
                             >
-                            <DialogTitle className="dialog-title">{"Please select An image File"}</DialogTitle>
-                            <DialogContent>
-                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }} id="choose-photo-icon"/>
-                            </DialogContent>
-                            <DialogActions>
-                            <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
-                            <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
-                            </DialogActions>
+                                <DialogTitle className="dialog-title">{"Please select An image File"}</DialogTitle>
+                                <DialogContent>
+                                    <input type="file" accept="image/*" ref={(domFileRef) => {
+                                        setUploadInput(domFileRef);
+                                    }} id="choose-photo-icon"/>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
+                                    <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
+                                </DialogActions>
                             </Dialog>
                             {
-                                (showPhotoUploadSuccess &&
+                                (showPhotoUploadSuccess.show &&
                                     (
-                                        <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-                                            Your Photo has been uploaded successfully!
+                                        <Alert icon={showPhotoUploadSuccess.success ? <CheckIcon fontSize="inherit"/> :
+                                            <CloseIcon fontSize="inherit"/>}
+                                               severity={showPhotoUploadSuccess.success ? "success" : "error"}>
+                                            {showPhotoUploadSuccess.message}
                                         </Alert>
                                     )
                                 )
