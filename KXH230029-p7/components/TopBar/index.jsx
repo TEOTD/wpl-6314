@@ -29,14 +29,15 @@ function TopBar() {
             // Create a DOM form and add the file to it under the name uploadedphoto
             const domForm = new FormData();
             domForm.append('uploadedphoto', uploadInput.files[0]);
+            console.log(uploadInput.files[0]);
             axios.post('/photos/new', domForm)
               .then((res) => {
                 console.log(res);
               })
               .catch(err => console.log(`POST ERR: ${err}`));
+              showSuccessAlert();
         }
         handleClose();
-        showSuccessAlert();
     }
 
     const [user, setUser] = useState(null);
@@ -136,7 +137,7 @@ function TopBar() {
                             {
                                 (showPhotoUploadSuccess &&
                                     <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-                                        Here is a gentle confirmation that your action was successful.
+                                        Your Photo has been uploaded successfully!
                                     </Alert>
                                 )
                             }
