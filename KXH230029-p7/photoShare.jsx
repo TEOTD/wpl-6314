@@ -49,7 +49,7 @@ function PhotoShare() {
     // Using memo to store contexts variable and set parameter functions, to avoid reloading on value change.
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
     const loginContextValue = useMemo(() => [isLoggedIn, setIsLoggedIn], [isLoggedIn]);
-    const loggedInUserContextValue = useMemo(() => [loggedInUser, setLoggedInUser], [loggedInUser])
+    const loggedInUserContextValue = useMemo(() => [loggedInUser, setLoggedInUser], [loggedInUser]);
 
 
     const [photoIndex, setPhotoIndex] = useState(-1);
@@ -118,6 +118,7 @@ function PhotoShare() {
     const renderMainContent = () => {
         return (
             isLoggedIn ?
+            (
                 <Routes>
                     <Route path="/"/>
                     <Route
@@ -144,10 +145,14 @@ function PhotoShare() {
                         )}
                     />
                     <Route path="/users" element={<UserList/>}/>
-                </Routes> :
+                </Routes> 
+            ) :
+            (
                 <Routes>
                     <Route path="/admin/login" element={<LoginRegister/>}/>
                 </Routes>
+            )
+                
         );
     };
 
@@ -168,7 +173,7 @@ function PhotoShare() {
                     </Paper>
                 </Grid>
             </>
-        )
+        );
     };
 
     return (

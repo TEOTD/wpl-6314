@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
+import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogTitle} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import CheckIcon from '@mui/icons-material/Check';
 import "./styles.css";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
 import axios from "axios";
+import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
 
 function TopBar() {
     const {pathname} = useLocation();
@@ -24,6 +24,15 @@ function TopBar() {
         setImageUploadShow(false);
     };
 
+    const showSuccessAlert = () => {
+        setShowPhotoUploadSuccess(true);
+    
+        // Hide alert after 3 seconds
+        setTimeout(() => {
+            setShowPhotoUploadSuccess(false);
+        }, 3000);
+    };
+    
     const handleFileUpload = () => {
         if (uploadInput.files.length > 0) {
             // Create a DOM form and add the file to it under the name uploadedphoto
@@ -38,18 +47,10 @@ function TopBar() {
               showSuccessAlert();
         }
         handleClose();
-    }
+    };
 
     const [user, setUser] = useState(null);
     const [version, setVersion] = useState('');
-    const showSuccessAlert = () => {
-        setShowPhotoUploadSuccess(true);
-    
-        // Hide alert after 3 seconds
-        setTimeout(() => {
-            setShowPhotoUploadSuccess(false);
-        }, 3000);
-    };
 
     const userId = useMemo(() => {
         const match = pathname.match(/\/(photos|users|comments)\/([A-Za-z\d]+)/);
@@ -66,9 +67,9 @@ function TopBar() {
     useEffect(() => {
         (async () => {
             await axios.get('/test/info').then(result => setVersion(result.data.__v))
-                .catch(error => console.error('Failed to fetch data:', error))
+                .catch(error => console.error('Failed to fetch data:', error));
         })();
-    }, [])
+    }, []);
 
     const title = useMemo(() => {
         if (!user) return 'Home Page';
@@ -136,9 +137,11 @@ function TopBar() {
                             </Dialog>
                             {
                                 (showPhotoUploadSuccess &&
-                                    <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-                                        Your Photo has been uploaded successfully!
-                                    </Alert>
+                                    (
+                                        <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+                                            Your Photo has been uploaded successfully!
+                                        </Alert>
+                                    )
                                 )
                             }
                         </>
