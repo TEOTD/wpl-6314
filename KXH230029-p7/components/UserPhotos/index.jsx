@@ -53,9 +53,11 @@ function CommentInput({imageId, setReload, reload}){
         <Box className="flex-display">
           <Box className="comment-input-box">
             
-                <TextField id="standard-multiline-flexible" multiline label="Add your Comment" variant="filled" 
+            <TextField id="standard-multiline-flexible" multiline label="Add your Comment" variant="filled" 
                     onChange={(e) => setComment(e.target.value)} maxRows={10}
-                />
+                    className="comment-input-input-box"
+                    fullWidth 
+            />
             
             <Button variant="contained" size="medium" onClick={() => {
                 addCommentRequest(imageId, comment);

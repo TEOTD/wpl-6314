@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
+import {AppBar, Box, Button, Checkbox, FormControlLabel, FormGroup, Toolbar, Typography, Dialog, DialogActions, Alert, DialogContent, DialogTitle} from "@mui/material";
 import {useLocation} from "react-router-dom";
 import CheckIcon from '@mui/icons-material/Check';
 import "./styles.css";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
 import axios from "axios";
+import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
 
 function TopBar() {
     const {pathname} = useLocation();
@@ -24,7 +24,16 @@ function TopBar() {
         setImageUploadShow(false);
     };
 
-    const handleFileUpload = () => {
+    const showSuccessAlert = () => {
+        setShowPhotoUploadSuccess(true);
+    
+        // Hide alert after 3 seconds
+        setTimeout(() => {
+            setShowPhotoUploadSuccess(false);
+        }, 3000);
+    };
+    
+    const handleFileUpload = async () => {
         if (uploadInput.files.length > 0) {
             // Create a DOM form and add the file to it under the name uploadedphoto
             const domForm = new FormData();
@@ -34,21 +43,13 @@ function TopBar() {
                 console.log(res);
               })
               .catch(err => console.log(`POST ERR: ${err}`));
+              showSuccessAlert();
         }
         handleClose();
-        showSuccessAlert();
-    }
+    };
 
     const [user, setUser] = useState(null);
     const [version, setVersion] = useState('');
-    const showSuccessAlert = () => {
-        setShowPhotoUploadSuccess(true);
-    
-        // Hide alert after 3 seconds
-        setTimeout(() => {
-            setShowPhotoUploadSuccess(false);
-        }, 3000);
-    };
 
     const userId = useMemo(() => {
         const match = pathname.match(/\/(photos|users|comments)\/([A-Za-z\d]+)/);
@@ -65,9 +66,9 @@ function TopBar() {
     useEffect(() => {
         (async () => {
             await axios.get('/test/info').then(result => setVersion(result.data.__v))
-                .catch(error => console.error('Failed to fetch data:', error))
+                .catch(error => console.error('Failed to fetch data:', error));
         })();
-    }, [])
+    }, []);
 
     const title = useMemo(() => {
         if (!user) return 'Home Page';
@@ -116,21 +117,30 @@ function TopBar() {
                             keepMounted
                             onClose={handleClose}
                             aria-describedby="alert-dialog-slide-description"
-                        >
-                            <DialogTitle>{"Please select An image File"}</DialogTitle>
+                            id="photo-upload-dialog"
+                            sx={{
+                                '& .MuiPaper-root': {
+                                  background: '#000',
+                                  borderRadius: "10px",
+                                }
+                            }}
+                            >
+                            <DialogTitle className="dialog-title">{"Please select An image File"}</DialogTitle>
                             <DialogContent>
-                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }}/>
+                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }} id="choose-photo-icon"/>
                             </DialogContent>
                             <DialogActions>
-                            <Button onClick={handleClose}>Cancel</Button>
-                            <Button onClick={handleFileUpload}>Upload</Button>
+                            <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
+                            <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
                             </DialogActions>
                             </Dialog>
                             {
                                 (showPhotoUploadSuccess &&
-                                    <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-                                        Here is a gentle confirmation that your action was successful.
-                                    </Alert>
+                                    (
+                                        <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+                                            Your Photo has been uploaded successfully!
+                                        </Alert>
+                                    )
                                 )
                             }
                         </>

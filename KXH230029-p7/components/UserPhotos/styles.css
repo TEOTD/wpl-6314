@@ -21,7 +21,7 @@
 }
 
 .comment-input-input-box{
-    width: 80vmin;
+      
 }
 
 .comment-input-container{
@@ -34,7 +34,8 @@
 }
 
 .comment-input-box{
-    
+    overflow: hidden !important;
+    justify-content: center !important;
 }
 
 #standard-multiline-flexible{
@@ -48,10 +49,11 @@
 
 #comment-submit-button{
     background-color: var(--accent-hover-color);
-    margin-left: 15px;
+    margin-left: 0px;
     height: 30px;
+    width: 100%;
     margin-top: 15px;
-    color: var(--text-color-hover);
+    color: var(--text-color);
     text-transform: none;
 }
 #comment-submit-button:hover{

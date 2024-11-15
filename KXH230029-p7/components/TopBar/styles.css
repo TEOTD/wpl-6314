@@ -31,3 +31,20 @@
 .add-photo-button{
     color: var(--text-color) !important;
 }
+
+#choose-photo-icon{
+    color: var(--accent-hover-color) !important;
+}
+
+#photo-upload-dialog{
+    color: black !important;
+}
+
+.dialog-title{
+    color: var(--text-color-hover) !important;
+    font-family: 'Star Jedi', sans-serif;
+}
+
+.dialog-button{
+    color: var(--accent-hover-color) !important;
+}
