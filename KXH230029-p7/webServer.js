@@ -38,7 +38,8 @@ mongoose.Promise = require("bluebird");
 
 const express = require("express");
 const session = require('express-session');
-const mongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -59,11 +60,11 @@ app.use(session({
         secure: false,
         maxAge: 24 * 60 * 60 * 1000
     },
-    store: new mongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
-}))
+    store: new MongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
+}));
 
 function isAuthenticated(request, response, next) {
-    if (request.session.user) next()
+    if (request.session.user) next();
     else response.status(401).send('Unauthorized');
 }
 
@@ -227,55 +228,53 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
  */
 app.post('/photos/new', (req, res) => {
     processFormBody(req, res, (err) => {
-      if (err || !req.file) {
-        console.error('File upload error:', err);
-        return res.status(400).send({ error: 'File upload failed' });
-      }
-  
-      // Validate file type and size
-      const allowedMimeTypes = ['image/jpeg', 'image/png'];
-      if (!allowedMimeTypes.includes(req.file.mimetype)) {
-        return res.status(400).send({ error: 'Invalid file type' });
-      }
-  
-      const timestamp = Date.now();
-      const fileName = `U${timestamp}_${req.file.originalname}`;
-      const filePath = './images/'+ fileName;
-  
-      // Write the file to the "images" directory
-      fs.writeFile(filePath, req.file.buffer, (err1) => {
-        if (err1) {
-          console.error('Error saving file:', err1);
-          return res.status(500).send({ error: 'File save failed' });
+        if (err || !req.file) {
+            console.error('File upload error:', err);
+            return res.status(400).send({error: 'File upload failed'});
         }
 
-        try{
-            const image = {
-                file_name: fileName,
-                user_id: req.session.user._id,
-                date_time: timestamp,
-                comments: [],
-            };
-            Photo.create(image);
-            return res.status(200).json({ message: 'File uploaded successfully', fileName });
-        } catch(error1){
-            return res.status(400).json({ error: 'Could not save image to the table.' });
+        // Validate file type and size
+        const allowedMimeTypes = ['image/jpeg', 'image/png'];
+        if (!allowedMimeTypes.includes(req.file.mimetype)) {
+            return res.status(400).send({error: 'Invalid file type'});
         }
-  
-      });
 
-      return;
+        const timestamp = Date.now();
+        const fileName = `U${timestamp}_${req.file.originalname}`;
+        const filePath = './images/' + fileName;
+
+        // Write the file to the "images" directory
+        fs.writeFile(filePath, req.file.buffer, (err1) => {
+            if (err1) {
+                console.error('Error saving file:', err1);
+                return res.status(500).send({error: 'File save failed'});
+            }
+
+            try {
+                const image = {
+                    file_name: fileName,
+                    user_id: req.session.user._id,
+                    date_time: timestamp,
+                    comments: [],
+                };
+                Photo.create(image);
+                return res.status(200).json({message: 'File uploaded successfully', fileName});
+            } catch (error1) {
+                return res.status(400).json({error: 'Could not save image to the table.'});
+            }
+        });
+        return res;
     });
 });
-  
-  
+
+
 /**
  * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
  */
-app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
+app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
     const photo_id = req.params.photo_id;
     const comment = req.body.comment;
-    try{
+    try {
         const newComment = {
             comment: comment,
             user_id: req.session.user._id,
@@ -283,19 +282,18 @@ app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
         };
         const result = await Photo.findByIdAndUpdate(
             photo_id,
-            { $push: { comments: newComment } },
-            { new: true }  // Return the updated document
+            {$push: {comments: newComment}},
+            {new: true}  // Return the updated document
         );
 
         if (!result) {
-            return res.status(404).json({ error: 'Photo not found' });
+            return res.status(404).json({error: 'Photo not found'});
         }
-        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
-    }
-    catch (error) {
+        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+    } catch (error) {
         console.error(error);
-        return res.status(400).json({ error: 'Something went wrong...' });
-    } 
+        return res.status(400).json({error: 'Something went wrong...'});
+    }
 });
 
 
@@ -532,8 +530,6 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
     }
 });
 
-const crypto = require('crypto');
-
 /**
  * Return a salted and hashed password entry from a clear text password.
  * @param {string} clearTextPassword
@@ -564,39 +560,42 @@ function doesPasswordMatch(hash, salt, clearTextPassword) {
 }
 
 
-app.post('/admin/login', async function (request, response, next) {
+async function regenerateSession(request, response, user, next) {
+    request.session.regenerate(function (error) {
+        if (error) {
+            return next(error);
+        }
+        request.session.user = {_id: user._id, first_name: user.first_name};
+        request.session.save(function (err) {
+            if (err) {
+                return next(err);
+            }
+            return response.status(200).json({_id: user._id, first_name: user.first_name});
+        });
+        return null;
+    });
+    return null;
+}
+
+
+app.post('/admin/login', async (request, response, next) => {
     const {username, password} = request.body;
     try {
-        const user = await User.findOne({login_name: username}, {
-            password_digest: 1,
-            salt: 1,
-            first_name: 1,
-            _id: 1
-        });
+        const user = await User.findOne(
+            {login_name: username},
+            {password_digest: 1, salt: 1, first_name: 1, _id: 1}
+        );
 
         if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
             return response.status(400).send('Invalid username or password');
         }
-
-        request.session.regenerate(function (err) {
-            if (err) {
-                return next(err);
-            }
-            request.session.user = {_id: user._id, first_name: user.first_name};
-            request.session.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                response.status(200).json({_id: user._id, first_name: user.first_name});
-            });
-        });
+        await regenerateSession(request, response, user, next);
     } catch (error) {
         response.status(500).send('Internal server error');
     }
 });
 
-
-app.post('/admin/logout', async function (request, response) {
+app.post('/admin/logout', (request, response) => {
     if (request.session.user) {
         request.session.destroy(() => response.sendStatus(200));
     } else {
@@ -604,11 +603,11 @@ app.post('/admin/logout', async function (request, response) {
     }
 });
 
-app.post('/user', async function (request, response, next) {
+app.post('/user', async (request, response, next) => {
     try {
         const passwordEntry = makePasswordEntry(request.body.password);
 
-        const body = {
+        const user = await User.create({
             login_name: request.body.username,
             password_digest: passwordEntry.hash,
             salt: passwordEntry.salt,
@@ -617,25 +616,13 @@ app.post('/user', async function (request, response, next) {
             location: request.body.location,
             description: request.body.description,
             occupation: request.body.occupation,
-        };
+        });
 
-        const user = await User.create(body);
         if (!user) {
             return response.status(400).send('Failed to create user');
         }
 
-        request.session.regenerate(function (err) {
-            if (err) {
-                return next(err);
-            }
-            request.session.user = {_id: user._id, first_name: user.first_name};
-            request.session.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                response.status(200).json({_id: user._id, first_name: user.first_name});
-            });
-        });
+        await regenerateSession(request, response, user, next);
     } catch (error) {
         response.status(500).send('Internal server error');
     }

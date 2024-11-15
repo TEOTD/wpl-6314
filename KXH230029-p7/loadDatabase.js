@@ -20,13 +20,13 @@ mongoose.connect("mongodb://127.0.0.1/project7", {
 });
 
 // Get the magic models we used in the previous projects.
-const models = require("./modelData/photoApp.js").models;
+const crypto = require("crypto");
 
 // Load the Mongoose schema for Use and Photo
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
-const crypto = require("crypto");
+const models = require("./modelData/photoApp.js").models;
 
 const versionString = "1.0";
 

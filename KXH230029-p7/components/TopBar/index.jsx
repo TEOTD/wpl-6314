@@ -26,13 +26,13 @@ function TopBar() {
 
     const showSuccessAlert = () => {
         setShowPhotoUploadSuccess(true);
-    
+
         // Hide alert after 3 seconds
         setTimeout(() => {
             setShowPhotoUploadSuccess(false);
         }, 3000);
     };
-    
+
     const handleFileUpload = async () => {
         if (uploadInput.files.length > 0) {
             // Create a DOM form and add the file to it under the name uploadedphoto
@@ -109,6 +109,7 @@ function TopBar() {
                     </Typography>
                     {isLoggedIn && (
                         <>
+                            <Box className="separator"/>
                             <Button color="inherit" onClick={handleClickOpen} className="add-photo-button">
                                 Add Photo
                             </Button>
@@ -145,7 +146,7 @@ function TopBar() {
                             }
                         </>
                     )}
-                    
+
                 </Box>
                 <Box sx={{display: "flex", alignItems: "center", gap: 3}}>
                     {isLoggedIn && (
