@@ -116,14 +116,21 @@ function TopBar() {
                             keepMounted
                             onClose={handleClose}
                             aria-describedby="alert-dialog-slide-description"
-                        >
-                            <DialogTitle>{"Please select An image File"}</DialogTitle>
+                            id="photo-upload-dialog"
+                            sx={{
+                                '& .MuiPaper-root': {
+                                  background: '#000',
+                                  borderRadius: "10px",
+                                }
+                            }}
+                            >
+                            <DialogTitle className="dialog-title">{"Please select An image File"}</DialogTitle>
                             <DialogContent>
-                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }}/>
+                                <input type="file" accept="image/*" ref={(domFileRef) => { setUploadInput(domFileRef); }} id="choose-photo-icon"/>
                             </DialogContent>
                             <DialogActions>
-                            <Button onClick={handleClose}>Cancel</Button>
-                            <Button onClick={handleFileUpload}>Upload</Button>
+                            <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
+                            <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
                             </DialogActions>
                             </Dialog>
                             {
