@@ -39,7 +39,6 @@ mongoose.Promise = require("bluebird");
 const express = require("express");
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -73,6 +72,7 @@ const {Types} = require("mongoose");
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
+const {makePasswordEntry, doesPasswordMatch} = require("./password");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
@@ -185,7 +185,7 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
     const objectId = new Types.ObjectId(id);
     try {
-        const user = await User.findById(objectId, {__v: 0});
+        const user = await User.findById(objectId, {__v: 0, login_name: 0, password_digest: 0, salt: 0});
         if (!user) {
             console.log(`User with _id: ${id} not found.`);
             return response.status(404).send(`User with _id: ${id} not found.`);
@@ -215,7 +215,7 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         if (!result) {
             return res.status(404).json({error: 'Photo not found'});
         }
-        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+        return res.status(200).json({message: 'Comment added successfully', comment: comment});
     } catch (error) {
         console.error(error);
         return res.status(400).json({error: 'Something went wrong...'});
@@ -234,7 +234,7 @@ app.post('/photos/new', (req, res) => {
         }
 
         // Validate file type and size
-        const allowedMimeTypes = ['image/jpeg', 'image/png'];
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!allowedMimeTypes.includes(req.file.mimetype)) {
             return res.status(400).send({error: 'Invalid file type'});
         }
@@ -289,7 +289,7 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         if (!result) {
             return res.status(404).json({error: 'Photo not found'});
         }
-        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+        return res.status(200).json({message: 'Comment added successfully', comment: comment});
     } catch (error) {
         console.error(error);
         return res.status(400).json({error: 'Something went wrong...'});
@@ -530,68 +530,37 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
     }
 });
 
-/**
- * Return a salted and hashed password entry from a clear text password.
- * @param {string} clearTextPassword
- * @return {object} passwordEntry where passwordEntry is an object with two
- * string properties:
- *    salt - The salt used for the password.
- *    hash - The sha1 hash of the password and salt.
- */
-function makePasswordEntry(clearTextPassword) {
-    const salt = crypto.randomBytes(8).toString('hex');
-    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
-
-    return {salt, hash};
-}
-
-
-/**
- * Return true if the specified clear text password and salt generates the
- * specified hash.
- * @param {string} hash
- * @param {string} salt
- * @param {string} clearTextPassword
- * @return {boolean}
- */
-function doesPasswordMatch(hash, salt, clearTextPassword) {
-    const generatedHash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
-    return generatedHash === hash;
-}
-
 
 async function regenerateSession(request, response, user, next) {
-    request.session.regenerate(function (error) {
+    return request.session.regenerate(function (error) {
         if (error) {
             return next(error);
         }
-        request.session.user = {_id: user._id, first_name: user.first_name};
-        request.session.save(function (err) {
+        request.session.user = {_id: user._id, first_name: user.first_name, login_name: user.login_name};
+        return request.session.save(function (err) {
             if (err) {
                 return next(err);
             }
-            return response.status(200).json({_id: user._id, first_name: user.first_name});
+            return response.status(200).json({_id: user._id, first_name: user.first_name, login_name: user.login_name});
         });
-        return null;
     });
-    return null;
 }
 
 
 app.post('/admin/login', async (request, response, next) => {
-    const {username, password} = request.body;
+    const {login_name, password} = request.body;
     try {
         const user = await User.findOne(
-            {login_name: username},
+            {login_name: login_name},
             {password_digest: 1, salt: 1, first_name: 1, _id: 1}
         );
 
         if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
-            return response.status(400).send('Invalid username or password');
+            return response.status(400).send('Invalid login_name or password');
         }
-        await regenerateSession(request, response, user, next);
+        return await regenerateSession(request, response, user, next);
     } catch (error) {
-        response.status(500).send('Internal server error');
+        return response.status(500).send('Internal server error');
     }
 });
 
@@ -608,11 +577,11 @@ app.post('/user', async (request, response, next) => {
         const passwordEntry = makePasswordEntry(request.body.password);
 
         const user = await User.create({
-            login_name: request.body.username,
+            login_name: request.body.login_name,
             password_digest: passwordEntry.hash,
             salt: passwordEntry.salt,
-            first_name: request.body.firstName,
-            last_name: request.body.lastName,
+            first_name: request.body.first_name,
+            last_name: request.body.last_name,
             location: request.body.location,
             description: request.body.description,
             occupation: request.body.occupation,
@@ -622,9 +591,12 @@ app.post('/user', async (request, response, next) => {
             return response.status(400).send('Failed to create user');
         }
 
-        await regenerateSession(request, response, user, next);
+        return await regenerateSession(request, response, user, next);
     } catch (error) {
-        response.status(500).send('Internal server error');
+        if (error.message.includes('duplicate key error')) {
+            return response.status(400).send('login_name already exists');
+        }
+        return response.status(500).send('Internal server error');
     }
 });
 

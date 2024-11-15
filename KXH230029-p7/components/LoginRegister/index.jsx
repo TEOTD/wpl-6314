@@ -6,11 +6,11 @@ import {LoggedInUserContext, LoginContext} from '../context/appContext';
 
 function LoginRegister() {
     const [credentials, setCredentials] = useState({
-        firstName: '',
-        lastName: '',
-        username: '',
+        first_name: '',
+        last_name: '',
+        login_name: '',
         password: '',
-        confirmPassword: '',
+        confirm_password: '',
         location: '',
         description: '',
         occupation: '',
@@ -24,15 +24,15 @@ function LoginRegister() {
 
     const validateFields = () => {
         const errors = {};
-        if (!credentials.username) errors.username = 'Username is required';
+        if (!credentials.login_name) errors.login_name = 'login_name is required';
         if (!credentials.password) errors.password = 'Password is required';
 
         if (!isLoginView) {
-            if (!credentials.firstName) errors.firstName = 'First Name is required';
-            if (!credentials.lastName) errors.lastName = 'Last Name is required';
-            if (!credentials.confirmPassword) errors.confirmPassword = 'Please confirm your password';
-            if (credentials.password !== credentials.confirmPassword) {
-                errors.confirmPassword = 'Passwords do not match';
+            if (!credentials.first_name) errors.first_name = 'First Name is required';
+            if (!credentials.last_name) errors.last_name = 'Last Name is required';
+            if (!credentials.confirm_password) errors.confirm_password = 'Please confirm your password';
+            if (credentials.password !== credentials.confirm_password) {
+                errors.confirm_password = 'Passwords do not match';
             }
         }
 
@@ -44,13 +44,8 @@ function LoginRegister() {
         const {name, value} = e.target;
         setCredentials((prev) => ({...prev, [name]: value}));
 
-        if (name === 'password' || name === 'confirmPassword') {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-            const isPasswordValid = passwordRegex.test(credentials.password);
-
-            if (!isPasswordValid) {
-                setFieldError('Password must be at least 8 characters long, with uppercase, lowercase, number, and special character.');
-            } else if (name === 'confirmPassword' && credentials.password !== value) {
+        if (name === 'password' || name === 'confirm_password') {
+            if (name === 'confirm_password' && credentials.password !== value) {
                 setFieldError('Passwords do not match');
             } else {
                 setFieldError('');
@@ -63,7 +58,7 @@ function LoginRegister() {
         setLoading(true);
         const url = isLogin ? '/admin/login' : '/user';
         const data = isLogin
-            ? {username: credentials.username, password: credentials.password}
+            ? {login_name: credentials.login_name, password: credentials.password}
             : credentials;
         await axios.post(url, data)
             .then((result) => {
@@ -92,10 +87,10 @@ function LoginRegister() {
                 </Typography>
                 {!isLoginView && (
                     <>
-                        {['firstName', 'lastName'].map((field) => (
+                        {['first_name', 'last_name'].map((field) => (
                             <TextField
                                 key={field}
-                                label={field === 'firstName' ? 'First Name' : 'Last Name'}
+                                label={field === 'first_name' ? 'First Name' : 'Last Name'}
                                 name={field}
                                 color="secondary"
                                 variant="outlined"
@@ -111,14 +106,14 @@ function LoginRegister() {
                     </>
                 )}
                 <TextField
-                    label="Username"
-                    name="username"
+                    label="Login Name"
+                    name="login_name"
                     variant="outlined"
                     color="secondary"
-                    value={credentials.username}
+                    value={credentials.login_name}
                     onChange={handleChange}
-                    error={!!fieldErrors.username}
-                    helperText={fieldErrors.username}
+                    error={!!fieldErrors.login_name}
+                    helperText={fieldErrors.login_name}
                     required
                     className="login-text-fields"
                 />
@@ -130,8 +125,8 @@ function LoginRegister() {
                     color="secondary"
                     value={credentials.password}
                     onChange={handleChange}
-                    error={!!fieldErrors.password || (!isLoginView && fieldError.includes('least 8 characters long'))}
-                    helperText={fieldErrors.password || (!isLoginView && fieldError.includes('least 8 characters long') ? fieldError : null)}
+                    error={!!fieldErrors.password || (!isLoginView)}
+                    helperText={fieldErrors.password || (!isLoginView ? fieldError : null)}
                     required
                     className="login-text-fields"
                 />
@@ -139,15 +134,15 @@ function LoginRegister() {
                     <>
                         <TextField
                             label="Re-Type Password"
-                            name="confirmPassword"
+                            name="confirm_password"
                             type="password"
                             variant="outlined"
                             color="secondary"
-                            value={credentials.confirmPassword}
+                            value={credentials.confirm_password}
                             onChange={handleChange}
-                            error={!!fieldErrors.confirmPassword || fieldError.includes('match')}
-                            helperText={fieldError.includes('match') ? fieldError : fieldErrors.confirmPassword}
-                            disabled={!!fieldErrors.confirmPassword || fieldError.includes('least 8 characters long') || credentials.password.length <= 0}
+                            error={!!fieldErrors.confirm_password || fieldError.includes('match')}
+                            helperText={fieldError.includes('match') ? fieldError : fieldErrors.confirm_password}
+                            disabled={!!fieldErrors.confirm_password || credentials.password.length <= 0}
                             required
                             className="login-text-fields"
                         />
@@ -177,11 +172,11 @@ function LoginRegister() {
                         fullWidth
                         onClick={() => {
                             setCredentials({
-                                firstName: '',
-                                lastName: '',
-                                username: '',
+                                first_name: '',
+                                last_name: '',
+                                login_name: '',
                                 password: '',
-                                confirmPassword: '',
+                                confirm_password: '',
                                 location: '',
                                 description: '',
                                 occupation: '',
