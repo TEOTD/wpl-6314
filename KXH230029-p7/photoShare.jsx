@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import {Grid, Paper} from "@mui/material";
 import {HashRouter, Route, Routes, useLocation, useNavigate, useParams} from "react-router-dom";
 import "./styles/main.css";
+import axios from "axios";
 import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
@@ -55,6 +56,33 @@ function PhotoShare() {
     const [photoIndex, setPhotoIndex] = useState(-1);
     const {pathname} = useLocation();
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const loggedInFlag = localStorage.getItem('isLoggedIn');
+        const currentLoggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+        if (loggedInFlag === 'true') {
+            (async () => {
+                await axios.get('/admin/check-session', {withCredentials: true})
+                    .then(response => {
+                        if (response.status === 200) {
+                            setIsLoggedIn(true);
+                            setLoggedInUser(currentLoggedInUser);
+                        } else {
+                            localStorage.removeItem('isLoggedIn');
+                            localStorage.removeItem('loggedInUser');
+                            setIsLoggedIn(false);
+                        }
+                    })
+                    .catch(() => {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('loggedInUser');
+                        setIsLoggedIn(false);
+                    });
+            })();
+        }
+    }, []);
 
     // Set up initial state based on the URL path on component mount this is used for checking bookmark of advance features
     // Disable first load after initial setup
@@ -145,14 +173,14 @@ function PhotoShare() {
                         )}
                     />
                     <Route path="/users" element={<UserList/>}/>
-                </Routes> 
+                </Routes>
             ) :
             (
                 <Routes>
                     <Route path="/admin/login" element={<LoginRegister/>}/>
                 </Routes>
             )
-                
+
         );
     };
 

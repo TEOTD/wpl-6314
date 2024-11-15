@@ -1,37 +1,38 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
-import {LoggedInUserContext, LoginContext} from '../context/appContext';
+import React, {useContext, useState} from 'react';
+import './styles.css';
+import {Box, Button, CircularProgress, TextField, Typography} from '@mui/material';
 import axios from 'axios';
+import {LoggedInUserContext, LoginContext} from '../context/appContext';
 
 function LoginRegister() {
     const [credentials, setCredentials] = useState({
-        firstName: '',
-        lastName: '',
-        username: '',
+        first_name: '',
+        last_name: '',
+        login_name: '',
         password: '',
-        confirmPassword: '',
+        confirm_password: '',
         location: '',
         description: '',
         occupation: '',
     });
-    const [isLoggedIn, setIsLoggedIn] = useContext(LoginContext);
-    const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
+    const [, setIsLoggedIn] = useContext(LoginContext);
+    const [, setLoggedInUser] = useContext(LoggedInUserContext);
     const [loading, setLoading] = useState(false);
     const [isLoginView, setIsLoginView] = useState(true);
-    const [error, setError] = useState('');
+    const [fieldError, setFieldError] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
 
     const validateFields = () => {
         const errors = {};
-        if (!credentials.username) errors.username = 'Username is required';
+        if (!credentials.login_name) errors.login_name = 'login_name is required';
         if (!credentials.password) errors.password = 'Password is required';
 
         if (!isLoginView) {
-            if (!credentials.firstName) errors.firstName = 'First Name is required';
-            if (!credentials.lastName) errors.lastName = 'Last Name is required';
-            if (!credentials.confirmPassword) errors.confirmPassword = 'Please confirm your password';
-            if (credentials.password !== credentials.confirmPassword) {
-                errors.confirmPassword = 'Passwords do not match';
+            if (!credentials.first_name) errors.first_name = 'First Name is required';
+            if (!credentials.last_name) errors.last_name = 'Last Name is required';
+            if (!credentials.confirm_password) errors.confirm_password = 'Please confirm your password';
+            if (credentials.password !== credentials.confirm_password) {
+                errors.confirm_password = 'Passwords do not match';
             }
         }
 
@@ -43,19 +44,11 @@ function LoginRegister() {
         const {name, value} = e.target;
         setCredentials((prev) => ({...prev, [name]: value}));
 
-        // Simplified Password and Match Validation
-        if (name === 'password' || name === 'confirmPassword') {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-            const isPasswordValid = passwordRegex.test(credentials.password);
-
-            if (!isPasswordValid) {
-                setError(
-                    'Password must be at least 8 characters long, with uppercase, lowercase, number, and special character.'
-                );
-            } else if (name === 'confirmPassword' && credentials.password !== value) {
-                setError('Passwords do not match');
+        if (name === 'password' || name === 'confirm_password') {
+            if (name === 'confirm_password' && credentials.password !== value) {
+                setFieldError('Passwords do not match');
             } else {
-                setError('');
+                setFieldError('');
             }
         }
     };
@@ -65,205 +58,145 @@ function LoginRegister() {
         setLoading(true);
         const url = isLogin ? '/admin/login' : '/user';
         const data = isLogin
-            ? {username: credentials.username, password: credentials.password}
+            ? {login_name: credentials.login_name, password: credentials.password}
             : credentials;
-
-        try {
-            const result = await axios.post(url, data);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('loggedInUser', JSON.stringify(result.data));
-            console.log(result.data)
-            setIsLoggedIn(true);
-            setLoggedInUser(result.data);
-        } catch (error) {
-            setError(`Failed to ${isLogin ? 'login' : 'register'}`);
-        } finally {
-            setLoading(false);
-        }
+        await axios.post(url, data)
+            .then((result) => {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loggedInUser', JSON.stringify(result.data));
+                setIsLoggedIn(true);
+                setLoggedInUser(result.data);
+            }).catch((error) => {
+                const errorMessage = error.response?.data || 'Unexpected error occurred';
+                setFieldError(`Failed to ${isLogin ? 'login' : 'register'} error: ${errorMessage}`);
+            }).finally(() => {
+                    setLoading(false);
+                }
+            );
     };
 
-    useEffect(() => {
-        const loggedInFlag = localStorage.getItem('isLoggedIn');
-        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (loggedInFlag === 'true') {
-            axios.get('/admin/check-session', {withCredentials: true})
-                .then(response => {
-                    if (response.status === 200) {
-                        setIsLoggedIn(true);
-                        console.log(loggedInUser)
-                        setLoggedInUser(loggedInUser)
-                    } else {
-                        localStorage.removeItem('isLoggedIn');
-                        localStorage.removeItem('loggedInUser');
-                        setIsLoggedIn(false);
-                    }
-                })
-                .catch(() => {
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('loggedInUser');
-                    setIsLoggedIn(false);
-                });
-        }
-    }, []);
+    if (loading) {
+        return <CircularProgress style={{display: 'block', margin: '20px auto'}}/>;
+    }
 
     return (
-        <Paper style={{padding: '20px', maxWidth: '400px', margin: '20px auto'}}>
-            {loading ? (
-                <CircularProgress style={{display: 'block', margin: '20px auto'}}/>
-            ) : (
-                <>
-                    <Typography variant="h6" color="textPrimary" gutterBottom>
-                        {isLoginView ? 'Please Login' : 'Please Register'}
-                    </Typography>
-
-                    {!isLoginView && (
-                        <>
+        <>
+            <Box className="login-register-container">
+                <Typography variant="h4" gutterBottom className="login-heading">
+                    {isLoginView ? 'Login' : 'Register'}
+                </Typography>
+                {!isLoginView && (
+                    <>
+                        {['first_name', 'last_name'].map((field) => (
                             <TextField
-                                label="First Name"
-                                name="firstName"
+                                key={field}
+                                label={field === 'first_name' ? 'First Name' : 'Last Name'}
+                                name={field}
+                                color="secondary"
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                value={credentials.firstName}
+                                value={credentials[field]}
                                 onChange={handleChange}
-                                error={fieldErrors.firstName}
-                                helperText={fieldErrors.firstName}
+                                error={!!fieldErrors[field]}
+                                helperText={fieldErrors[field]}
+                                id="filled-helperText"
                                 required
+                                className="login-text-fields"
                             />
+                        ))}
+                    </>
+                )}
+                <TextField
+                    label="Login Name"
+                    name="login_name"
+                    variant="outlined"
+                    color="secondary"
+                    value={credentials.login_name}
+                    onChange={handleChange}
+                    error={!!fieldErrors.login_name}
+                    helperText={fieldErrors.login_name}
+                    required
+                    className="login-text-fields"
+                />
+                <TextField
+                    label="Password"
+                    name="password"
+                    type="password"
+                    variant="outlined"
+                    color="secondary"
+                    value={credentials.password}
+                    onChange={handleChange}
+                    error={!!fieldErrors.password || (!isLoginView)}
+                    helperText={fieldErrors.password || (!isLoginView ? fieldError : null)}
+                    required
+                    className="login-text-fields"
+                />
+                {!isLoginView && (
+                    <>
+                        <TextField
+                            label="Re-Type Password"
+                            name="confirm_password"
+                            type="password"
+                            variant="outlined"
+                            color="secondary"
+                            value={credentials.confirm_password}
+                            onChange={handleChange}
+                            error={!!fieldErrors.confirm_password || fieldError.includes('match')}
+                            helperText={fieldError.includes('match') ? fieldError : fieldErrors.confirm_password}
+                            disabled={!!fieldErrors.confirm_password || credentials.password.length <= 0}
+                            required
+                            className="login-text-fields"
+                        />
+                        {['location', 'description', 'occupation'].map((field) => (
                             <TextField
-                                label="Last Name"
-                                name="lastName"
+                                key={field}
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                name={field}
                                 variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                value={credentials.lastName}
+                                color="secondary"
+                                value={credentials[field]}
                                 onChange={handleChange}
-                                error={fieldErrors.lastName}
-                                helperText={fieldErrors.lastName}
-                                required
+                                className="login-text-fields"
+                                rows={field === 'description' ? 3 : 1}
+                                multiline={field === 'description'}
                             />
-                        </>
-                    )}
-                    <TextField
-                        label="Username"
-                        name="username"
-                        variant="outlined"
-                        fullWidth
-                        margin="normal"
-                        value={credentials.username}
-                        onChange={handleChange}
-                        error={fieldErrors.username}
-                        helperText={fieldErrors.username}
-                        required
-                    />
-                    <TextField
-                        label="Password"
-                        name="password"
-                        type="password"
-                        variant="outlined"
-                        fullWidth
-                        margin="normal"
-                        value={credentials.password}
-                        onChange={handleChange}
-                        error={fieldErrors.password || (error && error.includes('least 8 characters long')) && !isLoginView}
-                        helperText={!isLoginView && (error.includes('least 8 characters long') ? error : null) ||
-                            (fieldErrors.password ? fieldErrors.password : null)}
-                        required
-                    />
-                    {!isLoginView && (
-                        <>
-                            <TextField
-                                label="Re-Type Password"
-                                name="confirmPassword"
-                                type="password"
-                                variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                value={credentials.confirmPassword}
-                                onChange={handleChange}
-                                error={fieldErrors.password || (error && error.includes('match'))}
-                                helperText={(error.includes('match') ? error : null) ||
-                                    (fieldErrors.password ? fieldErrors.password : null)}
-                                disabled={credentials.password.length <= 0 || (error && error.includes('least 8 characters long'))
-                                    || fieldErrors.password
-                                    && !isLoginView}
-                                required
-                            />
-                            <TextField
-                                label="Location"
-                                name="location"
-                                variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                value={credentials.location}
-                                onChange={handleChange}
-                            />
-                            <TextField
-                                label="Description"
-                                name="description"
-                                variant="outlined"
-                                multiline
-                                rows={3}
-                                fullWidth
-                                margin="normal"
-                                value={credentials.description}
-                                onChange={handleChange}
-                            />
-                            <TextField
-                                label="Occupation"
-                                name="occupation"
-                                variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                value={credentials.occupation}
-                                onChange={handleChange}
-                            />
-                        </>
-                    )}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        style={{marginTop: '20px'}}
-                        onClick={() => handleAuth(isLoginView)}
-                    >
+                        ))}
+                    </>
+                )}
+                <Box className="login-button-container">
+                    <Button variant="contained" fullWidth onClick={() => handleAuth(isLoginView)}
+                            className="login-button">
                         {isLoginView ? 'Login' : 'Register'}
                     </Button>
                     <Button
-                        variant="text"
-                        color="secondary"
+                        variant="contained"
                         fullWidth
-                        style={{marginTop: '10px'}}
                         onClick={() => {
                             setCredentials({
-                                firstName: '',
-                                lastName: '',
-                                username: '',
+                                first_name: '',
+                                last_name: '',
+                                login_name: '',
                                 password: '',
-                                confirmPassword: '',
+                                confirm_password: '',
                                 location: '',
                                 description: '',
                                 occupation: '',
                             });
-                            setFieldErrors({})
-                            setError('')
-                            setIsLoginView(!isLoginView)
+                            setFieldErrors({});
+                            setFieldError('');
+                            setIsLoginView(!isLoginView);
                         }}
+                        className="login-button"
                     >
                         {isLoginView ? 'Create an Account' : 'Go to Login'}
                     </Button>
-                    {error && error.includes('Failed to') && (
-                        <Typography
-                            variant="body2"
-                            color="error"
-                            style={{marginTop: '10px', textAlign: 'center'}}
-                        >
-                            {error}
-                        </Typography>
-                    )}
-                </>
+                </Box>
+            </Box>
+            {!!fieldError && fieldError.includes('Failed to') && (
+                <Typography variant="body2" color="error" className="not-found-message">
+                    {fieldError}
+                </Typography>
             )}
-        </Paper>
+        </>
     );
 }
 

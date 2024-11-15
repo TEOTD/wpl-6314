@@ -11,8 +11,8 @@
     --secondary-color: #ffaba3;
     --secondary-hover-color: #ff4735;
     --tertiary-color: #7fd860;
-    --accent-color: #B19CD9;
-    --accent-hover-color: #9B7BCA;
+    --accent-color: #c7b9df;
+    --accent-hover-color: #aa95ca;
     --background-color: #111;
     --text-color: #333333;
     --text-color-hover: #f3f3f3;
@@ -45,11 +45,11 @@ body {
 }
 
 .not-found-message {
-    color: var(--secondary-hover-color);
-    text-align: center;
+    color: var(--secondary-hover-color) !important;
+    text-align: center !important;
     font-size: 3em;
-    margin: 20px 10px;
-    font-weight: bold;
+    margin: 20px 10px !important;
+    font-weight: bold !important;
 }
 
 .loading-spinner {

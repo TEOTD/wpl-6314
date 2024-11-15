@@ -1,5 +1,3 @@
-"use strict";
-
 const mongoose = require("mongoose");
 
 /**
@@ -14,6 +12,13 @@ const userSchema = new mongoose.Schema({
     location: String,
     description: String,
     occupation: String,
+});
+
+userSchema.index({login_name: 1}, {unique: true});
+userSchema.on('index', (error) => {
+    if (error) {
+        console.error('Index creation failed:', error);
+    }
 });
 
 /**

@@ -24,12 +24,14 @@
     color: var(--text-color);
 }
 
-.logout-button {
+.logout-button, .add-photo-button {
     color: var(--text-color) !important;
+    background-color: var(--accent-color) !important;
 }
 
-.add-photo-button{
+.logout-button:hover, .add-photo-button:hover {
     color: var(--text-color) !important;
+    background-color: var(--accent-hover-color) !important;
 }
 
 #choose-photo-icon{

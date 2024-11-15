@@ -20,13 +20,12 @@ mongoose.connect("mongodb://127.0.0.1/project7", {
 });
 
 // Get the magic models we used in the previous projects.
-const models = require("./modelData/photoApp.js").models;
-
 // Load the Mongoose schema for Use and Photo
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
-const crypto = require("crypto");
+const {makePasswordEntry} = require("./password");
+const models = require("./modelData/photoApp.js").models;
 
 const versionString = "1.0";
 
@@ -36,13 +35,6 @@ const removePromises = [
     Photo.deleteMany({}),
     SchemaInfo.deleteMany({}),
 ];
-
-function makePasswordEntry(clearTextPassword) {
-    const salt = crypto.randomBytes(8).toString('hex');
-    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
-
-    return {salt, hash};
-}
 
 Promise.all(removePromises)
     .then(function () {

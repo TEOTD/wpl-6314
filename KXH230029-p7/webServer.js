@@ -33,12 +33,9 @@
 
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
-
-// const async = require("async");
-
 const express = require("express");
 const session = require('express-session');
-const mongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 app.use(express.json());
@@ -49,7 +46,6 @@ const fs = require("fs");
 const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
 
 app.use(express.json());
-//todo: generate a public and private key to hash session id
 app.use(session({
     secret: "secret",
     resave: false,
@@ -59,11 +55,11 @@ app.use(session({
         secure: false,
         maxAge: 24 * 60 * 60 * 1000
     },
-    store: new mongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
-}))
+    store: new MongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
+}));
 
 function isAuthenticated(request, response, next) {
-    if (request.session.user) next()
+    if (request.session.user) next();
     else response.status(401).send('Unauthorized');
 }
 
@@ -72,6 +68,7 @@ const {Types} = require("mongoose");
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
+const {makePasswordEntry, doesPasswordMatch} = require("./password");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
@@ -184,7 +181,7 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
     const objectId = new Types.ObjectId(id);
     try {
-        const user = await User.findById(objectId, {__v: 0});
+        const user = await User.findById(objectId, {__v: 0, login_name: 0, password_digest: 0, salt: 0});
         if (!user) {
             console.log(`User with _id: ${id} not found.`);
             return response.status(404).send(`User with _id: ${id} not found.`);
@@ -196,13 +193,13 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
 });
 
-app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
-    const photo_id = req.params.photo_id;
-    const comment = req.body.comment;
+app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const comment = request.body.comment;
     try {
         const newComment = {
             comment: comment,
-            user_id: req.session.user._id,
+            user_id: request.session.user._id,
             date_time: new Date(),
         };
         const result = await Photo.findByIdAndUpdate(
@@ -212,12 +209,12 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
         );
 
         if (!result) {
-            return res.status(404).json({error: 'Photo not found'});
+            return response.status(404).json('Photo not found');
         }
-        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+        return response.status(200).json({message: 'Comment added successfully', comment: comment});
     } catch (error) {
         console.error(error);
-        return res.status(400).json({error: 'Something went wrong...'});
+        return response.status(400).json('Something went wrong...');
     }
 });
 
@@ -225,77 +222,74 @@ app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
 /**
  * URL /photos/new - Acccepts an image file in the body.
  */
-app.post('/photos/new', (req, res) => {
-    processFormBody(req, res, (err) => {
-      if (err || !req.file) {
-        console.error('File upload error:', err);
-        return res.status(400).send({ error: 'File upload failed' });
-      }
-  
-      // Validate file type and size
-      const allowedMimeTypes = ['image/jpeg', 'image/png'];
-      if (!allowedMimeTypes.includes(req.file.mimetype)) {
-        return res.status(400).send({ error: 'Invalid file type' });
-      }
-  
-      const timestamp = Date.now();
-      const fileName = `U${timestamp}_${req.file.originalname}`;
-      const filePath = './images/'+ fileName;
-  
-      // Write the file to the "images" directory
-      fs.writeFile(filePath, req.file.buffer, (err1) => {
-        if (err1) {
-          console.error('Error saving file:', err1);
-          return res.status(500).send({ error: 'File save failed' });
+app.post('/photos/new', isAuthenticated, async function (request, response) {
+    processFormBody(request, response, (err) => {
+        if (err || !request.file) {
+            console.error('File upload error:', err);
+            return response.status(400).send('File upload failed');
         }
 
-        try{
-            const image = {
-                file_name: fileName,
-                user_id: req.session.user._id,
-                date_time: timestamp,
-                comments: [],
-            };
-            Photo.create(image);
-            return res.status(200).json({ message: 'File uploaded successfully', fileName });
-        } catch(error1){
-            return res.status(400).json({ error: 'Could not save image to the table.' });
+        // Validate file type and size
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedMimeTypes.includes(request.file.mimetype)) {
+            return response.status(400).send('Invalid file type');
         }
-  
-      });
 
-      return;
+        const timestamp = Date.now();
+        const fileName = `U${timestamp}_${request.file.originalname}`;
+        const filePath = './images/' + fileName;
+
+        // Write the file to the "images" directory
+        fs.writeFile(filePath, request.file.buffer, (err1) => {
+            if (err1) {
+                console.error('Error saving file:', err1);
+                return response.status(500).send('File save failed');
+            }
+
+            try {
+                const image = {
+                    file_name: fileName,
+                    user_id: request.session.user._id,
+                    date_time: timestamp,
+                    comments: [],
+                };
+                Photo.create(image);
+                return response.status(200).json({message: 'File uploaded successfully', fileName});
+            } catch (error1) {
+                return response.status(400).json('Could not save image to the table.');
+            }
+        });
+        return response;
     });
 });
-  
-  
+
+
 /**
  * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
  */
-app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
-    const photo_id = req.params.photo_id;
-    const comment = req.body.comment;
-    try{
+app.post("/commentsOfPhoto/:photo_id", async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const comment = request.body.comment;
+    try {
         const newComment = {
             comment: comment,
-            user_id: req.session.user._id,
+            user_id: request.session.user._id,
             date_time: new Date(),
         };
         const result = await Photo.findByIdAndUpdate(
             photo_id,
-            { $push: { comments: newComment } },
-            { new: true }  // Return the updated document
+            {$push: {comments: newComment}},
+            {new: true}  // Return the updated document
         );
 
         if (!result) {
-            return res.status(404).json({ error: 'Photo not found' });
+            return response.status(404).json('Photo not found');
         }
-        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
-    }
-    catch (error) {
+        return response.status(200).json({message: 'Comment added successfully', comment: comment});
+    } catch (error) {
         console.error(error);
-        return res.status(400).json({ error: 'Something went wrong...' });
-    } 
+        return response.status(400).json('Something went wrong...');
+    }
 });
 
 
@@ -532,75 +526,45 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
     }
 });
 
-const crypto = require('crypto');
 
-/**
- * Return a salted and hashed password entry from a clear text password.
- * @param {string} clearTextPassword
- * @return {object} passwordEntry where passwordEntry is an object with two
- * string properties:
- *    salt - The salt used for the password.
- *    hash - The sha1 hash of the password and salt.
- */
-function makePasswordEntry(clearTextPassword) {
-    const salt = crypto.randomBytes(8).toString('hex');
-    const hash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
-
-    return {salt, hash};
-}
-
-
-/**
- * Return true if the specified clear text password and salt generates the
- * specified hash.
- * @param {string} hash
- * @param {string} salt
- * @param {string} clearTextPassword
- * @return {boolean}
- */
-function doesPasswordMatch(hash, salt, clearTextPassword) {
-    const generatedHash = crypto.createHash('sha1').update(clearTextPassword + salt).digest('hex');
-    return generatedHash === hash;
+async function regenerateSession(request, response, user, next) {
+    return request.session.regenerate(function (error) {
+        if (error) {
+            return next(error);
+        }
+        request.session.user = {_id: user._id, first_name: user.first_name, login_name: user.login_name};
+        return request.session.save(function (err) {
+            if (err) {
+                return next(err);
+            }
+            return response.status(200).json({_id: user._id, first_name: user.first_name, login_name: user.login_name});
+        });
+    });
 }
 
 
 app.post('/admin/login', async function (request, response, next) {
-    const {username, password} = request.body;
+    const {login_name, password} = request.body;
     try {
-        const user = await User.findOne({login_name: username}, {
-            password_digest: 1,
-            salt: 1,
-            first_name: 1,
-            _id: 1
-        });
+        const user = await User.findOne(
+            {login_name: login_name},
+            {password_digest: 1, salt: 1, first_name: 1, _id: 1}
+        );
 
         if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
-            return response.status(400).send('Invalid username or password');
+            return response.status(400).send('Invalid login_name or password');
         }
-
-        request.session.regenerate(function (err) {
-            if (err) {
-                return next(err);
-            }
-            request.session.user = {_id: user._id, first_name: user.first_name};
-            request.session.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                response.status(200).json({_id: user._id, first_name: user.first_name});
-            });
-        });
+        return await regenerateSession(request, response, user, next);
     } catch (error) {
-        response.status(500).send('Internal server error');
+        return response.status(500).send('Internal server error');
     }
 });
 
-
 app.post('/admin/logout', async function (request, response) {
     if (request.session.user) {
-        request.session.destroy(() => response.sendStatus(200));
+        return request.session.destroy(() => response.sendStatus(200));
     } else {
-        response.status(400).send('No user is logged in');
+        return response.status(400).send('No user is logged in');
     }
 });
 
@@ -608,44 +572,35 @@ app.post('/user', async function (request, response, next) {
     try {
         const passwordEntry = makePasswordEntry(request.body.password);
 
-        const body = {
-            login_name: request.body.username,
+        const user = await User.create({
+            login_name: request.body.login_name,
             password_digest: passwordEntry.hash,
             salt: passwordEntry.salt,
-            first_name: request.body.firstName,
-            last_name: request.body.lastName,
+            first_name: request.body.first_name,
+            last_name: request.body.last_name,
             location: request.body.location,
             description: request.body.description,
             occupation: request.body.occupation,
-        };
+        });
 
-        const user = await User.create(body);
         if (!user) {
             return response.status(400).send('Failed to create user');
         }
 
-        request.session.regenerate(function (err) {
-            if (err) {
-                return next(err);
-            }
-            request.session.user = {_id: user._id, first_name: user.first_name};
-            request.session.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                response.status(200).json({_id: user._id, first_name: user.first_name});
-            });
-        });
+        return await regenerateSession(request, response, user, next);
     } catch (error) {
-        response.status(500).send('Internal server error');
+        if (error.message.includes('duplicate key error')) {
+            return response.status(400).send('login_name already exists');
+        }
+        return response.status(500).send('Internal server error');
     }
 });
 
-app.get('/admin/check-session', (request, response) => {
+app.get('/admin/check-session', async function (request, response) {
     if (request.session && request.session.user) {
-        response.sendStatus(200);
+        return response.sendStatus(200);
     } else {
-        response.sendStatus(401);
+        return response.sendStatus(401);
     }
 });
 
