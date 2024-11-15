@@ -54,7 +54,11 @@ app.use(session({
     secret: "secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {secure: false},
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
+    },
     store: new mongoStore({mongoUrl: 'mongodb://127.0.0.1/project7'})
 }))
 
@@ -190,6 +194,108 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
         console.log("Error in /user/:id:", error);
         return response.status(500).send({error: `An error occurred while fetching user with _id: ${id}. ${error.message}`});
     }
+});
+
+app.post("/commentsOfPhoto/:photo_id", async (req, res) => {
+    const photo_id = req.params.photo_id;
+    const comment = req.body.comment;
+    try {
+        const newComment = {
+            comment: comment,
+            user_id: req.session.user._id,
+            date_time: new Date(),
+        };
+        const result = await Photo.findByIdAndUpdate(
+            photo_id,
+            {$push: {comments: newComment}},
+            {new: true}
+        );
+
+        if (!result) {
+            return res.status(404).json({error: 'Photo not found'});
+        }
+        return res.status(201).json({message: 'Comment added successfully', comment: comment});
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({error: 'Something went wrong...'});
+    }
+});
+
+
+/**
+ * URL /photos/new - Acccepts an image file in the body.
+ */
+app.post('/photos/new', (req, res) => {
+    processFormBody(req, res, (err) => {
+      if (err || !req.file) {
+        console.error('File upload error:', err);
+        return res.status(400).send({ error: 'File upload failed' });
+      }
+  
+      // Validate file type and size
+      const allowedMimeTypes = ['image/jpeg', 'image/png'];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).send({ error: 'Invalid file type' });
+      }
+  
+      const timestamp = Date.now();
+      const fileName = `U${timestamp}_${req.file.originalname}`;
+      const filePath = './images/'+ fileName;
+  
+      // Write the file to the "images" directory
+      fs.writeFile(filePath, req.file.buffer, (err1) => {
+        if (err1) {
+          console.error('Error saving file:', err1);
+          return res.status(500).send({ error: 'File save failed' });
+        }
+
+        try{
+            const image = {
+                file_name: fileName,
+                user_id: req.session.user._id,
+                date_time: timestamp,
+                comments: [],
+            };
+            Photo.create(image);
+            return res.status(200).json({ message: 'File uploaded successfully', fileName });
+        } catch(error1){
+            return res.status(400).json({ error: 'Could not save image to the table.' });
+        }
+  
+      });
+
+      return;
+    });
+});
+  
+  
+/**
+ * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
+ */
+app.post("/commentsOfPhoto/:photo_id",  async (req, res) => {
+    const photo_id = req.params.photo_id;
+    const comment = req.body.comment;
+    try{
+        const newComment = {
+            comment: comment,
+            user_id: req.session.user._id,
+            date_time: new Date(),
+        };
+        const result = await Photo.findByIdAndUpdate(
+            photo_id,
+            { $push: { comments: newComment } },
+            { new: true }  // Return the updated document
+        );
+
+        if (!result) {
+            return res.status(404).json({ error: 'Photo not found' });
+        }
+        return res.status(201).json({ message: 'Comment added successfully', comment: comment });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: 'Something went wrong...' });
+    } 
 });
 
 
@@ -609,6 +715,14 @@ app.post('/user', async function (request, response, next) {
         });
     } catch (error) {
         response.status(500).send('Internal server error');
+    }
+});
+
+app.get('/admin/check-session', (request, response) => {
+    if (request.session && request.session.user) {
+        response.sendStatus(200);
+    } else {
+        response.sendStatus(401);
     }
 });
 
