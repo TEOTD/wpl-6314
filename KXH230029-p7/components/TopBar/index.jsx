@@ -33,12 +33,11 @@ function TopBar() {
         }, 3000);
     };
     
-    const handleFileUpload = () => {
+    const handleFileUpload = async () => {
         if (uploadInput.files.length > 0) {
             // Create a DOM form and add the file to it under the name uploadedphoto
             const domForm = new FormData();
             domForm.append('uploadedphoto', uploadInput.files[0]);
-            console.log(uploadInput.files[0]);
             axios.post('/photos/new', domForm)
               .then((res) => {
                 console.log(res);
