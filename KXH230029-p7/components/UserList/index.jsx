@@ -80,7 +80,7 @@ function UserList() {
         return (
             <Link to={`/photos/${userId}/0`} style={{textDecoration: 'none', color: 'inherit'}}>
                 <IconButton aria-label="photos">
-                    <Badge badgeContent={photoCount} color="secondary">
+                    <Badge badgeContent={photoCount} color="secondary" showZero="true">
                         <PhotoLibrary color="action" sx={{
                             color: 'var(--tertiary-color)',
                         }}/>
@@ -96,7 +96,7 @@ function UserList() {
         return (
             <Link to={`/comments/${userId}`} style={{textDecoration: 'none', color: 'inherit'}}>
                 <IconButton aria-label="photos">
-                    <Badge badgeContent={commentCount} color="secondary">
+                    <Badge badgeContent={commentCount} color="secondary" showZero="true">
                         <Message color="action" sx={{
                             color: 'var(--secondary-hover-color)'
                         }}/>
