@@ -14,7 +14,7 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import "./styles.css";
@@ -23,6 +23,7 @@ import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/app
 
 function TopBar() {
     const {pathname} = useLocation();
+    const navigate = useNavigate();
 
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useContext(AdvancedContext);
     const [isLoggedIn, setIsLoggedIn] = useContext(LoginContext);
@@ -41,10 +42,6 @@ function TopBar() {
 
     const handleClose = useCallback(() => {
         setImageUploadShow(false);
-    }, []);
-
-    const handleClick = useCallback(() => {
-        document.querySelector("#choose-photo-icon").click();
     }, []);
 
     const showAlert = useCallback((data) => {
@@ -128,6 +125,7 @@ function TopBar() {
                 localStorage.removeItem("loggedInUser");
                 setIsLoggedIn(false);
                 setLoggedInUser(null);
+                navigate("/admin/login", {replace: true});
             }
         ).catch(error => {
             console.error("Logout failed:", error);

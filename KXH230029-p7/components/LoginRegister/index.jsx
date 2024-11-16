@@ -2,6 +2,7 @@ import React, {useContext, useState} from 'react';
 import './styles.css';
 import {Box, Button, CircularProgress, TextField, Typography} from '@mui/material';
 import axios from 'axios';
+import {useNavigate} from "react-router-dom";
 import {LoggedInUserContext, LoginContext} from '../context/appContext';
 
 function LoginRegister() {
@@ -21,6 +22,7 @@ function LoginRegister() {
     const [isLoginView, setIsLoginView] = useState(true);
     const [fieldError, setFieldError] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
+    const navigate = useNavigate();
 
     const validateFields = () => {
         const errors = {};
@@ -66,6 +68,7 @@ function LoginRegister() {
                 localStorage.setItem('loggedInUser', JSON.stringify(result.data));
                 setIsLoggedIn(true);
                 setLoggedInUser(result.data);
+                navigate(`/users/${result.data._id}`);
             }).catch((error) => {
                 const errorMessage = error.response?.data || 'Unexpected error occurred';
                 setFieldError(`Failed to ${isLogin ? 'login' : 'register'} error: ${errorMessage}`);
