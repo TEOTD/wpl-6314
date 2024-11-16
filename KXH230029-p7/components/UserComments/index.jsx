@@ -1,22 +1,10 @@
-import React, {useEffect, useMemo, useState, useContext} from "react";
+import React, {useContext, useEffect, useMemo, useState} from "react";
 import {CircularProgress, Paper, Typography} from "@mui/material";
 import axios from "axios";
 import {Link} from "react-router-dom";
-import {AdvancedContext } from "../context/appContext";
+import {AdvancedContext} from "../context/appContext";
 import "./styles.css";
-
-// Helper function to format the date and time for display
-const formatDateTime = (date) => {
-    return new Date(date).toLocaleString('en-US', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
-};
+import formatDateTime from "../../lib/utils";
 
 // Component to render each individual comment
 function Comment({comment, photoIndex}) {
@@ -36,77 +24,55 @@ function Comment({comment, photoIndex}) {
     );
 }
 
-// Main component to fetch and display comments for a specific user
 function UserComments({userId}) {
     const [photos, setPhotos] = useState({});
     const [comments, setComments] = useState([]);
-    const [loadingComments, setLoadingComments] = useState(true);
-    const [loadingPhotos, setLoadingPhotos] = useState(true);
-    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    const [loading, setLoading] = useState(true);
+    const [enableAdvancedFeatures] = useContext(AdvancedContext);
 
-    // Fetch comments for the specified user
     useEffect(() => {
         if (!userId) return;
-        setLoadingComments(true);
+        setLoading(true);
         (async () => {
-            await axios.get(`/commentsOfUser/${userId}`)
-                .then((result) => setComments(result.data))
-                .catch((error) => console.error("Failed to fetch user comments:", error))
-                .finally(() => setLoadingComments(false));
+            await Promise.all([
+                axios.get(`/commentsOfUser/${userId}`),
+                axios.get(`/photos/list`)
+            ])
+                .then(([commentsResponse, photosResponse]) => {
+                    setComments(commentsResponse.data);
+                    const photosByUser = photosResponse.data.reduce((acc, photo) => {
+                        (acc[photo.user_id] = acc[photo.user_id] || []).push(photo);
+                        return acc;
+                    }, {});
+                    Object.values(photosByUser).forEach(arr => arr.sort((a, b) => a.id - b.id));
+                    setPhotos(photosByUser);
+                })
+                .catch(error => {
+                    console.error("Failed to fetch data:", error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
         })();
     }, [userId]);
 
-    // Fetch all photos and organize them by user
-    useEffect(() => {
-        setLoadingPhotos(true);
-        (async () => {
-            await axios.get(`/photos/list`)
-                .then((result) => {
-                    // Group photos by user_id for quick lookup later
-                    const photosByUser = result.data.reduce((acc, photo) => {
-                        if (!acc[photo.user_id]) {
-                            acc[photo.user_id] = [];
-                        }
-                        acc[photo.user_id].push(photo);
-                        return acc;
-                    }, {});
+    const renderedComments = useMemo(() => (
+        comments.map(comment => {
+            const userPhotos = photos[comment.photo_user_id] || [];
+            const photoIndex = userPhotos.findIndex(photo => photo._id === comment.photo_id);
+            return (
+                <Comment
+                    key={`${comment._id}-${comment.photo_id}`}
+                    comment={comment}
+                    photoIndex={photoIndex}
+                />
+            );
+        })
+    ), [comments, photos]);
 
-                    // Sort photos for each user by ID to maintain order
-                    Object.keys(photosByUser).forEach(id => {
-                        photosByUser[id].sort((a, b) => a.id - b.id);
-                    });
-
-                    setPhotos(photosByUser);
-                })
-                .catch((error) => console.error("Failed to fetch photos:", error))
-                .finally(() => setLoadingPhotos(false));
-        })();
-    }, []);
-
-    // Generate the rendered comments using useMemo for performance optimization
-    const renderedComments = useMemo(() => comments.map((comment) => {
-        const userPhotos = photos[comment.photo_user_id] || [];
-        const photoIndex = userPhotos.findIndex(photo => photo._id === comment.photo_id);
-        return (
-            <Comment
-                key={`${comment._id}-${comment.photo_id}`}
-                comment={comment}
-                photoIndex={photoIndex}
-                userPhoto={userPhotos[photoIndex]}
-            />
-        );
-    }), [comments, photos]);
-
-    if (loadingComments || loadingPhotos) return <CircularProgress className="loading-spinner"/>;
-    if (!comments.length) {
-        return <Typography variant="h6" className="no-comments">No Comments Yet</Typography>;
-    }
-
-    // Render comments only if advanced features are enabled
-    return (
-        enableAdvancedFeatures &&
-        <div>{renderedComments}</div>
-    );
+    if (loading) return <CircularProgress className="loading-spinner"/>;
+    if (!comments.length) return <Typography variant="h6" className="no-comments">No Comments Yet</Typography>;
+    return enableAdvancedFeatures ? <div>{renderedComments}</div> : null;
 }
 
 export default UserComments;

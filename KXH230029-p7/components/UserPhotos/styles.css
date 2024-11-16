@@ -16,15 +16,15 @@
     color: var(--text-color-hover);
 }
 
-.flex-display{
+.flex-display {
     display: flex !important;
 }
 
-.comment-input-input-box{
-      
+.comment-input-input-box {
+
 }
 
-.comment-input-container{
+.comment-input-container {
     padding: 10px;
     background-color: var(--text-color) !important;
     margin-top: 5px;
@@ -33,21 +33,21 @@
     justify-content: left;
 }
 
-.comment-input-box{
+.comment-input-box {
     overflow: hidden !important;
     justify-content: center !important;
 }
 
-#standard-multiline-flexible{
+#standard-multiline-flexible {
     width: 100vh;
     color: var(--text-color-hover);
 }
 
 .MuiInputLabel-root {
-    color:  var(--text-color-hover) !important;
+    color: var(--text-color-hover) !important;
 }
 
-#comment-submit-button{
+#comment-submit-button {
     background-color: var(--accent-hover-color);
     margin-left: 0px;
     height: 30px;
@@ -56,17 +56,19 @@
     color: var(--text-color);
     text-transform: none;
 }
-#comment-submit-button:hover{
+
+#comment-submit-button:hover {
     background-color: var(--accent-color);
 }
 
-#comment-clear-button{
+#comment-clear-button {
     background-color: var(--accent-hover-color);
     margin-left: 15px;
     height: 30px;
     color: var(--text-color-hover);
 }
-#comment-clear-button:hover{
+
+#comment-clear-button:hover {
     background-color: var(--accent-color);
 }
 
@@ -106,7 +108,7 @@
     font-weight: bold;
 }
 
-.no-comments {
+.no-comments, .no-photos {
     color: var(--text-color-hover);
     background-color: var(--secondary-hover-color);
     padding: 10px;

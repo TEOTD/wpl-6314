@@ -1,14 +1,12 @@
-import React, {useEffect, useMemo, useState, useContext} from "react";
+import React, {useContext, useEffect, useMemo, useState} from "react";
 import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
-import {AdvancedContext } from "../context/appContext";
+import {AdvancedContext} from "../context/appContext";
 
-// UserList component displays a list of users fetched from an API
 function UserList() {
-    // State to store user data and loading status
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
     const [numberOfPhotosOfUser, setNumberOfPhotosOfUser] = useState(null);
@@ -16,7 +14,6 @@ function UserList() {
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
 
-    // Fetch user list data on component mount
     useEffect(() => {
         setLoading(true);
         (async () => {
@@ -106,8 +103,6 @@ function UserList() {
         );
     };
 
-    // Memoized function to render user list only when `users` state changes
-    // Return null if there are no users
     const renderedUserList = useMemo(() => {
         if (!users) return null;
         return (
@@ -145,12 +140,8 @@ function UserList() {
         );
     }, [users, enableAdvancedFeatures]);
 
-    // Display loading spinner if data is still loading
     if (loading) return <CircularProgress className="loading-spinner"/>;
-    // Display message if no users are found
     if (!users) return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
-
-    // Render the list of users if data is available and loading is complete
     return renderedUserList;
 }
 
