@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import TextField from '@mui/material/TextField';
 import axios from "axios";
-import {AdvancedContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
 // Component to render individual comments for a photo
@@ -124,7 +124,7 @@ function UserPhotos({userId, photoIndex, setPhotoIndex}) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
-    const [reload, setReload] = useState(false);
+    const [reload, setReload] = useContext(ReloadContext);
 
     useEffect(() => {
         if (!userId) return;

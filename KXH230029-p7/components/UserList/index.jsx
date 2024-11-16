@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
-import {AdvancedContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext} from "../context/appContext";
 
 function UserList() {
     const [users, setUsers] = useState(null);
@@ -12,6 +12,7 @@ function UserList() {
     const [numberOfPhotosOfUser, setNumberOfPhotosOfUser] = useState(null);
     const [numberOfCommentsOfUser, setNumberOfCommentsOfUser] = useState(null);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    const [reload,] = useContext(ReloadContext);
 
 
     useEffect(() => {
@@ -44,7 +45,7 @@ function UserList() {
                     setLoading(false);
                 });
         })();
-    }, []);
+    }, [reload]);
 
     useEffect(() => {
         setLoading(true);
@@ -60,7 +61,7 @@ function UserList() {
                     setLoading(false);
                 });
         })();
-    }, []);
+    }, [reload]);
 
     function getNumberOfPhotosOfUser(userId) {
         const userPhotos = numberOfPhotosOfUser.find(photo => photo.user_id === userId);
@@ -138,7 +139,7 @@ function UserList() {
                 ))}
             </List>
         );
-    }, [users, enableAdvancedFeatures]);
+    }, [users, enableAdvancedFeatures, reload, numberOfPhotosOfUser]);
 
     if (loading) return <CircularProgress className="loading-spinner"/>;
     if (!users) return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
