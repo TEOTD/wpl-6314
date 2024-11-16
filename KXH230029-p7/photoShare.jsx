@@ -9,7 +9,7 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import UserComments from "./components/UserComments";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "./components/context/appContext";
+import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
 
 function UserDetailRoute() {
@@ -41,6 +41,8 @@ function UserCommentsRoute() {
 function PhotoShare({isLoggedIn, navigate}) {
     const [firstLoad, setFirstLoad] = useState(true);
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
+    const [reload, setReload] = useState(false);
+    const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
     const [photoIndex, setPhotoIndex] = useState(-1);
 
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
@@ -132,20 +134,22 @@ function PhotoShare({isLoggedIn, navigate}) {
         <div>
             <Grid container spacing={2}>
                 <AdvancedContext.Provider value={advancedContextValue}>
-                    <Grid item xs={12}>
-                        <TopBar/>
-                    </Grid>
-                    <div className="main-top-bar-buffer"/>
-                    <Grid item sm={3}>
-                        <Paper className="main-grid-item">
-                            {renderUserList()}
-                        </Paper>
-                    </Grid>
-                    <Grid item sm={9}>
-                        <Paper className="main-grid-item">
-                            {renderMainContent()}
-                        </Paper>
-                    </Grid>
+                    <ReloadContext.Provider value={reloadContextValue}>
+                        <Grid item xs={12}>
+                            <TopBar/>
+                        </Grid>
+                        <div className="main-top-bar-buffer"/>
+                        <Grid item sm={3}>
+                            <Paper className="main-grid-item">
+                                {renderUserList()}
+                            </Paper>
+                        </Grid>
+                        <Grid item sm={9}>
+                            <Paper className="main-grid-item">
+                                {renderMainContent()}
+                            </Paper>
+                        </Grid>
+                    </ReloadContext.Provider>
                 </AdvancedContext.Provider>
             </Grid>
         </div>

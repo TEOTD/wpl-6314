@@ -19,7 +19,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import "./styles.css";
 import axios from "axios";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
+import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "../context/appContext";
 
 function TopBar() {
     const {pathname} = useLocation();
@@ -30,6 +30,7 @@ function TopBar() {
     const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
     const [imageUploadShow, setImageUploadShow] = useState(false);
     const [uploadInput, setUploadInput] = useState(null);
+    const [reload, setReload] = useContext(ReloadContext);
     const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState({
         message: '',
         success: false,
@@ -45,10 +46,12 @@ function TopBar() {
     }, []);
 
     const showAlert = useCallback((data) => {
+        setReload(!reload);
         setShowPhotoUploadSuccess(data);
     }, []);
 
     useEffect(() => {
+        setReload(!reload);
         if (showPhotoUploadSuccess.show) {
             setTimeout(() => {
                 setShowPhotoUploadSuccess((prev) => ({

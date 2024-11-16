@@ -10,3 +10,6 @@ export const LoginContext = createContext([true, b => {
 // eslint-disable-next-line no-unused-vars
 export const LoggedInUserContext = createContext([null, b => {
 }]);
+// eslint-disable-next-line no-unused-vars
+export const ReloadContext = createContext([true, p => {
+}]);
