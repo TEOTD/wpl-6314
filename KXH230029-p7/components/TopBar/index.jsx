@@ -4,7 +4,7 @@ import {useLocation} from "react-router-dom";
 import CheckIcon from '@mui/icons-material/Check';
 import "./styles.css";
 import axios from "axios";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
+import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "../context/appContext";
 
 function TopBar() {
     const {pathname} = useLocation();
@@ -15,6 +15,7 @@ function TopBar() {
     const [imageUploadShow, setImageUploadShow] = React.useState(false);
     const [uploadInput, setUploadInput] = useState();
     const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState(false);
+    const [reload, setReload] = useContext(ReloadContext);
 
     const handleClickOpen = () => {
         setImageUploadShow(true);
@@ -26,7 +27,7 @@ function TopBar() {
 
     const showSuccessAlert = () => {
         setShowPhotoUploadSuccess(true);
-    
+        setReload(!reload);
         // Hide alert after 3 seconds
         setTimeout(() => {
             setShowPhotoUploadSuccess(false);
@@ -39,8 +40,7 @@ function TopBar() {
             const domForm = new FormData();
             domForm.append('uploadedphoto', uploadInput.files[0]);
             axios.post('/photos/new', domForm)
-              .then((res) => {
-                console.log(res);
+              .then(() => {
               })
               .catch(err => console.log(`POST ERR: ${err}`));
               showSuccessAlert();

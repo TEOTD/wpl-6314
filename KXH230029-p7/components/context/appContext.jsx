@@ -7,3 +7,5 @@ export const LoginContext = createContext([true, b => {
 }]);
 export const LoggedInUserContext = createContext([null, b => {
 }]);
+export const ReloadContext = createContext([true, p => {
+}]);

@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
-import {AdvancedContext } from "../context/appContext";
+import {AdvancedContext, ReloadContext } from "../context/appContext";
 
 // UserList component displays a list of users fetched from an API
 function UserList() {
@@ -14,6 +14,7 @@ function UserList() {
     const [numberOfPhotosOfUser, setNumberOfPhotosOfUser] = useState(null);
     const [numberOfCommentsOfUser, setNumberOfCommentsOfUser] = useState(null);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    const [reload,] = useContext(ReloadContext);
 
 
     // Fetch user list data on component mount
@@ -47,7 +48,7 @@ function UserList() {
                     setLoading(false);
                 });
         })();
-    }, []);
+    }, [reload]);
 
     useEffect(() => {
         setLoading(true);
@@ -63,7 +64,7 @@ function UserList() {
                     setLoading(false);
                 });
         })();
-    }, []);
+    }, [reload]);
 
     function getNumberOfPhotosOfUser(userId) {
         const userPhotos = numberOfPhotosOfUser.find(photo => photo.user_id === userId);
@@ -143,7 +144,7 @@ function UserList() {
                 ))}
             </List>
         );
-    }, [users, enableAdvancedFeatures]);
+    }, [users, enableAdvancedFeatures, reload, numberOfPhotosOfUser]);
 
     // Display loading spinner if data is still loading
     if (loading) return <CircularProgress className="loading-spinner"/>;

@@ -8,7 +8,7 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import UserComments from "./components/UserComments";
-import {AdvancedContext, LoggedInUserContext, LoginContext} from "./components/context/appContext";
+import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
 
 // Route component for displaying user details with advanced features toggle passed as a prop
@@ -43,11 +43,13 @@ function UserCommentsRoute() {
 function PhotoShare() {
     const [firstLoad, setFirstLoad] = useState(true);
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
+    const [reload, setReload] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loggedInUser, setLoggedInUser] = useState(null);
 
     // Using memo to store contexts variable and set parameter functions, to avoid reloading on value change.
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
+    const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
     const loginContextValue = useMemo(() => [isLoggedIn, setIsLoggedIn], [isLoggedIn]);
     const loggedInUserContextValue = useMemo(() => [loggedInUser, setLoggedInUser], [loggedInUser]);
 
@@ -182,12 +184,14 @@ function PhotoShare() {
                 <LoginContext.Provider value={loginContextValue}>
                     <LoggedInUserContext.Provider value={loggedInUserContextValue}>
                         <AdvancedContext.Provider value={advancedContextValue}>
-                            {/* TopBar component with advanced features toggle */}
-                            <Grid item xs={12}>
-                                <TopBar/>
-                            </Grid>
-                            <div className="main-top-bar-buffer"/>
-                            {renderMainComponent()}
+                            <ReloadContext.Provider value={reloadContextValue}>
+                                {/* TopBar component with advanced features toggle */}
+                                <Grid item xs={12}>
+                                    <TopBar/>
+                                </Grid>
+                                <div className="main-top-bar-buffer"/>
+                                {renderMainComponent()}
+                            </ReloadContext.Provider>
                         </AdvancedContext.Provider>
                     </LoggedInUserContext.Provider>
                 </LoginContext.Provider>
