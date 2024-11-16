@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {
     Alert,
     AppBar,
@@ -15,8 +15,8 @@ import {
     Typography
 } from "@mui/material";
 import {useLocation} from "react-router-dom";
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import "./styles.css";
 import axios from "axios";
 import {AdvancedContext, LoggedInUserContext, LoginContext} from "../context/appContext";
@@ -27,50 +27,56 @@ function TopBar() {
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useContext(AdvancedContext);
     const [isLoggedIn, setIsLoggedIn] = useContext(LoginContext);
     const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
-    const [imageUploadShow, setImageUploadShow] = React.useState(false);
-    const [uploadInput, setUploadInput] = useState();
+    const [imageUploadShow, setImageUploadShow] = useState(false);
+    const [uploadInput, setUploadInput] = useState(null);
     const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState({
         message: '',
         success: false,
         show: false
     });
 
-    const handleClickOpen = () => {
+    const handleClickOpen = useCallback(() => {
         setImageUploadShow(true);
-    };
+    }, []);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setImageUploadShow(false);
-    };
+    }, []);
 
-    const showAlert = (data) => {
+    const handleClick = useCallback(() => {
+        document.querySelector("#choose-photo-icon").click();
+    }, []);
+
+    const showAlert = useCallback((data) => {
         setShowPhotoUploadSuccess(data);
+    }, []);
 
-        // Hide and reset alert after 3 seconds
-        setTimeout(() => {
-            setShowPhotoUploadSuccess((prev) => ({
-                ...prev,
-                show: false,
-            }));
-        }, 3000);
-    };
+    useEffect(() => {
+        if (showPhotoUploadSuccess.show) {
+            setTimeout(() => {
+                setShowPhotoUploadSuccess((prev) => ({
+                    ...prev,
+                    show: false,
+                }));
+            }, 3000);
+        }
+    }, [showPhotoUploadSuccess.show]);
 
     const handleFileUpload = async () => {
-        if (uploadInput.files.length > 0) {
-            // Create a DOM form and add the file to it under the name uploadedphoto
+        if (uploadInput?.files.length > 0) {
             const domForm = new FormData();
-            domForm.append('uploadedphoto', uploadInput.files[0]);
-            axios.post('/photos/new', domForm)
+            domForm.append("uploadedphoto", uploadInput.files[0]);
+            await axios.post("/photos/new", domForm)
                 .then(() => {
                     showAlert({
-                        message: 'Your Photo has been uploaded successfully!',
+                        message: "Your Photo has been uploaded successfully!",
                         success: true,
                         show: true
                     });
                 })
                 .catch(err => showAlert(
                     {
-                        message: `Photo upload failed: ${err.response?.data || 'unexpected error'}`,
+                        message: `Photo upload failed: ${err.response?.data || "unexpected error"}`,
                         success: false,
                         show: true
                     }));
@@ -79,7 +85,7 @@ function TopBar() {
     };
 
     const [user, setUser] = useState(null);
-    const [version, setVersion] = useState('');
+    const [version, setVersion] = useState("");
 
     const userId = useMemo(() => {
         const match = pathname.match(/\/(photos|users|comments)\/([A-Za-z\d]+)/);
@@ -88,46 +94,48 @@ function TopBar() {
 
     useEffect(() => {
         if (isLoggedIn && userId) {
-            axios.get(`/user/${userId}`).then(result => setUser(result.data))
-                .catch(error => console.error('Failed to fetch data:', error));
+            (async () => {
+                await axios.get(`/user/${userId}`)
+                    .then((result) => setUser(result.data))
+                    .catch((error) => console.error("Failed to fetch data:", error));
+            })();
         }
-    }, [userId]);
+    }, [userId, isLoggedIn]);
 
     useEffect(() => {
         (async () => {
-            await axios.get('/test/info').then(result => setVersion(result.data.__v))
-                .catch(error => console.error('Failed to fetch data:', error));
+            await axios.get("/test/info").then(result => setVersion(result.data.__v))
+                .catch(error => console.error("Failed to fetch data:", error));
         })();
     }, []);
 
     const title = useMemo(() => {
-        if (!user) return 'Home Page';
-        if (pathname.startsWith('/users/')) return `${user.first_name} ${user.last_name}`;
-        if (pathname.startsWith('/photos/')) return `Photos of ${user.first_name} ${user.last_name}`;
-        if (pathname.startsWith('/comments/')) return `Comments of ${user.first_name} ${user.last_name}`;
-        return 'Home Page';
+        if (!user) return "Home Page";
+        if (pathname.startsWith("/users/")) return `${user.first_name} ${user.last_name}`;
+        if (pathname.startsWith("/photos/")) return `Photos of ${user.first_name} ${user.last_name}`;
+        if (pathname.startsWith("/comments/")) return `Comments of ${user.first_name} ${user.last_name}`;
+        return "Home Page";
     }, [user, pathname]);
 
     const greeting = useMemo(() => {
-        if (!isLoggedIn) return 'Please Login';
+        if (!isLoggedIn) return "Please Login";
         return `Hi ${loggedInUser.first_name} !!!!`;
-    }, [isLoggedIn]);
+    }, [isLoggedIn, loggedInUser]);
 
-    // Logout function to clear session and redirect to log in
-    const handleLogout = async () => {
-        try {
-            await axios.post('/admin/logout');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('loggedInUser');
-            setIsLoggedIn(false);
-            setLoggedInUser(null);
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-    };
+    const handleLogout = useCallback(async () => {
+        await axios.post("/admin/logout").then(() => {
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("loggedInUser");
+                setIsLoggedIn(false);
+                setLoggedInUser(null);
+            }
+        ).catch(error => {
+            console.error("Logout failed:", error);
+        });
+    }, [setIsLoggedIn, setLoggedInUser]);
 
     return (
-        <AppBar position="static" className="top-bar" sx={{backgroundColor: 'var(--primary-color)'}}>
+        <AppBar position="static" className="top-bar" sx={{backgroundColor: "var(--primary-color)"}}>
             <Toolbar sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                 <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                     <Typography variant="h6" className="my-name">
@@ -150,37 +158,43 @@ function TopBar() {
                                 aria-describedby="alert-dialog-slide-description"
                                 id="photo-upload-dialog"
                                 sx={{
-                                    '& .MuiPaper-root': {
-                                        background: '#000',
+                                    "& .MuiPaper-root": {
+                                        background: "#000",
                                         borderRadius: "10px",
-                                    }
+                                    },
                                 }}
                             >
                                 <DialogTitle className="dialog-title">{"Please select An image File"}</DialogTitle>
                                 <DialogContent>
-                                    <input type="file" accept="image/*" ref={(domFileRef) => {
-                                        setUploadInput(domFileRef);
-                                    }} id="choose-photo-icon"/>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={(domFileRef) => setUploadInput(domFileRef)}
+                                        id="choose-photo-icon"
+                                        className="dialog-button-input"
+                                    />
                                 </DialogContent>
                                 <DialogActions>
                                     <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
                                     <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
                                 </DialogActions>
                             </Dialog>
-                            {
-                                (showPhotoUploadSuccess.show &&
-                                    (
-                                        <Alert icon={showPhotoUploadSuccess.success ? <CheckIcon fontSize="inherit"/> :
-                                            <CloseIcon fontSize="inherit"/>}
-                                               severity={showPhotoUploadSuccess.success ? "success" : "error"}>
-                                            {showPhotoUploadSuccess.message}
-                                        </Alert>
-                                    )
-                                )
-                            }
+                            {showPhotoUploadSuccess.show && (
+                                <Alert
+                                    icon={
+                                        showPhotoUploadSuccess.success ? (
+                                            <CheckIcon fontSize="inherit"/>
+                                        ) : (
+                                            <CloseIcon fontSize="inherit"/>
+                                        )
+                                    }
+                                    severity={showPhotoUploadSuccess.success ? "success" : "error"}
+                                >
+                                    {showPhotoUploadSuccess.message}
+                                </Alert>
+                            )}
                         </>
                     )}
-
                 </Box>
                 <Box sx={{display: "flex", alignItems: "center", gap: 3}}>
                     {isLoggedIn && (
@@ -190,11 +204,11 @@ function TopBar() {
                                     control={(
                                         <Checkbox
                                             sx={{
-                                                color: 'var(--text-color)',
-                                                '&.Mui-checked': {color: 'var(--text-color)'},
+                                                color: "var(--text-color)",
+                                                "&.Mui-checked": {color: "var(--text-color)"},
                                             }}
                                             checked={enableAdvancedFeatures}
-                                            onChange={() => setEnableAdvancedFeatures(prev => !prev)}
+                                            onChange={() => setEnableAdvancedFeatures((prev) => !prev)}
                                         />
                                     )}
                                     label="Advanced Features"

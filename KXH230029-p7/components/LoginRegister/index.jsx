@@ -40,8 +40,8 @@ function LoginRegister() {
         return Object.keys(errors).length === 0;
     };
 
-    const handleChange = (e) => {
-        const {name, value} = e.target;
+    const handleChange = (event) => {
+        const {name, value} = event.target;
         setCredentials((prev) => ({...prev, [name]: value}));
 
         if (name === 'password' || name === 'confirm_password') {
@@ -125,8 +125,8 @@ function LoginRegister() {
                     color="secondary"
                     value={credentials.password}
                     onChange={handleChange}
-                    error={!!fieldErrors.password || (!isLoginView)}
-                    helperText={fieldErrors.password || (!isLoginView ? fieldError : null)}
+                    error={!!fieldErrors.password}
+                    helperText={fieldErrors.password || fieldError}
                     required
                     className="login-text-fields"
                 />

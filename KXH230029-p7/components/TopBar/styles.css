@@ -34,19 +34,32 @@
     background-color: var(--accent-hover-color) !important;
 }
 
-#choose-photo-icon{
+#choose-photo-icon {
     color: var(--accent-hover-color) !important;
 }
 
-#photo-upload-dialog{
+#photo-upload-dialog {
     color: black !important;
 }
 
-.dialog-title{
+.dialog-title {
     color: var(--text-color-hover) !important;
     font-family: 'Star Jedi', sans-serif;
 }
 
-.dialog-button{
+.dialog-button {
     color: var(--accent-hover-color) !important;
+}
+
+.dialog-button-input {
+    color: var(--accent-hover-color) !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
 }
