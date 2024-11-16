@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Box, Button, CircularProgress, Paper, Typography} from "@mui/material";
+import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import TextField from '@mui/material/TextField';
 import axios from "axios";
 import {AdvancedContext} from "../context/appContext";
@@ -34,30 +34,27 @@ function CommentInput({imageId, setReload, reload}) {
 
     return (
         <Paper elevation={1} className="comment-input-container">
-            <Box className="flex-display">
-                <Box className="comment-input-box">
-                    <TextField
-                        id="standard-multiline-flexible"
-                        multiline
-                        label="Add your Comment"
-                        variant="filled"
-                        onChange={(e) => setComment(e.target.value)}
-                        maxRows={10}
-                        className="comment-input-input-box"
-                        fullWidth
-                    />
-                    <Button
-                        variant="contained"
-                        size="medium"
-                        onClick={() => {
-                            addCommentRequest(imageId, comment).then(() => setReload(!reload));
-                        }}
-                        id="comment-submit-button"
-                    >
-                        Comment
-                    </Button>
-                </Box>
-            </Box>
+            <TextField
+                id="standard-multiline-flexible"
+                multiline
+                label="Add your Comment"
+                variant="filled"
+                onChange={(e) => setComment(e.target.value)}
+                maxRows={10}
+                className="comment-input-input-box"
+                color="secondary"
+                fullWidth
+            />
+            <Button
+                variant="contained"
+                size="medium"
+                onClick={() => {
+                    addCommentRequest(imageId, comment).then(() => setReload(!reload));
+                }}
+                id="comment-submit-button"
+            >
+                Comment
+            </Button>
         </Paper>
     );
 }
@@ -90,6 +87,18 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
 
     return (
         <div key={photo._id} className="photo-container">
+            {enableAdvancedFeatures && (
+                <div className="button-container">
+                    <Button onClick={() => onStep(-1)} disabled={buttonState.left} variant="contained"
+                            sx={navButtonStyles("left")}>
+                        Previous
+                    </Button>
+                    <Button onClick={() => onStep(1)} disabled={buttonState.right} variant="contained"
+                            sx={navButtonStyles("right")}>
+                        Next
+                    </Button>
+                </div>
+            )}
             <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
             <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
                 {formatDateTime(photo.date_time)}
@@ -106,18 +115,6 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
                 <Typography variant="h6" sx={{margin: "10px 0"}} className="no-comments">
                     No Comments Yet
                 </Typography>
-            )}
-            {enableAdvancedFeatures && (
-                <div className="button-container">
-                    <Button onClick={() => onStep(-1)} disabled={buttonState.left} variant="contained"
-                            sx={navButtonStyles("left")}>
-                        Previous
-                    </Button>
-                    <Button onClick={() => onStep(1)} disabled={buttonState.right} variant="contained"
-                            sx={navButtonStyles("right")}>
-                        Next
-                    </Button>
-                </div>
             )}
         </div>
     );
