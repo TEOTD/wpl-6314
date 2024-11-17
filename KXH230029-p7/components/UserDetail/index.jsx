@@ -1,20 +1,19 @@
-import React, {useEffect, useState, useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {Button, CircularProgress, Typography} from "@mui/material";
 import "./styles.css";
 import axios from "axios";
-import {AdvancedContext } from "../context/appContext";
+import {AdvancedContext} from "../context/appContext";
 
-function UserDetail({
-                        userId
-                    }) {
-    // State to hold user data and loading status
+function UserDetail({userId}) {
+    // State to hold the fetched user data
     const [user, setUser] = useState(null);
+    // State to manage the loading spinner visibility
     const [loading, setLoading] = useState(true);
-    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    // Context value to check if advanced features are enabled
+    const [enableAdvancedFeatures] = useContext(AdvancedContext);
 
-    // Fetch user data when component mounts or when userId changes
-    // Set loading state to true while fetching and set to false after fetch completes
+    // Effect to fetch user data when the component mounts or the userId changes
     useEffect(() => {
         if (userId) {
             setLoading(true);
@@ -33,44 +32,39 @@ function UserDetail({
         }
     }, [userId]);
 
-    // Show a loading spinner while data is being fetched
+    // Display a loading spinner while data is being fetched
     if (loading) {
         return <CircularProgress className="loading-spinner"/>;
     }
 
-    // Display message if no user data is found
+    // Display a message if no user data is found
     if (!user) {
         return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
     }
 
-    // Destructure user details from fetched data
-    const {
-        first_name,
-        last_name,
-        description,
-        location,
-        occupation
-    } = user;
+    // Destructure user details from the fetched data
+    const {first_name, last_name, description, location, occupation} = user;
 
     return (
         <div className="user-detail-container">
-            {/* Display user's name */}
+            {/* Display the user's full name */}
             <Typography variant="h4" className="user-name">{`${first_name} ${last_name}`}</Typography>
 
-            {/* Display user description */}
+            {/* Display the user's description */}
             <Typography variant="body1" className="user-description">{description}</Typography>
 
-            {/* Display user's location */}
+            {/* Display the user's location with a label */}
             <Typography variant="body1" className="user-location">
                 <strong>Location:</strong> {location}
             </Typography>
 
-            {/* Display user's occupation */}
+            {/* Display the user's occupation with a label */}
             <Typography variant="body1" className="user-occupation" marginBottom="10px">
                 <strong>Occupation:</strong> {occupation}
             </Typography>
 
-            {/* Button to view user's photos, links to either advanced or standard view based on enableAdvancedFeatures */}
+            {/* Button to view user's photos */}
+            {/*Set the link path based on whether advanced features are enabled*/}
             <Button
                 component={Link}
                 to={enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}

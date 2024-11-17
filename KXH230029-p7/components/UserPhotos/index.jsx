@@ -1,17 +1,18 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import "./styles.css";
-import {Link} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import TextField from '@mui/material/TextField';
 import axios from "axios";
-import {AdvancedContext, ReloadContext} from "../context/appContext";
+import {AdvancedContext, FirstLoadContext, ReloadContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
-// Component to render individual comments for a photo
+// Component to display a single comment
 function Comment({comment}) {
     return (
         <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
             <Typography variant="body1" className="comment">{comment.comment}</Typography>
+            {/* Displays the user's name and the date of the comment */}
             <Typography variant="caption">
                 <Link to={`/users/${comment.user._id}`} className="comment-link">
                     {comment.user.first_name} {comment.user.last_name}
@@ -22,18 +23,20 @@ function Comment({comment}) {
     );
 }
 
+// Function to send a request to add a new comment for a photo
 async function addCommentRequest(imageId, commentText) {
     await axios.post(`/commentsOfPhoto/${imageId}`, {
         comment: commentText
     });
 }
 
+// Component to handle the comment input functionality
 function CommentInput({imageId, setReload, reload}) {
-
     const [comment, setComment] = useState("");
 
     return (
         <Paper elevation={1} className="comment-input-container">
+            {/* Input field for writing a new comment */}
             <TextField
                 id="standard-multiline-flexible"
                 multiline
@@ -45,6 +48,7 @@ function CommentInput({imageId, setReload, reload}) {
                 color="secondary"
                 fullWidth
             />
+            {/* Button to submit the comment */}
             <Button
                 variant="contained"
                 size="medium"
@@ -59,11 +63,12 @@ function CommentInput({imageId, setReload, reload}) {
     );
 }
 
-// Component to display a single photo
+// Component to display a single photo along with navigation and comments
 function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
     const [buttonState, setButtonState] = useState({left: false, right: false});
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
 
+    // Styles for the navigation buttons
     const navButtonStyles = (side) => ({
         flex: 1,
         backgroundColor: "var(--accent-color)",
@@ -81,12 +86,14 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
         }
     });
 
+    // Effect to update the button state based on the current index
     useEffect(() => {
         setButtonState({left: index <= 0, right: index >= totalPhotos - 1});
     }, [index, totalPhotos]);
 
     return (
         <div key={photo._id} className="photo-container">
+            {/* Navigation buttons for advanced features */}
             {enableAdvancedFeatures && (
                 <div className="button-container">
                     <Button onClick={() => onStep(-1)} disabled={buttonState.left} variant="contained"
@@ -99,12 +106,16 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
                     </Button>
                 </div>
             )}
+            {/* Photo display */}
             <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
+            {/* Photo date display */}
             <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
                 {formatDateTime(photo.date_time)}
             </Typography>
+            {/* Comments section */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
             <CommentInput imageId={photo._id} setReload={setReload} reload={reload}/>
+            {/* List of comments or a message if there are no comments */}
             {photo.comments && photo.comments.length > 0 ? (
                 <div className="comments-section">
                     {photo.comments.map((comment) => (
@@ -120,12 +131,33 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
     );
 }
 
+// Component to display all photos of a user and handle navigation
 function UserPhotos({userId, photoIndex, setPhotoIndex}) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures,] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
+    const [firstLoad] = useContext(FirstLoadContext);
+    const {pathname} = useLocation();
+    const navigate = useNavigate();
 
+    // Effect to manage the photoIndex state and redirect based on URL changes
+    useEffect(() => {
+        const routes = pathname.split("/");
+        if (routes.length >= 3 && routes[1] === "photos") {
+            setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
+        }
+    }, [enableAdvancedFeatures]);
+
+    // Effect to update the URL based on photoIndex changes
+    useEffect(() => {
+        const routes = pathname.split("/");
+        if (!firstLoad && routes[1] === "photos") {
+            navigate(photoIndex === -1 ? `/photos/${routes[2]}` : `/photos/${routes[2]}/${photoIndex}`);
+        }
+    }, [photoIndex]);
+
+    // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
@@ -137,16 +169,19 @@ function UserPhotos({userId, photoIndex, setPhotoIndex}) {
         })();
     }, [userId, reload]);
 
+    // Function to handle photo navigation
     const handleStep = useCallback((direction) => {
         setPhotoIndex((prevIndex) => Math.min(Math.max(prevIndex + direction, 0), photos.length - 1));
     }, [photos.length, setPhotoIndex]);
 
+    // Display loading spinner, a message if there are no photos, or the photos
     if (loading) return <CircularProgress className="loading-spinner"/>;
     if (!photos.length) return <Typography variant="h6" className="no-photos">No Photos Yet.</Typography>;
     if (enableAdvancedFeatures && photoIndex >= 0 && !photos[photoIndex]) {
         return <Typography variant="h6" className="no-photos">No Photos Yet.</Typography>;
     }
 
+    // Toggle Screens based on advanced features
     return enableAdvancedFeatures && photoIndex >= 0 ? (
         <Photo
             photo={photos[photoIndex]}

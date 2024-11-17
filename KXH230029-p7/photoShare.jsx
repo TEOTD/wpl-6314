@@ -9,18 +9,23 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import UserComments from "./components/UserComments";
-import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "./components/context/appContext";
+import {
+    AdvancedContext,
+    FirstLoadContext,
+    LoggedInUserContext,
+    LoginContext,
+    ReloadContext
+} from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
 
+// Route component for rendering UserDetail with a userId parameter
 function UserDetailRoute() {
     const {userId} = useParams();
     return <UserDetail userId={userId}/>;
 }
 
-function UserPhotosRoute({
-                             photoIndex,
-                             setPhotoIndex
-                         }) {
+// Route component for rendering UserPhotos with userId and handling photoIndex state
+function UserPhotosRoute({photoIndex, setPhotoIndex}) {
     const {userId} = useParams();
     return (
         <UserPhotos
@@ -31,6 +36,7 @@ function UserPhotosRoute({
     );
 }
 
+// Route component for rendering UserComments with a userId parameter
 function UserCommentsRoute() {
     const {userId} = useParams();
     return (
@@ -38,41 +44,22 @@ function UserCommentsRoute() {
     );
 }
 
-function PhotoShare({isLoggedIn, navigate}) {
-    const [firstLoad, setFirstLoad] = useState(true);
+// Main PhotoShare component that handles the overall app structure
+function PhotoShare({isLoggedIn}) {
+    // State to track if advanced features are enabled
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
+    // State for triggering component reloads
     const [reload, setReload] = useState(false);
+    // Memoized context value for reload state
     const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
+    // State for tracking the photo index
     const [photoIndex, setPhotoIndex] = useState(-1);
-
+    // Memoized context value for advanced features
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
+    // Getting the current pathname from the location
     const {pathname} = useLocation();
 
-    useEffect(() => {
-        const routes = pathname.split("/");
-        setFirstLoad(false);
-        if ((routes[1] === "photos" && routes.length === 4) || (routes[1] === "comments")) {
-            setEnableAdvancedFeatures(true);
-        }
-    }, []);
-
-    useEffect(() => {
-        const routes = pathname.split("/");
-        if (routes.length >= 3 && routes[1] === "photos") {
-            setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
-        }
-        if (firstLoad === false && enableAdvancedFeatures === false && routes[1] === "comments") {
-            navigate(`/users/${routes[2]}`);
-        }
-    }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
-
-    useEffect(() => {
-        const routes = pathname.split("/");
-        if (!firstLoad && routes[1] === "photos") {
-            navigate(photoIndex === -1 ? `/photos/${routes[2]}` : `/photos/${routes[2]}/${photoIndex}`);
-        }
-    }, [photoIndex, setPhotoIndex]);
-
+    // Effect to manage URL path and enable/disable advanced features accordingly
     useEffect(() => {
         const routes = pathname.split("/");
         if (routes[1] === "photos") {
@@ -85,10 +72,12 @@ function PhotoShare({isLoggedIn, navigate}) {
         }
     }, [pathname]);
 
+    // Function to render the UserList component if the user is logged in
     const renderUserList = () => {
         return (isLoggedIn ? <UserList/> : null);
     };
 
+    // Function to render the main content of the app based on login status
     const renderMainContent = () => {
         return (
             isLoggedIn ?
@@ -101,7 +90,12 @@ function PhotoShare({isLoggedIn, navigate}) {
                         />
                         <Route
                             path="/photos/:userId"
-                            element={<UserPhotosRoute/>}
+                            element={(
+                                <UserPhotosRoute
+                                    photoIndex={photoIndex}
+                                    setPhotoIndex={setPhotoIndex}
+                                />
+                            )}
                         />
                         <Route
                             path="/photos/:userId/:photoIndex"
@@ -126,10 +120,10 @@ function PhotoShare({isLoggedIn, navigate}) {
                         <Route path="/admin/login" element={<LoginRegister/>}/>
                     </Routes>
                 )
-
         );
     };
 
+    // Main render of the PhotoShare component, including the top bar and layout
     return (
         <div>
             <Grid container spacing={2}>
@@ -156,14 +150,22 @@ function PhotoShare({isLoggedIn, navigate}) {
     );
 }
 
+// Main App component that handles user authentication and session check and first load
 function App() {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loggedInUser, setLoggedInUser] = useState(null);
+    const [firstLoad, setFirstLoad] = useState(true);
 
+    // Memoized context value for login state
     const loginContextValue = useMemo(() => [isLoggedIn, setIsLoggedIn], [isLoggedIn]);
+    // Memoized context value for the logged-in user
     const loggedInUserContextValue = useMemo(() => [loggedInUser, setLoggedInUser], [loggedInUser]);
+    // Memoized context value for first load
+    const firstLoadContextValue = useMemo(() => [firstLoad, setFirstLoad], [firstLoad]);
 
+
+    // Effect to check user session and manage login state
     useEffect(() => {
         const loggedInFlag = localStorage.getItem('isLoggedIn');
         const currentLoggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -174,11 +176,13 @@ function App() {
                     .then(response => {
                         if (response.status === 200) {
                             setIsLoggedIn(true);
+                            setFirstLoad(false);
                             setLoggedInUser(currentLoggedInUser);
                         } else {
                             localStorage.removeItem('isLoggedIn');
                             localStorage.removeItem('loggedInUser');
                             setIsLoggedIn(false);
+                            setFirstLoad(false);
                             navigate("/admin/login", {replace: true});
                         }
                     })
@@ -186,6 +190,7 @@ function App() {
                         localStorage.removeItem('isLoggedIn');
                         localStorage.removeItem('loggedInUser');
                         setIsLoggedIn(false);
+                        setFirstLoad(false);
                         navigate("/admin/login", {replace: true});
                     });
             })();
@@ -194,15 +199,19 @@ function App() {
         }
     }, []);
 
+    // Render the main application with context providers
     return (
-        <LoginContext.Provider value={loginContextValue}>
-            <LoggedInUserContext.Provider value={loggedInUserContextValue}>
-                <PhotoShare isLoggedIn={isLoggedIn} navigate={navigate}/>
-            </LoggedInUserContext.Provider>
-        </LoginContext.Provider>
+        <FirstLoadContext.Provider value={firstLoadContextValue}>
+            <LoginContext.Provider value={loginContextValue}>
+                <LoggedInUserContext.Provider value={loggedInUserContextValue}>
+                    <PhotoShare isLoggedIn={isLoggedIn}/>
+                </LoggedInUserContext.Provider>
+            </LoginContext.Provider>
+        </FirstLoadContext.Provider>
     );
 }
 
+// Render the application into the root DOM node
 const root = ReactDOM.createRoot(document.getElementById("photoshareapp"));
 root.render(
     <HashRouter>

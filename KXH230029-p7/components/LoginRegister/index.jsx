@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 import {LoggedInUserContext, LoginContext} from '../context/appContext';
 
 function LoginRegister() {
+    // State to manage user credentials for login or registration
     const [credentials, setCredentials] = useState({
         first_name: '',
         last_name: '',
@@ -16,17 +17,22 @@ function LoginRegister() {
         description: '',
         occupation: '',
     });
+
+    // Context hooks to update the login status and logged-in user information
     const [, setIsLoggedIn] = useContext(LoginContext);
     const [, setLoggedInUser] = useContext(LoggedInUserContext);
+
+    // State to handle loading indicator, login/register view toggle, and error messages
     const [loading, setLoading] = useState(false);
     const [isLoginView, setIsLoginView] = useState(true);
     const [fieldError, setFieldError] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
     const navigate = useNavigate();
 
+    // Function to validate form required fields before submitting login/registration
     const validateFields = () => {
         const errors = {};
-        if (!credentials.login_name) errors.login_name = 'login_name is required';
+        if (!credentials.login_name) errors.login_name = 'Login name is required';
         if (!credentials.password) errors.password = 'Password is required';
 
         if (!isLoginView) {
@@ -38,14 +44,17 @@ function LoginRegister() {
             }
         }
 
+        // Update field errors and return whether the form is valid
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
+    // Handler to update credentials state when input fields change
     const handleChange = (event) => {
         const {name, value} = event.target;
         setCredentials((prev) => ({...prev, [name]: value}));
 
+        // Check for password match when updating password fields
         if (name === 'password' || name === 'confirm_password') {
             if (name === 'confirm_password' && credentials.password !== value) {
                 setFieldError('Passwords do not match');
@@ -55,13 +64,20 @@ function LoginRegister() {
         }
     };
 
+    // Function to handle login or registration authentication
     const handleAuth = async (isLogin) => {
+        // Validate fields before making the API request
         if (!validateFields()) return;
         setLoading(true);
+
+        // Determine the API endpoint and data based on the view
         const url = isLogin ? '/admin/login' : '/user';
         const data = isLogin
             ? {login_name: credentials.login_name, password: credentials.password}
             : credentials;
+
+        // Make the API request for login/registration
+        // On success, store login status and user data in localStorage for login caching and context
         await axios.post(url, data)
             .then((result) => {
                 localStorage.setItem('isLoggedIn', 'true');
@@ -71,7 +87,7 @@ function LoginRegister() {
                 navigate(`/users/${result.data._id}`);
             }).catch((error) => {
                 const errorMessage = error.response?.data || 'Unexpected error occurred';
-                setFieldError(`Failed to ${isLogin ? 'login' : 'register'} error: ${errorMessage}`);
+                setFieldError(`Failed to ${isLogin ? 'login' : 'register'}: ${errorMessage}`);
             }).finally(() => {
                     setLoading(false);
                 }
@@ -85,9 +101,12 @@ function LoginRegister() {
     return (
         <>
             <Box className="login-register-container">
+                {/* Heading that changes based on the view (Login or Register) */}
                 <Typography variant="h4" gutterBottom className="login-heading">
                     {isLoginView ? 'Login' : 'Register'}
                 </Typography>
+
+                {/* Render additional fields for registration */}
                 {!isLoginView && (
                     <>
                         {['first_name', 'last_name'].map((field) => (
@@ -101,13 +120,14 @@ function LoginRegister() {
                                 onChange={handleChange}
                                 error={!!fieldErrors[field]}
                                 helperText={fieldErrors[field]}
-                                id="filled-helperText"
                                 required
                                 className="login-text-fields"
                             />
                         ))}
                     </>
                 )}
+
+                {/* Input for login name */}
                 <TextField
                     label="Login Name"
                     name="login_name"
@@ -120,6 +140,8 @@ function LoginRegister() {
                     required
                     className="login-text-fields"
                 />
+
+                {/* Input for password */}
                 <TextField
                     label="Password"
                     name="password"
@@ -133,6 +155,8 @@ function LoginRegister() {
                     required
                     className="login-text-fields"
                 />
+
+                {/* Confirm password field for registration */}
                 {!isLoginView && (
                     <>
                         <TextField
@@ -149,6 +173,8 @@ function LoginRegister() {
                             required
                             className="login-text-fields"
                         />
+
+                        {/* Additional optional fields for registration */}
                         {['location', 'description', 'occupation'].map((field) => (
                             <TextField
                                 key={field}
@@ -165,6 +191,8 @@ function LoginRegister() {
                         ))}
                     </>
                 )}
+
+                {/* Buttons for authentication and toggling between login and register views */}
                 <Box className="login-button-container">
                     <Button variant="contained" fullWidth onClick={() => handleAuth(isLoginView)}
                             className="login-button">
@@ -194,6 +222,8 @@ function LoginRegister() {
                     </Button>
                 </Box>
             </Box>
+
+            {/* Error message display */}
             {!!fieldError && fieldError.includes('Failed to') && (
                 <Typography variant="body2" color="error" className="not-found-message">
                     {fieldError}
