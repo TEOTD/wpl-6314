@@ -98,7 +98,7 @@ app.get("/", function (request, response) {
  * /test/counts - Returns an object with the counts of the different collections
  *                in JSON format.
  */
-app.get("/test/:p1", async function (request, response) {
+app.get("/test/:p1", isAuthenticated, async function (request, response) {
     // Express parses the ":p1" from the URL and returns it in the request.params
     // objects.
     console.log("/test called with param1 = ", request.params.p1);
@@ -193,6 +193,9 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
     }
 });
 
+/**
+ * URL /commentsOfPhoto/:photo_id - Adds user comments for a photo.
+ */
 app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const comment = request.body.comment;
@@ -220,7 +223,7 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request,
 
 
 /**
- * URL /photos/new - Acccepts an image file in the body.
+ * URL /photos/new - Accepts an image file in the body. Adds photos.
  */
 app.post('/photos/new', isAuthenticated, async function (request, response) {
     processFormBody(request, response, (err) => {
@@ -265,9 +268,9 @@ app.post('/photos/new', isAuthenticated, async function (request, response) {
 
 
 /**
- * URL /commentsOfPhoto/:photo_id - Acccepts an comment in the body and adds it to the database.
+ * URL /commentsOfPhoto/:photo_id - Accepts a comment in the body and adds it to the database.
  */
-app.post("/commentsOfPhoto/:photo_id", async function (request, response) {
+app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const comment = request.body.comment;
     try {
@@ -409,6 +412,9 @@ const server = app.listen(3000, function () {
     );
 });
 
+/**
+ * URL /photos/count - Returns the Photo counts for User.
+ */
 app.get("/photos/count", isAuthenticated, async function (request, response) {
     const aggregationFunction = [
         {
@@ -436,6 +442,9 @@ app.get("/photos/count", isAuthenticated, async function (request, response) {
     }
 });
 
+/**
+ * URL /comments/count - Returns the Comment counts for User.
+ */
 app.get("/comments/count", isAuthenticated, async function (request, response) {
     const aggregationFunction = [
         {
@@ -468,6 +477,9 @@ app.get("/comments/count", isAuthenticated, async function (request, response) {
     }
 });
 
+/**
+ * URL /commentsOfUser/:id - Returns the Comment of each User (id).
+ */
 app.get("/commentsOfUser/:id", isAuthenticated, async function (request, response) {
     const id = request.params.id;
 
@@ -512,6 +524,9 @@ app.get("/commentsOfUser/:id", isAuthenticated, async function (request, respons
     }
 });
 
+/**
+ * URL /photos/list - Returns the Photos of all Users.
+ */
 app.get("/photos/list", isAuthenticated, async function (request, response) {
     try {
         const photos = await Photo.find({}, {_id: 1, user_id: 1}).sort({_id: 1});
@@ -526,7 +541,7 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
     }
 });
 
-
+//Function creates and regenerates user session
 async function regenerateSession(request, response, user, next) {
     return request.session.regenerate(function (error) {
         if (error) {
@@ -542,7 +557,9 @@ async function regenerateSession(request, response, user, next) {
     });
 }
 
-
+/**
+ * URL /admin/login - Returns user session by logging them in.
+ */
 app.post('/admin/login', async function (request, response, next) {
     const {login_name, password} = request.body;
     try {
@@ -560,6 +577,9 @@ app.post('/admin/login', async function (request, response, next) {
     }
 });
 
+/**
+ * URL /admin/logout - Destroys user session and logs them out.
+ */
 app.post('/admin/logout', async function (request, response) {
     if (request.session.user) {
         return request.session.destroy(() => response.sendStatus(200));
@@ -568,6 +588,9 @@ app.post('/admin/logout', async function (request, response) {
     }
 });
 
+/**
+ * URL /user - Registers the user and logs them in.
+ */
 app.post('/user', async function (request, response, next) {
     try {
         const passwordEntry = makePasswordEntry(request.body.password);
@@ -596,6 +619,9 @@ app.post('/user', async function (request, response, next) {
     }
 });
 
+/**
+ * URL /admin/check-session - Checks for the user session.
+ */
 app.get('/admin/check-session', async function (request, response) {
     if (request.session && request.session.user) {
         return response.sendStatus(200);

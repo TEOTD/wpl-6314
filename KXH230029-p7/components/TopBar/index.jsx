@@ -128,7 +128,7 @@ function TopBar() {
                 .then(result => setVersion(result.data.__v))
                 .catch(error => console.error("Failed to fetch data:", error));
         })();
-    }, []);
+    }, [isLoggedIn]);
 
     // Memoized title based on the current path and user details
     const title = useMemo(() => {
@@ -168,12 +168,12 @@ function TopBar() {
                     <Typography variant="h6" className="my-name">
                         {greeting}
                     </Typography>
-                    <Box className="separator"/>
-                    <Typography variant="caption" className="version">
-                        Version: {version}
-                    </Typography>
                     {isLoggedIn && (
                         <>
+                            <Box className="separator"/>
+                            <Typography variant="caption" className="version">
+                                Version: {version}
+                            </Typography>
                             <Box className="separator"/>
                             <Button color="inherit" onClick={handleClickOpen} className="add-photo-button">
                                 Add Photo
