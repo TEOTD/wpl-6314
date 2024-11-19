@@ -26,12 +26,11 @@ function UserDetailRoute() {
 }
 
 // Route component for rendering UserPhotos with userId and handling photoIndex state
-function UserPhotosRoute({setPhotoIndex}) {
+function UserPhotosRoute() {
     const {userId} = useParams();
     return (
         <UserPhotos
             userId={userId}
-            setPhotoIndex={setPhotoIndex}
         />
     );
 }
@@ -110,17 +109,13 @@ function PhotoShare({isLoggedIn, firstLoad}) {
                         <Route
                             path="/photos/:userId"
                             element={(
-                                <UserPhotosRoute
-                                    setPhotoIndex={setPhotoIndex}
-                                />
+                                <UserPhotosRoute/>
                             )}
                         />
                         <Route
                             path="/photos/:userId/:photoIndex"
                             element={(
-                                <UserPhotosRoute
-                                    setPhotoIndex={setPhotoIndex}
-                                />
+                                <UserPhotosRoute/>
                             )}
                         />
                         <Route

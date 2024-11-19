@@ -132,12 +132,12 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
 }
 
 // Component to display all photos of a user and handle navigation
-function UserPhotos({userId, setPhotoIndex}) {
+function UserPhotos({userId}) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
-    const [photoIndex,] = useContext(PhotoIndexContext);
+    const [photoIndex, setPhotoIndex] = useContext(PhotoIndexContext);
 
     // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {
