@@ -45,7 +45,7 @@ function UserCommentsRoute() {
 }
 
 // Main PhotoShare component that handles the overall app structure
-function PhotoShare({isLoggedIn}) {
+function PhotoShare({isLoggedIn, firstLoad}) {
     // State to track if advanced features are enabled
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
     // State for triggering component reloads
@@ -58,6 +58,23 @@ function PhotoShare({isLoggedIn}) {
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
     // Getting the current pathname from the location
     const {pathname} = useLocation();
+    const navigate = useNavigate();
+
+    // Effect to manage the photoIndex state and redirect based on URL changes
+    useEffect(() => {
+        const routes = pathname.split("/");
+        if (routes.length >= 3 && routes[1] === "photos") {
+            setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
+        }
+    }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
+
+    // Effect to update the URL based on photoIndex changes
+    useEffect(() => {
+        const routes = pathname.split("/");
+        if (!firstLoad && routes[1] === "photos") {
+            navigate(photoIndex === -1 ? `/photos/${routes[2]}` : `/photos/${routes[2]}/${photoIndex}`);
+        }
+    }, [photoIndex, setPhotoIndex]);
 
     // Effect to manage URL path and enable/disable advanced features accordingly
     useEffect(() => {
@@ -204,7 +221,7 @@ function App() {
         <FirstLoadContext.Provider value={firstLoadContextValue}>
             <LoginContext.Provider value={loginContextValue}>
                 <LoggedInUserContext.Provider value={loggedInUserContextValue}>
-                    <PhotoShare isLoggedIn={isLoggedIn}/>
+                    <PhotoShare isLoggedIn={isLoggedIn} firstLoad={firstLoad}/>
                 </LoggedInUserContext.Provider>
             </LoginContext.Provider>
         </FirstLoadContext.Provider>

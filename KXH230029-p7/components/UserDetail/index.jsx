@@ -51,17 +51,23 @@ function UserDetail({userId}) {
             <Typography variant="h4" className="user-name">{`${first_name} ${last_name}`}</Typography>
 
             {/* Display the user's description */}
-            <Typography variant="body1" className="user-description">{description}</Typography>
+            {description && <Typography variant="body1" className="user-description">{description}</Typography>}
 
             {/* Display the user's location with a label */}
-            <Typography variant="body1" className="user-location">
-                <strong>Location:</strong> {location}
-            </Typography>
+            {location &&
+                (
+                    <Typography variant="body1" className="user-location">
+                        <strong>Location:</strong> {location}
+                    </Typography>
+                )}
 
             {/* Display the user's occupation with a label */}
-            <Typography variant="body1" className="user-occupation" marginBottom="10px">
-                <strong>Occupation:</strong> {occupation}
-            </Typography>
+            {occupation &&
+                (
+                    <Typography variant="body1" className="user-occupation" marginBottom="10px">
+                        <strong>Occupation:</strong> {occupation}
+                    </Typography>
+                )}
 
             {/* Button to view user's photos */}
             {/*Set the link path based on whether advanced features are enabled*/}

@@ -123,11 +123,13 @@ function TopBar() {
 
     // Effect to fetch the version number from the server
     useEffect(() => {
-        (async () => {
-            await axios.get("/test/info")
-                .then(result => setVersion(result.data.__v))
-                .catch(error => console.error("Failed to fetch data:", error));
-        })();
+        if (isLoggedIn) {
+            (async () => {
+                await axios.get("/test/info")
+                    .then(result => setVersion(result.data.__v))
+                    .catch(error => console.error("Failed to fetch data:", error));
+            })();
+        }
     }, [isLoggedIn]);
 
     // Memoized title based on the current path and user details

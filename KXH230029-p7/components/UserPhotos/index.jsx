@@ -1,10 +1,10 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import "./styles.css";
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import TextField from '@mui/material/TextField';
 import axios from "axios";
-import {AdvancedContext, FirstLoadContext, ReloadContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
 // Component to display a single comment
@@ -135,27 +135,8 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
 function UserPhotos({userId, photoIndex, setPhotoIndex}) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+    const [enableAdvancedFeatures] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
-    const [firstLoad] = useContext(FirstLoadContext);
-    const {pathname} = useLocation();
-    const navigate = useNavigate();
-
-    // Effect to manage the photoIndex state and redirect based on URL changes
-    useEffect(() => {
-        const routes = pathname.split("/");
-        if (routes.length >= 3 && routes[1] === "photos") {
-            setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
-        }
-    }, [enableAdvancedFeatures]);
-
-    // Effect to update the URL based on photoIndex changes
-    useEffect(() => {
-        const routes = pathname.split("/");
-        if (!firstLoad && routes[1] === "photos") {
-            navigate(photoIndex === -1 ? `/photos/${routes[2]}` : `/photos/${routes[2]}/${photoIndex}`);
-        }
-    }, [photoIndex]);
 
     // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {
