@@ -209,6 +209,7 @@ function App() {
                     });
             })();
         } else {
+            setFirstLoad(false);
             navigate("/admin/login", {replace: true});
         }
     }, []);
