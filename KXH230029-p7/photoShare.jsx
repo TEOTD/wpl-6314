@@ -60,7 +60,7 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     const {pathname} = useLocation();
     const navigate = useNavigate();
 
-    // Effect to manage the photoIndex state and redirect based on URL changes
+    // Effect to manage the photoIndex state and redirect based on URL and advanced feature changes
     useEffect(() => {
         const routes = pathname.split("/");
         if (routes.length >= 3 && routes[1] === "photos") {
