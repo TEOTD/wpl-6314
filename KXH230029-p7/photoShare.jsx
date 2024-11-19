@@ -64,14 +64,14 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     useEffect(() => {
         const routes = pathname.split("/");
         if (routes.length >= 3 && routes[1] === "photos") {
-            setPhotoIndex(enableAdvancedFeatures ? Math.max(photoIndex, 0) : -1);
+            setPhotoIndex(enableAdvancedFeatures === true ? Math.max(photoIndex, 0) : -1);
         }
     }, [enableAdvancedFeatures, setEnableAdvancedFeatures]);
 
     // Effect to update the URL based on photoIndex changes
     useEffect(() => {
         const routes = pathname.split("/");
-        if (!firstLoad && routes[1] === "photos") {
+        if (firstLoad === false && routes[1] === "photos") {
             navigate(photoIndex === -1 ? `/photos/${routes[2]}` : `/photos/${routes[2]}/${photoIndex}`);
         }
     }, [photoIndex, setPhotoIndex]);

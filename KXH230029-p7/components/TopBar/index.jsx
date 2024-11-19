@@ -147,14 +147,19 @@ function TopBar() {
         return `Hi ${loggedInUser.first_name} !!!!`;
     }, [isLoggedIn, loggedInUser]);
 
+    function resetAllContext() {
+        setIsLoggedIn(false);
+        setLoggedInUser(null);
+        setEnableAdvancedFeatures(false);
+    }
+
     // Function to handle logout and clear stored data
     const handleLogout = useCallback(async () => {
         await axios.post("/admin/logout")
             .then(() => {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("loggedInUser");
-                setIsLoggedIn(false);
-                setLoggedInUser(null);
+                resetAllContext();
                 navigate("/admin/login", {replace: true});
             })
             .catch(error => {
