@@ -14,7 +14,8 @@ import {
     FirstLoadContext,
     LoggedInUserContext,
     LoginContext,
-    ReloadContext
+    ReloadContext,
+    PhotoIndexContext
 } from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
 
@@ -25,12 +26,11 @@ function UserDetailRoute() {
 }
 
 // Route component for rendering UserPhotos with userId and handling photoIndex state
-function UserPhotosRoute({photoIndex, setPhotoIndex}) {
+function UserPhotosRoute({setPhotoIndex}) {
     const {userId} = useParams();
     return (
         <UserPhotos
             userId={userId}
-            photoIndex={photoIndex}
             setPhotoIndex={setPhotoIndex}
         />
     );
@@ -56,6 +56,8 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     const [photoIndex, setPhotoIndex] = useState(-1);
     // Memoized context value for advanced features
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
+    // Setting Photo Index content
+    const photoIndexContextValue = useMemo(() => [photoIndex, setPhotoIndex], [photoIndex]);
     // Getting the current pathname from the location
     const {pathname} = useLocation();
     const navigate = useNavigate();
@@ -109,7 +111,6 @@ function PhotoShare({isLoggedIn, firstLoad}) {
                             path="/photos/:userId"
                             element={(
                                 <UserPhotosRoute
-                                    photoIndex={photoIndex}
                                     setPhotoIndex={setPhotoIndex}
                                 />
                             )}
@@ -118,7 +119,6 @@ function PhotoShare({isLoggedIn, firstLoad}) {
                             path="/photos/:userId/:photoIndex"
                             element={(
                                 <UserPhotosRoute
-                                    photoIndex={photoIndex}
                                     setPhotoIndex={setPhotoIndex}
                                 />
                             )}
@@ -146,20 +146,22 @@ function PhotoShare({isLoggedIn, firstLoad}) {
             <Grid container spacing={2}>
                 <AdvancedContext.Provider value={advancedContextValue}>
                     <ReloadContext.Provider value={reloadContextValue}>
-                        <Grid item xs={12}>
-                            <TopBar/>
-                        </Grid>
-                        <div className="main-top-bar-buffer"/>
-                        <Grid item sm={3}>
-                            <Paper className="main-grid-item">
-                                {renderUserList()}
-                            </Paper>
-                        </Grid>
-                        <Grid item sm={9}>
-                            <Paper className="main-grid-item">
-                                {renderMainContent()}
-                            </Paper>
-                        </Grid>
+                        <PhotoIndexContext.Provider value={photoIndexContextValue}>
+                            <Grid item xs={12}>
+                                <TopBar/>
+                            </Grid>
+                            <div className="main-top-bar-buffer"/>
+                            <Grid item sm={3}>
+                                <Paper className="main-grid-item">
+                                    {renderUserList()}
+                                </Paper>
+                            </Grid>
+                            <Grid item sm={9}>
+                                <Paper className="main-grid-item">
+                                    {renderMainContent()}
+                                </Paper>
+                            </Grid>
+                        </PhotoIndexContext.Provider>
                     </ReloadContext.Provider>
                 </AdvancedContext.Provider>
             </Grid>

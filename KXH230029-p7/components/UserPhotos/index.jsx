@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import TextField from '@mui/material/TextField';
 import axios from "axios";
-import {AdvancedContext, ReloadContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext, PhotoIndexContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
 // Component to display a single comment
@@ -132,11 +132,12 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
 }
 
 // Component to display all photos of a user and handle navigation
-function UserPhotos({userId, photoIndex, setPhotoIndex}) {
+function UserPhotos({userId, setPhotoIndex}) {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
+    const [photoIndex,] = useContext(PhotoIndexContext);
 
     // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {

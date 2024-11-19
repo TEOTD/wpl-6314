@@ -12,3 +12,4 @@ export const LoggedInUserContext = createContext([null,]);
 export const ReloadContext = createContext([true,]);
 // Context used to handle opening of bookmark links.
 export const FirstLoadContext = createContext([true,]);
+export const PhotoIndexContext = createContext([0,]);
