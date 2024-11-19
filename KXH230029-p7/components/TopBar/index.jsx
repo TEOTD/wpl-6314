@@ -19,7 +19,13 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import "./styles.css";
 import axios from "axios";
-import {AdvancedContext, LoggedInUserContext, LoginContext, ReloadContext} from "../context/appContext";
+import {
+    AdvancedContext,
+    LoggedInUserContext,
+    LoginContext,
+    PhotoIndexContext,
+    ReloadContext
+} from "../context/appContext";
 
 function TopBar() {
     // Get the current location path and initialize the navigate function
@@ -31,6 +37,7 @@ function TopBar() {
     const [isLoggedIn, setIsLoggedIn] = useContext(LoginContext);
     const [loggedInUser, setLoggedInUser] = useContext(LoggedInUserContext);
     const [reload, setReload] = useContext(ReloadContext);
+    const [, setPhotoIndex] = useContext(PhotoIndexContext);
 
     // State variables for UI elements and notifications
     const [imageUploadShow, setImageUploadShow] = useState(false);
@@ -151,6 +158,7 @@ function TopBar() {
         setIsLoggedIn(false);
         setLoggedInUser(null);
         setEnableAdvancedFeatures(false);
+        setPhotoIndex(-1);
     }
 
     // Function to handle logout and clear stored data

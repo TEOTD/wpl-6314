@@ -49,10 +49,10 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState(false);
     // State for triggering component reloads
     const [reload, setReload] = useState(false);
-    // Memoized context value for reload state
-    const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
     // State for tracking the photo index
     const [photoIndex, setPhotoIndex] = useState(-1);
+    // Memoized context value for reload state
+    const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
     // Memoized context value for advanced features
     const advancedContextValue = useMemo(() => [enableAdvancedFeatures, setEnableAdvancedFeatures], [enableAdvancedFeatures]);
     // Setting Photo Index content
