@@ -1,0 +1,109 @@
+.photo-container {
+    background-color: var(--background-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.photo-image {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.photo-date {
+    color: var(--text-color-hover);
+}
+
+.comment-input-container {
+    padding: 10px;
+    background-color: var(--text-color) !important;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    flex-direction: column !important;
+}
+
+.comment-input-box {
+    overflow: hidden !important;
+    justify-content: center !important;
+}
+
+#standard-multiline-flexible {
+    width: 100vh;
+    color: var(--text-color-hover);
+}
+
+.MuiInputLabel-root {
+    color: var(--text-color-hover) !important;
+}
+
+#comment-submit-button {
+    background-color: var(--accent-hover-color);
+    margin-left: 0px;
+    height: 30px;
+    width: 100%;
+    margin-top: 15px;
+    color: var(--text-color);
+    text-transform: none;
+}
+
+#comment-submit-button:hover {
+    background-color: var(--accent-color);
+}
+
+#comment-clear-button {
+    background-color: var(--accent-hover-color);
+    margin-left: 15px;
+    height: 30px;
+    color: var(--text-color-hover);
+}
+
+#comment-clear-button:hover {
+    background-color: var(--accent-color);
+}
+
+.comment {
+    color: var(--text-color-hover);
+}
+
+.comments-section {
+    margin-top: 10px;
+}
+
+.comment-container {
+    margin: 5px 0;
+    padding: 10px;
+}
+
+.comment-link {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.button-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.nav-button {
+    width: 100%;
+}
+
+.comments-heading {
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    padding: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+.no-comments, .no-photos {
+    color: var(--text-color-hover);
+    background-color: var(--secondary-hover-color);
+    padding: 10px;
+}

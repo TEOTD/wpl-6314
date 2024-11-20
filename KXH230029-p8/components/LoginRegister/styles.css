@@ -1,0 +1,51 @@
+.login-register-container {
+    background-color: var(--background-color);
+    max-width: 90%;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-heading {
+    color: var(--highlight-color);
+    margin-bottom: 20px;
+    font-weight: bold !important;
+}
+
+.login-text-fields {
+    margin: 5px auto !important;
+    display: block;
+    width: 100%;
+}
+
+.login-text-fields input, .login-text-fields label, .login-text-fields textarea {
+    color: var(--text-color-hover) !important;
+}
+
+.login-button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.login-button {
+    background-color: var(--accent-color) !important;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+    color: var(--text-color) !important;
+}
+
+.login-button:hover {
+    background-color: var(--accent-hover-color) !important;
+}
+
+.login-text-fields .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--text-color-hover) !important;
+}
+
+.login-text-fields .MuiOutlinedInput-notchedOutline {
+    border-color: var(--text-color-hover) !important;
+}

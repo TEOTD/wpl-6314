@@ -1,0 +1,65 @@
+.top-bar {
+    padding: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.separator {
+    width: 2px;
+    height: 24px;
+    background-color: var(--text-color);
+    margin: 0 8px;
+}
+
+.my-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.version, .advanced-features {
+    color: var(--text-color);
+}
+
+.title {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.logout-button, .add-photo-button {
+    color: var(--text-color) !important;
+    background-color: var(--accent-color) !important;
+}
+
+.logout-button:hover, .add-photo-button:hover {
+    color: var(--text-color) !important;
+    background-color: var(--accent-hover-color) !important;
+}
+
+#choose-photo-icon {
+    color: var(--accent-hover-color) !important;
+}
+
+#photo-upload-dialog {
+    color: black !important;
+}
+
+.dialog-title {
+    color: var(--text-color-hover) !important;
+    font-family: 'Star Jedi', sans-serif;
+}
+
+.dialog-button {
+    color: var(--accent-hover-color) !important;
+}
+
+.dialog-button-input {
+    color: var(--accent-hover-color) !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
