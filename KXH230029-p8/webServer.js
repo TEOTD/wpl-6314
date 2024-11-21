@@ -83,7 +83,7 @@ mongoose.connect("mongodb://127.0.0.1/project7", {
 app.use(express.static(__dirname));
 
 app.get("/", function (request, response) {
-    response.send("Simple web server of files from " + __dirname);
+    return response.send("Simple web server of files from " + __dirname);
 });
 
 /**
@@ -164,9 +164,9 @@ app.get("/test/:p1", isAuthenticated, async function (request, response) {
 app.get("/user/list", isAuthenticated, async function (request, response) {
     try {
         const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1}).sort({_id: 1});
-        response.status(200).send(users);
+        return response.status(200).send(users);
     } catch (error) {
-        response.status(500).send({error: "An error occurred while fetching users."});
+        return response.status(500).send({error: "An error occurred while fetching users."});
     }
 });
 
@@ -264,35 +264,6 @@ app.post('/photos/new', isAuthenticated, async function (request, response) {
         });
         return response;
     });
-});
-
-
-/**
- * URL /commentsOfPhoto/:photo_id - Accepts a comment in the body and adds it to the database.
- */
-app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
-    const photo_id = request.params.photo_id;
-    const comment = request.body.comment;
-    try {
-        const newComment = {
-            comment: comment,
-            user_id: request.session.user._id,
-            date_time: new Date(),
-        };
-        const result = await Photo.findByIdAndUpdate(
-            photo_id,
-            {$push: {comments: newComment}},
-            {new: true}  // Return the updated document
-        );
-
-        if (!result) {
-            return response.status(404).json('Photo not found');
-        }
-        return response.status(200).json({message: 'Comment added successfully', comment: comment});
-    } catch (error) {
-        console.error(error);
-        return response.status(400).json('Something went wrong...');
-    }
 });
 
 
@@ -436,9 +407,9 @@ app.get("/photos/count", isAuthenticated, async function (request, response) {
     ];
     try {
         const photoCounts = await Photo.aggregate(aggregationFunction);
-        response.status(200).send(photoCounts);
+        return response.status(200).send(photoCounts);
     } catch (error) {
-        response.status(500).send({error: "An error occurred while fetching photo count."});
+        return response.status(500).send({error: "An error occurred while fetching photo count."});
     }
 });
 
@@ -471,9 +442,9 @@ app.get("/comments/count", isAuthenticated, async function (request, response) {
     ];
     try {
         const commentCounts = await Photo.aggregate(aggregationFunction);
-        response.status(200).send(commentCounts);
+        return response.status(200).send(commentCounts);
     } catch (error) {
-        response.status(500).send({error: "An error occurred while fetching comment count."});
+        return response.status(500).send({error: "An error occurred while fetching comment count."});
     }
 });
 
@@ -629,4 +600,90 @@ app.get('/admin/check-session', async function (request, response) {
         return response.sendStatus(401);
     }
 });
+
+/**
+ * URL: /latestPhotoOfUser/:id - Get the most recently uploaded photo for a specific user.
+ */
+app.get("/latestPhotoOfUser/:id", isAuthenticated, async (request, response) => {
+    const id = request.params.id;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(400).send("Invalid or missing userId.");
+    }
+
+    try {
+        const photosList
+            = await Photo.find({ user_id: id }, {_id: 1, file_name: 1, date_time: 1, user_id: 1})
+            .sort({_id: 1});
+
+        if (!photosList || photosList.length === 0) {
+            return response.status(404).send("No photos found for the specified user.");
+        }
+
+        const sortedPhotos = [...photosList].sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
+        const recentPhoto = sortedPhotos[0];
+        const photoIndex = photosList.findIndex(photo => photo._id.toString() === recentPhoto._id.toString());
+
+        return response.send({
+            _id: recentPhoto._id,
+            user_id: recentPhoto.user_id,
+            file_name: recentPhoto.file_name,
+            date_time: recentPhoto.date_time,
+            photo_index: photoIndex
+        });
+    } catch (err) {
+        console.error("Error fetching most recent photo for user:", err);
+        return response.status(500).send("An error occurred while fetching the recent photo.");
+    }
+});
+
+/**
+ * URL: /mostCommentedPhotoOfUser/:id - Get the photo with the most comments for a specific user.
+ */
+app.get("/mostCommentedPhotoOfUser/:id", isAuthenticated, async (request, response) => {
+    const id = request.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(400).send("Invalid or missing userId.");
+    }
+
+    try {
+        const photosList
+            = await Photo.find({ user_id: id })
+            .sort({_id: 1});
+
+        if (!photosList  || photosList.length === 0) {
+            return response.status(404).send("No photos found for the specified user.");
+        }
+
+        let mostCommentedPhoto = null;
+        let maxComments = 0;
+        let photoIndex = -1;
+
+        photosList.forEach((photo, index) => {
+            const commentCount = photo.comments ? photo.comments.length : 0;
+            if (commentCount > maxComments) {
+                mostCommentedPhoto = photo;
+                maxComments = commentCount;
+                photoIndex = index;
+            }
+        });
+
+        if (!mostCommentedPhoto) {
+            return response.status(404).send("No comments found on any photos for the specified user.");
+        }
+
+        return response.send({
+            _id: mostCommentedPhoto._id,
+            file_name: mostCommentedPhoto.file_name,
+            comment_count: maxComments,
+            user_id: mostCommentedPhoto.user_id,
+            date_time: mostCommentedPhoto.date_time,
+            photo_index: photoIndex
+        });
+    } catch (err) {
+        console.error("Error fetching most commented photo for user:", err);
+        return response.status(500).send("An error occurred while fetching the most commented photo.");
+    }
+});
+
 

@@ -1,94 +1,160 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {Button, CircularProgress, Typography} from "@mui/material";
+import {Button, CircularProgress, Paper, Typography} from "@mui/material";
 import "./styles.css";
 import axios from "axios";
-import {AdvancedContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext} from "../context/appContext";
+import formatDateTime from "../../lib/utils";
 
 function UserDetail({userId}) {
     // State to hold the fetched user data
     const [user, setUser] = useState(null);
+    // State to hold the latest photo of the user
+    const [latestPhoto, setLatestPhoto] = useState(null);
+    // State to hold the most commented photo of the user
+    const [mostCommentedPhoto, setMostCommentedPhoto] = useState(null);
     // State to manage the loading spinner visibility
     const [loading, setLoading] = useState(true);
-    // Context value to check if advanced features are enabled
-    const [enableAdvancedFeatures] = useContext(AdvancedContext);
 
-    // Effect to fetch user data when the component mounts or the userId changes
+    // Context to check if advanced features are enabled
+    const [enableAdvancedFeatures] = useContext(AdvancedContext);
+    // Context to check if reload is needed when photo or comments are added
+    const [reload] = useContext(ReloadContext);
+
+    // Function to fetch data from the given URL and update the state
+    // If error occurs, reset state
+    const fetchData = async (url, setState) => {
+        try {
+            const response = await axios.get(url);
+            setState(response.data);
+        } catch (error) {
+            setState(null);
+        }
+    };
+
+    // Effect to fetch user data when the component mounts, or when the userId or reload changes
     useEffect(() => {
         if (userId) {
             setLoading(true);
             (async () => {
-                await axios.get(`/user/${userId}`)
-                    .then((result) => {
-                        setUser(result.data);
-                    })
-                    .catch((error) => {
-                        console.error("Failed to fetch user:", error);
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
+                await Promise.all([
+                    fetchData(`/user/${userId}`, setUser),
+                    fetchData(`/latestPhotoOfUser/${userId}`, setLatestPhoto),
+                    fetchData(`/mostCommentedPhotoOfUser/${userId}`, setMostCommentedPhoto),
+                ]);
+                setLoading(false);
             })();
         }
-    }, [userId]);
+    }, [userId, reload]);
 
-    // Display a loading spinner while data is being fetched
+    // Show loading spinner while data is being fetched
     if (loading) {
         return <CircularProgress className="loading-spinner"/>;
     }
 
-    // Display a message if no user data is found
+    // Show a message if user data is not found
     if (!user) {
         return <Typography variant="h6" className="not-found-message">User not found.</Typography>;
     }
 
-    // Destructure user details from the fetched data
+    // Destructure user details from the fetched data for easier use
     const {first_name, last_name, description, location, occupation} = user;
 
-    return (
-        <div className="user-detail-container">
-            {/* Display the user's full name */}
-            <Typography variant="h4" className="user-name">{`${first_name} ${last_name}`}</Typography>
+    // Render the photo card (latest or most commented photo) with proper formatting and links
+    const renderPhotoCard = (photo, label) => {
+        if (!photo) {
+            return (
+                <Typography variant="h6" className="no-comments user-detail-container"
+                            sx={{margin: "10px"}}>{label}
+                </Typography>
+            );
+        }
 
-            {/* Display the user's description */}
-            {description && <Typography variant="body1" className="user-description">{description}</Typography>}
-
-            {/* Display the user's location with a label */}
-            {location &&
-                (
-                    <Typography variant="body1" className="user-location">
-                        <strong>Location:</strong> {location}
-                    </Typography>
-                )}
-
-            {/* Display the user's occupation with a label */}
-            {occupation &&
-                (
-                    <Typography variant="body1" className="user-occupation" marginBottom="10px">
-                        <strong>Occupation:</strong> {occupation}
-                    </Typography>
-                )}
-
-            {/* Button to view user's photos */}
-            {/*Set the link path based on whether advanced features are enabled*/}
-            <Button
-                component={Link}
-                to={enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
-                className="viewPhotosButton"
-                variant="contained"
-                fullWidth
-                sx={{
-                    backgroundColor: "var(--accent-color)",
-                    color: "var(--text-color)",
-                    '&:hover': {
-                        backgroundColor: "var(--accent-hover-color)",
-                        color: "var(--hover-text-color)"
-                    }
-                }}
+        return (
+            <Link
+                to={`/photos/${photo.user_id}/${photo.photo_index}`}
+                style={{textDecoration: "none", color: "inherit"}}
             >
-                View Photos
-            </Button>
-        </div>
+                <Paper
+                    sx={{backgroundColor: "var(--secondary-hover-color)", margin: "10px"}}
+                    className="comment-container flex-comment-container engagement-container"
+                >
+                    {/* Display the photo */}
+                    <img
+                        src={`/images/${photo.file_name}`}
+                        alt={photo.file_name}
+                        className="comment-photo-image"
+                    />
+
+                    {/* Container for photo information */}
+                    <div className="photo-information">
+                        <Typography
+                            variant="body2"
+                            sx={{margin: "10px 0"}}
+                            className="photo-date"
+                        >
+                            {formatDateTime(photo.date_time)}
+                        </Typography>
+
+                        {/* Display the comment count if available */}
+                        {photo.comment_count && (
+                            <Typography
+                                variant="body2"
+                                sx={{margin: "10px 0"}}
+                                className="photo-date photo-comment-count"
+                            >
+                                Comment Count: {photo.comment_count}
+                            </Typography>
+                        )}
+                    </div>
+                </Paper>
+            </Link>
+        );
+    };
+
+    return (
+        <>
+            <div className="user-detail-container">
+                <Typography variant="h4" className="user-name">{`${first_name} ${last_name}`}</Typography>
+                {description && <Typography variant="body1" className="user-description">{description}</Typography>}
+                {location && (
+                    <Typography variant="body1" className="user-location"><strong>Location:</strong> {location}
+                    </Typography>
+                )}
+                {occupation && (
+                    <Typography variant="body1" className="user-occupation"
+                                marginBottom="10px"><strong>Occupation:</strong> {occupation}
+                    </Typography>
+                )}
+
+                {/* Button to view the photos, with conditional URL for advanced features */}
+                <Button
+                    component={Link}
+                    to={enableAdvancedFeatures ? `/photos/${userId}/0` : `/photos/${userId}`}
+                    className="viewPhotosButton"
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                        backgroundColor: "var(--accent-color)",
+                        color: "var(--text-color)",
+                        "&:hover": {
+                            backgroundColor: "var(--accent-hover-color)",
+                            color: "var(--hover-text-color)",
+                        },
+                    }}
+                >
+                    View Photos
+                </Button>
+            </div>
+
+            <div className="user-detail-container user-engagement-container">
+                <Typography variant="h4" className="user-name">User Engagement</Typography>
+                {/* Display the latest photo */}
+                {renderPhotoCard(latestPhoto, "No Photos Yet")}
+                {/* Display the most commented photo */}
+                {renderPhotoCard(mostCommentedPhoto, "No Comments Yet")}
+            </div>
+        </>
     );
 }
 

@@ -24,3 +24,16 @@
 .user-occupation {
     color: var(--secondary-color);
 }
+
+.user-engagement-container {
+    padding: 20px;
+}
+
+.engagement-container {
+    margin-bottom: 10px;
+}
+
+.photo-information {
+    display: flex;
+    flex-direction: column;
+}
