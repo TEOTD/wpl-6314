@@ -76,6 +76,8 @@
 .comment-container {
     margin: 5px 0;
     padding: 10px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .comment-link {
@@ -106,4 +108,16 @@
     color: var(--text-color-hover);
     background-color: var(--secondary-hover-color);
     padding: 10px;
+}
+
+.more-button {
+    background: var(--accent-color) !important;
+    color: var(--text-color) !important;
+    z-index: 10;
+}
+
+.more-button-comment {
+    background: var(--secondary-hover-color) !important;
+    color: var(--text-color-hover) !important;
+    z-index: 10;
 }
