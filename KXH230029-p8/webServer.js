@@ -43,6 +43,7 @@ app.use(express.json());
 
 const multer = require("multer");
 const fs = require("fs");
+const path = require("path");
 const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
 
 app.use(express.json());
@@ -613,7 +614,7 @@ app.get("/latestPhotoOfUser/:id", isAuthenticated, async (request, response) => 
 
     try {
         const photosList
-            = await Photo.find({ user_id: id }, {_id: 1, file_name: 1, date_time: 1, user_id: 1})
+            = await Photo.find({user_id: id}, {_id: 1, file_name: 1, date_time: 1, user_id: 1})
             .sort({_id: 1});
 
         if (!photosList || photosList.length === 0) {
@@ -648,10 +649,10 @@ app.get("/mostCommentedPhotoOfUser/:id", isAuthenticated, async (request, respon
 
     try {
         const photosList
-            = await Photo.find({ user_id: id })
+            = await Photo.find({user_id: id})
             .sort({_id: 1});
 
-        if (!photosList  || photosList.length === 0) {
+        if (!photosList || photosList.length === 0) {
             return response.status(404).send("No photos found for the specified user.");
         }
 
@@ -686,4 +687,193 @@ app.get("/mostCommentedPhotoOfUser/:id", isAuthenticated, async (request, respon
     }
 });
 
+/**
+ * URL: /photosOfUser/:id - Delete selected photo of user.
+ */
+app.delete("/photosOfUser/:id", isAuthenticated, async (request, response) => {
+    const {id} = request.params;
 
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(400).send("Invalid or missing photo ID.");
+    }
+
+    try {
+        // Find the photo to retrieve its file path
+        const photo = await Photo.findById(id);
+        if (!photo) {
+            return response.status(404).send("Photo not found.");
+        }
+
+        // Delete the photo record from the database
+        const result = await Photo.deleteOne({_id: id});
+        if (result.deletedCount === 0) {
+            return response.status(404).send("Photo not found in database.");
+        }
+
+        // Construct the file path and delete the file from the directory
+        const filePath = path.join(__dirname, "images", photo.file_name);
+        return fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error("Error deleting file:", err);
+                return response.status(500).send("Photo record deleted, but file removal failed.");
+            }
+
+            return response.status(200).send("Photo and file successfully deleted.");
+        });
+    } catch (err) {
+        console.error("Error deleting photo:", err);
+        return response.status(500).send("An error occurred while deleting the photo.");
+    }
+});
+
+/**
+ * URL: /commentOfUser/:id - Delete selected comment of user.
+ */
+app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
+    const {id} = request.params;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(400).send("Invalid or missing comment ID.");
+    }
+
+    try {
+        // Find the photo containing the comment and remove the comment
+        const photo = await Photo.findOneAndUpdate(
+            {"comments._id": id},
+            {$pull: {comments: {_id: id}}},
+            {new: true}
+        );
+
+        if (!photo) {
+            return response.status(404).send("Comment not found.");
+        }
+
+        return response.status(200).send("Comment deleted successfully.");
+    } catch (err) {
+        console.error("Error deleting comment:", err);
+        return response.status(500).send("An error occurred while deleting the comment.");
+    }
+});
+
+/**
+ * URL: /user/:id - Delete user and its traces.
+ */
+//todo: add more handling as features are added
+// app.delete("/user/:id", isAuthenticated, async (request, response) => {
+//     const id = request.params.id;
+//     if (!Types.ObjectId.isValid(id)) {
+//         console.log(`Invalid UserId format: ${id}`);
+//         return response.status(400).send({error: `Invalid UserId: ${id}`});
+//     }
+//
+//     const objectId = new Types.ObjectId(id);
+//     const mongoSession = await startSession();
+//     mongoSession.startTransaction();
+//
+//     try {
+//         const user = await User.findById(objectId).session(mongoSession);
+//         if (!user) {
+//             console.log(`User with _id: ${id} not found.`);
+//             await mongoSession.abortTransaction();
+//             await mongoSession.endSession();
+//             return response.status(404).send({error: `User with _id: ${id} not found.`});
+//         }
+//
+//         // Step 1: Remove user's comments from photos
+//         const commentsDeleteResult = await Photo.updateMany(
+//             {"comments.user_id": objectId},
+//             {$pull: {comments: {user_id: objectId}}},
+//             {multi: true, session: mongoSession}
+//         );
+//         console.log(`Removed user comments from ${commentsDeleteResult.modifiedCount} photos.`);
+//
+//         // Step 2: Find user's photos before deletion (needed for file deletion)
+//         const userPhotos = await Photo.find({user_id: objectId}).session(mongoSession);
+//
+//         // Step 3: Delete photos from database
+//         const photosDeleteResult = await Photo.deleteMany({user_id: objectId}).session(mongoSession);
+//         console.log(`Deleted ${photosDeleteResult.deletedCount} photos of user with _id: ${id}.`);
+//
+//         // Step 4: Delete user from the database
+//         await User.findByIdAndDelete(objectId).session(mongoSession);
+//         console.log(`User with _id: ${id} deleted successfully.`);
+//
+//         // Commit the transaction if all database operations are successful
+//         await mongoSession.commitTransaction();
+//         await mongoSession.endSession();
+//
+//         // Step 5: Delete physical files associated with the user's photos
+//         for (const photo of userPhotos) {
+//             const filePath = path.join(__dirname, "images", photo.file_name);
+//             try {
+//                 fs.unlinkSync(filePath); // Delete the file synchronously
+//                 console.log(`Deleted file: ${filePath}`);
+//             } catch (err) {
+//                 console.error(`Failed to delete file: ${filePath}`, err);
+//                 // Log the error but do not affect the transaction
+//             }
+//         }
+//
+//         return response.status(200).send({message: "User account deleted successfully. You have been logged out."});
+//     } catch (error) {
+//         await mongoSession.abortTransaction();
+//         await mongoSession.endSession();
+//         console.log("Error in DELETE /user/:id with transaction:", error);
+//         return response.status(500).send({error: `An error occurred while deleting the account. ${error.message}`});
+//     }
+// });
+
+app.delete("/user/:id", isAuthenticated, async (request, response) => {
+    const id = request.params.id;
+    if (!Types.ObjectId.isValid(id)) {
+        console.log(`Invalid UserId format: ${id}`);
+        return response.status(400).send({error: `Invalid UserId: ${id}`});
+    }
+
+    const objectId = new Types.ObjectId(id);
+
+    try {
+        // Step 1: Find the user and check if they exist
+        const user = await User.findById(objectId);
+        if (!user) {
+            console.log(`User with _id: ${id} not found.`);
+            return response.status(404).send({error: `User with _id: ${id} not found.`});
+        }
+
+        // Step 2: Remove user's comments from photos
+        const commentsDeleteResult = await Photo.updateMany(
+            {"comments.user_id": objectId},
+            {$pull: {comments: {user_id: objectId}}},
+            {multi: true}
+        );
+        console.log(`Removed user comments from ${commentsDeleteResult.modifiedCount} photos.`);
+
+        // Step 3: Find user's photos before deletion (needed for file deletion)
+        const userPhotos = await Photo.find({user_id: objectId});
+
+        // Step 4: Delete photos from database
+        const photosDeleteResult = await Photo.deleteMany({user_id: objectId});
+        console.log(`Deleted ${photosDeleteResult.deletedCount} photos of user with _id: ${id}.`);
+
+        // Step 5: Delete the user from the database
+        await User.findByIdAndDelete(objectId);
+        console.log(`User with _id: ${id} deleted successfully.`);
+
+        // Step 6: Delete physical files associated with the user's photos
+        for (const photo of userPhotos) {
+            const filePath = path.join(__dirname, "images", photo.file_name);
+            try {
+                fs.unlinkSync(filePath); // Delete the file synchronously
+                console.log(`Deleted file: ${filePath}`);
+            } catch (err) {
+                console.error(`Failed to delete file: ${filePath}`, err);
+                // Log the error but do not stop the process
+            }
+        }
+
+        return response.status(200).send({message: "User account deleted successfully. You have been logged out."});
+    } catch (error) {
+        console.log("Error in DELETE /user/:id:", error);
+        return response.status(500).send({error: `An error occurred while deleting the account. ${error.message}`});
+    }
+});

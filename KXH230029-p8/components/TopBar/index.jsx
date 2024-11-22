@@ -41,6 +41,7 @@ function TopBar() {
 
     // State variables for UI elements and notifications
     const [imageUploadShow, setImageUploadShow] = useState(false);
+    const [deleteUserShow, setDeleteUserShow] = useState(false);
     const [uploadInput, setUploadInput] = useState(null);
     const [showPhotoUploadSuccess, setShowPhotoUploadSuccess] = useState({
         message: '',
@@ -56,14 +57,9 @@ function TopBar() {
         }
     }, []);
 
-    // Function to show the image upload dialog
-    const handleClickOpen = useCallback(() => {
-        setImageUploadShow(true);
-    }, []);
-
-    // Function to close the image upload dialog
-    const handleClose = useCallback(() => {
-        setImageUploadShow(false);
+    const handleDialogToggle = useCallback((type, open) => {
+        if (type === "image") setImageUploadShow(open);
+        if (type === "delete") setDeleteUserShow(open);
     }, []);
 
     // Function to show an alert message and refresh content
@@ -104,7 +100,7 @@ function TopBar() {
                     show: true
                 }));
         }
-        handleClose();
+        handleDialogToggle("image", false);
     };
 
     // State variables for user and app version
@@ -175,6 +171,21 @@ function TopBar() {
             });
     }, [setIsLoggedIn, setLoggedInUser, navigate]);
 
+
+    // Function to handle delete user and send it to the server
+    const handleDeleteUser = async () => {
+        await axios.delete(`/user/${loggedInUser._id}`)
+            .then(() => {
+                handleLogout();
+            })
+            .catch(err => showAlert({
+                message: `User deletion failed: ${err.response?.data || "unexpected error"}`,
+                success: false,
+                show: true
+            }));
+        handleDialogToggle("delete", false);
+    };
+
     // JSX structure of the top bar, including the photo upload dialog and alerts
     return (
         <AppBar position="static" className="top-bar" sx={{backgroundColor: "var(--primary-color)"}}>
@@ -190,13 +201,14 @@ function TopBar() {
                                 Version: {version}
                             </Typography>
                             <Box className="separator"/>
-                            <Button color="inherit" onClick={handleClickOpen} className="add-photo-button">
+                            <Button color="inherit" onClick={() => handleDialogToggle("image", true)}
+                                    className="add-photo-button">
                                 Add Photo
                             </Button>
                             <Dialog
                                 open={imageUploadShow}
                                 keepMounted
-                                onClose={handleClose}
+                                onClose={() => handleDialogToggle("image", false)}
                                 aria-describedby="alert-dialog-slide-description"
                                 id="photo-upload-dialog"
                                 sx={{
@@ -217,8 +229,38 @@ function TopBar() {
                                     />
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button className="dialog-button" onClick={handleClose}>Cancel</Button>
+                                    <Button className="dialog-button"
+                                            onClick={() => handleDialogToggle("image", false)}>Cancel
+                                    </Button>
                                     <Button className="dialog-button" onClick={handleFileUpload}>Upload</Button>
+                                </DialogActions>
+                            </Dialog>
+                            <Box className="separator"/>
+                            <Button color="inherit" onClick={() => handleDialogToggle("delete", true)}
+                                    className="delete-user-button">
+                                Delete User
+                            </Button>
+                            <Dialog
+                                open={deleteUserShow}
+                                keepMounted
+                                onClose={() => handleDialogToggle("delete", false)}
+                                aria-describedby="alert-dialog-slide-description"
+                                id="dialog"
+                                sx={{
+                                    "& .MuiPaper-root": {
+                                        background: "#000",
+                                        borderRadius: "10px",
+                                    },
+                                }}
+                            >
+                                <DialogTitle
+                                    className="dialog-title">{"Are You Sure You want to Delete the User ??"}
+                                </DialogTitle>
+                                <DialogActions>
+                                    <Button className="delete-dialog-button"
+                                            onClick={() => handleDialogToggle("delete", false)}>Cancel
+                                    </Button>
+                                    <Button className="delete-dialog-button" onClick={handleDeleteUser}>Delete</Button>
                                 </DialogActions>
                             </Dialog>
                             {showPhotoUploadSuccess.show && (

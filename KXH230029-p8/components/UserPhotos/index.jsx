@@ -1,38 +1,92 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Button, CircularProgress, Paper, Typography} from "@mui/material";
-import TextField from '@mui/material/TextField';
+import {Box, Button, CircularProgress, Menu, MenuItem, Paper, TextField, Typography,} from "@mui/material";
+import {Delete, Edit} from "@mui/icons-material";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import axios from "axios";
-import {AdvancedContext, ReloadContext, PhotoIndexContext} from "../context/appContext";
+import {AdvancedContext, LoggedInUserContext, PhotoIndexContext, ReloadContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
-// Component to display a single comment
-function Comment({comment}) {
+function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
+    return (
+        <Menu
+            id="options-menu"
+            MenuListProps={{"aria-labelledby": "options-button"}}
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+        >
+            {/*todo: add comment edit functionality*/}
+            {onEdit && (
+                <MenuItem onClick={onEdit} disableRipple>
+                    <Edit/> Edit
+                </MenuItem>
+            )}
+            <MenuItem onClick={onDelete} disableRipple>
+                <Delete/> Delete
+            </MenuItem>
+        </Menu>
+    );
+}
+
+function Comment({comment, loggedInUser, onReload}) {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+
+    const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
+    const handleMenuClose = () => setAnchorEl(null);
+
+    const deleteComment = async () => {
+        try {
+            await axios.delete(`/commentOfUser/${comment._id}`);
+            onReload();
+        } catch (error) {
+            console.error("Failed to delete comment:", error);
+        }
+    };
+
     return (
         <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
-            <Typography variant="body1" className="comment">{comment.comment}</Typography>
-            {/* Displays the user's name and the date of the comment */}
-            <Typography variant="caption">
-                <Link to={`/users/${comment.user._id}`} className="comment-link">
-                    {comment.user.first_name} {comment.user.last_name}
-                </Link>
-                <span className="photo-date">{' - '}{formatDateTime(comment.date_time)}</span>
-            </Typography>
+            <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                <Typography variant="body1" className="comment">{comment.comment}</Typography>
+                {/* Displays the user's name and the date of the comment */}
+                <Typography variant="caption">
+                    <Link to={`/users/${comment.user._id}`} className="comment-link">
+                        {comment.user.first_name} {comment.user.last_name}
+                    </Link>
+                    <span className="photo-date">{' - '}{formatDateTime(comment.date_time)}</span>
+                </Typography>
+            </Box>
+            {loggedInUser._id === comment.user._id && (
+                <Box>
+                    <Button onClick={handleMenuClick} className="more-button-comment">
+                        <MoreHorizIcon/>
+                    </Button>
+                    <OptionsMenu
+                        open={open}
+                        anchorEl={anchorEl}
+                        handleClose={handleMenuClose}
+                        onDelete={deleteComment}
+                    />
+                </Box>
+            )}
         </Paper>
     );
 }
 
-// Function to send a request to add a new comment for a photo
-async function addCommentRequest(imageId, commentText) {
-    await axios.post(`/commentsOfPhoto/${imageId}`, {
-        comment: commentText
-    });
-}
-
-// Component to handle the comment input functionality
-function CommentInput({imageId, setReload, reload}) {
+function CommentInput({imageId, onReload}) {
     const [comment, setComment] = useState("");
+
+    const addComment = async () => {
+        if (!comment.trim()) return;
+        try {
+            await axios.post(`/commentsOfPhoto/${imageId}`, {comment: comment});
+            setComment("");
+        } catch (error) {
+            console.error("Failed to add comment:", error);
+        }
+    };
 
     return (
         <Paper elevation={1} className="comment-input-container">
@@ -42,6 +96,7 @@ function CommentInput({imageId, setReload, reload}) {
                 multiline
                 label="Add your Comment"
                 variant="filled"
+                value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 maxRows={10}
                 className="comment-input-input-box"
@@ -53,7 +108,7 @@ function CommentInput({imageId, setReload, reload}) {
                 variant="contained"
                 size="medium"
                 onClick={() => {
-                    addCommentRequest(imageId, comment).then(() => setReload(!reload));
+                    addComment().then(() => onReload());
                 }}
                 id="comment-submit-button"
             >
@@ -63,10 +118,22 @@ function CommentInput({imageId, setReload, reload}) {
     );
 }
 
-// Component to display a single photo along with navigation and comments
-function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
+function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onReload}) {
+    const [loggedInUser] = useContext(LoggedInUserContext);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
     const [buttonState, setButtonState] = useState({left: false, right: false});
-    const [enableAdvancedFeatures,] = useContext(AdvancedContext);
+
+    const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
+    const handleMenuClose = () => setAnchorEl(null);
+
+    const deletePhoto = async () => {
+        try {
+            await axios.delete(`/photosOfUser/${photo._id}`);
+        } catch (error) {
+            console.error("Failed to delete photo:", error);
+        }
+    };
 
     // Styles for the navigation buttons
     const navButtonStyles = (side) => ({
@@ -108,18 +175,37 @@ function Photo({photo, index, totalPhotos, onStep, setReload, reload}) {
             )}
             {/* Photo display */}
             <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
-            {/* Photo date display */}
-            <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
-                {formatDateTime(photo.date_time)}
-            </Typography>
+            <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
+                    {formatDateTime(photo.date_time)}
+                </Typography>
+                {loggedInUser._id === photo.user_id && (
+                    <Box>
+                        <Button onClick={handleMenuClick} className="more-button">
+                            <MoreHorizIcon/>
+                        </Button>
+                        <OptionsMenu
+                            open={open}
+                            anchorEl={anchorEl}
+                            handleClose={handleMenuClose}
+                            onDelete={() => deletePhoto().then(() => onReload())}
+                        />
+                    </Box>
+                )}
+            </Box>
             {/* Comments section */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
-            <CommentInput imageId={photo._id} setReload={setReload} reload={reload}/>
+            <CommentInput imageId={photo._id} onReload={onReload}/>
             {/* List of comments or a message if there are no comments */}
-            {photo.comments && photo.comments.length > 0 ? (
+            {photo.comments?.length > 0 ? (
                 <div className="comments-section">
                     {photo.comments.map((comment) => (
-                        <Comment key={comment._id} comment={comment}/>
+                        <Comment
+                            key={comment._id}
+                            comment={comment}
+                            loggedInUser={loggedInUser}
+                            onReload={onReload}
+                        />
                     ))}
                 </div>
             ) : (
@@ -171,14 +257,17 @@ function UserPhotos({userId}) {
             totalPhotos={photos.length}
             onStep={handleStep}
             enableAdvancedFeatures={enableAdvancedFeatures}
-            setReload={setReload}
-            reload={reload}
+            onReload={() => setReload(!reload)}
         />
     ) : (
-        <div>{photos.map((photo, idx) => (
-            <Photo key={photo._id} photo={photo} index={idx} setReload={setReload} reload={reload}/>
-        ))}
-        </div>
+        photos.map((photo, idx) => (
+            <Photo
+                key={photo._id}
+                photo={photo}
+                index={idx}
+                onReload={() => setReload(!reload)}
+            />
+        ))
     );
 }
 
