@@ -4,11 +4,11 @@ import {Link} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
-import {AdvancedContext, ReloadContext} from "../context/appContext";
+import {AdvancedContext, ReloadContext, UserContext} from "../context/appContext";
 
 function UserList() {
     // State to store the list of users fetched from the server
-    const [users, setUsers] = useState(null);
+    const [users, setUsers] = useContext(UserContext);
     // State to manage loading spinner visibility
     const [loading, setLoading] = useState(true);
     // State to store the number of photos associated with each user

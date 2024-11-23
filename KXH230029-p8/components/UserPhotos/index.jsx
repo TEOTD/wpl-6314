@@ -1,11 +1,18 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import "./styles.css";
 import {Link} from "react-router-dom";
-import {Box, Button, CircularProgress, Menu, MenuItem, Paper, TextField, Typography,} from "@mui/material";
+import {Box, Button, CircularProgress, Menu, MenuItem, Paper, Typography,} from "@mui/material";
 import {Delete, Edit} from "@mui/icons-material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import axios from "axios";
-import {AdvancedContext, LoggedInUserContext, PhotoIndexContext, ReloadContext} from "../context/appContext";
+import {Mention, MentionsInput} from "react-mentions";
+import {
+    AdvancedContext,
+    LoggedInUserContext,
+    PhotoIndexContext,
+    ReloadContext,
+    UserContext
+} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
 function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
@@ -46,10 +53,31 @@ function Comment({comment, loggedInUser, onReload}) {
         }
     };
 
+    const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
+    const renderComment = (text) => {
+        const parts = [];
+        let lastIndex = 0;
+        text.replace(mentionRegex, (match, name, userId, index) => {
+            if (index > lastIndex) {
+                parts.push(text.substring(lastIndex, index));
+            }
+            parts.push(
+                <Link key={userId} to={`/users/${userId}`} className="comment-link">
+                    @{name}
+                </Link>
+            );
+            lastIndex = index + match.length;
+        });
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+        return parts;
+    };
+
     return (
         <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}} className="comment-container">
             <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                <Typography variant="body1" className="comment">{comment.comment}</Typography>
+                <Typography variant="body1" className="comment">{renderComment(comment.comment)}</Typography>
                 {/* Displays the user's name and the date of the comment */}
                 <Typography variant="caption">
                     <Link to={`/users/${comment.user._id}`} className="comment-link">
@@ -77,32 +105,93 @@ function Comment({comment, loggedInUser, onReload}) {
 
 function CommentInput({imageId, onReload}) {
     const [comment, setComment] = useState("");
+    const [users] = useContext(UserContext);
+    const [mentionedUsers, setMentionedUsers] = useState([]);
 
     const addComment = async () => {
         if (!comment.trim()) return;
         try {
-            await axios.post(`/commentsOfPhoto/${imageId}`, {comment: comment});
+            await axios.post(`/commentsOfPhoto/${imageId}`, {comment: comment, mentioned_users: mentionedUsers});
             setComment("");
+            setMentionedUsers([]);
         } catch (error) {
             console.error("Failed to add comment:", error);
         }
     };
 
+    const handleMentionSelect = (id, display) => {
+        const userExists = users.some(user => user._id === id);
+        if (!userExists) {
+            console.warn(`Invalid user mentioned. Ignoring mention: ${display}`);
+        } else {
+            setMentionedUsers([...mentionedUsers, {id, display}]);
+        }
+    };
+
+    //todo: fix css
+    const mentionInputStyle = {
+        control: {
+            fontSize: 16,
+        },
+        '&multiLine': {
+            control: {
+                fontFamily: 'monospace',
+                minHeight: 63,
+                width: '100%'
+            },
+            highlighter: {
+                padding: 9,
+                border: '1px solid transparent',
+                height: 80,
+                overflow: "hidden",
+                boxSizing: "border-box",
+            },
+            input: {
+                padding: 9,
+                border: '1px solid silver',
+                overflow: "auto",
+            },
+        },
+        suggestions: {
+            list: {
+                backgroundColor: 'white',
+                border: '1px solid rgba(0,0,0,0.15)',
+                fontSize: 16,
+            },
+            item: {
+                padding: '5px 15px',
+                borderBottom: '1px solid rgba(0,0,0,0.15)',
+                '&focused': {
+                    backgroundColor: '#cee4e5',
+                },
+            },
+        },
+    };
+
     return (
         <Paper elevation={1} className="comment-input-container">
             {/* Input field for writing a new comment */}
-            <TextField
+            <MentionsInput
                 id="standard-multiline-flexible"
-                multiline
                 label="Add your Comment"
                 variant="filled"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                maxRows={10}
-                className="comment-input-input-box"
+                className="comment-input-box multiLine"
                 color="secondary"
-                fullWidth
-            />
+                placeholder="Add a comment"
+                style={mentionInputStyle}
+                multiLine
+            >
+                <Mention
+                    trigger="@"
+                    data={users.map((user) => ({
+                        id: user._id,
+                        display: user.first_name + " " + user.last_name,
+                    }))}
+                    onAdd={handleMentionSelect}
+                />
+            </MentionsInput>
             {/* Button to submit the comment */}
             <Button
                 variant="contained"

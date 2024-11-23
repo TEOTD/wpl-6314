@@ -8,12 +8,33 @@ import formatDateTime from "../../lib/utils";
 
 // Component to render each individual comment with associated photo and text
 function Comment({comment, photoIndex}) {
+    const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
+    const renderComment = (text) => {
+        const parts = [];
+        let lastIndex = 0;
+        text.replace(mentionRegex, (match, name, userId, index) => {
+            if (index > lastIndex) {
+                parts.push(text.substring(lastIndex, index));
+            }
+            parts.push(
+                <Link key={userId} to={`/users/${userId}`} className="comment-link">
+                    @{name}
+                </Link>
+            );
+            lastIndex = index + match.length;
+        });
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+        return parts;
+    };
+
     return (
         // Link to the photo page of the specific comment
         <Link to={`/photos/${comment.photo_user_id}/${photoIndex}`} style={{textDecoration: 'none', color: 'inherit'}}>
             {/* Styled paper container for each comment */}
             <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}}
-                   className="comment-container flex-comment-container">
+                   className="comment-container-listed flex-comment-container">
                 {/* Image associated with the comment */}
                 <img src={`/images/${comment.file_name}`} alt={comment.file_name} className="comment-photo-image"/>
                 <div>
@@ -22,7 +43,7 @@ function Comment({comment, photoIndex}) {
                         {formatDateTime(comment.date_time)}
                     </Typography>
                     {/* The actual comment text */}
-                    <Typography variant="body1" className="comment">{comment.comment}</Typography>
+                    <Typography variant="body1" className="comment">{renderComment(comment.comment)}</Typography>
                 </div>
             </Paper>
         </Link>

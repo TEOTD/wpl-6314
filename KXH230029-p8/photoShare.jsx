@@ -14,8 +14,9 @@ import {
     FirstLoadContext,
     LoggedInUserContext,
     LoginContext,
+    PhotoIndexContext,
     ReloadContext,
-    PhotoIndexContext
+    UserContext
 } from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
 
@@ -51,6 +52,8 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     const [reload, setReload] = useState(false);
     // State for tracking the photo index
     const [photoIndex, setPhotoIndex] = useState(-1);
+    const [users, setUsers] = useState(null);
+
     // Memoized context value for reload state
     const reloadContextValue = useMemo(() => [reload, setReload], [reload]);
     // Memoized context value for advanced features
@@ -58,6 +61,7 @@ function PhotoShare({isLoggedIn, firstLoad}) {
     // Setting Photo Index content
     const photoIndexContextValue = useMemo(() => [photoIndex, setPhotoIndex], [photoIndex]);
     // Getting the current pathname from the location
+    const usersContextValue = useMemo(() => [users, setUsers], [users]);
     const {pathname} = useLocation();
     const navigate = useNavigate();
 
@@ -141,22 +145,24 @@ function PhotoShare({isLoggedIn, firstLoad}) {
             <Grid container spacing={2}>
                 <AdvancedContext.Provider value={advancedContextValue}>
                     <ReloadContext.Provider value={reloadContextValue}>
-                        <PhotoIndexContext.Provider value={photoIndexContextValue}>
-                            <Grid item xs={12}>
-                                <TopBar/>
-                            </Grid>
-                            <div className="main-top-bar-buffer"/>
-                            <Grid item sm={3}>
-                                <Paper className="main-grid-item">
-                                    {renderUserList()}
-                                </Paper>
-                            </Grid>
-                            <Grid item sm={9}>
-                                <Paper className="main-grid-item">
-                                    {renderMainContent()}
-                                </Paper>
-                            </Grid>
-                        </PhotoIndexContext.Provider>
+                        <UserContext.Provider value={usersContextValue}>
+                            <PhotoIndexContext.Provider value={photoIndexContextValue}>
+                                <Grid item xs={12}>
+                                    <TopBar/>
+                                </Grid>
+                                <div className="main-top-bar-buffer"/>
+                                <Grid item sm={3}>
+                                    <Paper className="main-grid-item">
+                                        {renderUserList()}
+                                    </Paper>
+                                </Grid>
+                                <Grid item sm={9}>
+                                    <Paper className="main-grid-item">
+                                        {renderMainContent()}
+                                    </Paper>
+                                </Grid>
+                            </PhotoIndexContext.Provider>
+                        </UserContext.Provider>
                     </ReloadContext.Provider>
                 </AdvancedContext.Provider>
             </Grid>

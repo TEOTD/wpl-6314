@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {Button, CircularProgress, Paper, Typography} from "@mui/material";
+import {Box, Button, CircularProgress, Paper, Typography} from "@mui/material";
 import "./styles.css";
 import axios from "axios";
 import {AdvancedContext, ReloadContext} from "../context/appContext";
@@ -13,6 +13,7 @@ function UserDetail({userId}) {
     const [latestPhoto, setLatestPhoto] = useState(null);
     // State to hold the most commented photo of the user
     const [mostCommentedPhoto, setMostCommentedPhoto] = useState(null);
+    const [mentions, setMentions] = useState(null);
     // State to manage the loading spinner visibility
     const [loading, setLoading] = useState(true);
 
@@ -41,6 +42,7 @@ function UserDetail({userId}) {
                     fetchData(`/user/${userId}`, setUser),
                     fetchData(`/latestPhotoOfUser/${userId}`, setLatestPhoto),
                     fetchData(`/mostCommentedPhotoOfUser/${userId}`, setMostCommentedPhoto),
+                    fetchData(`/photosWithMentions/${userId}`, setMentions)
                 ]);
                 setLoading(false);
             })();
@@ -70,6 +72,27 @@ function UserDetail({userId}) {
             );
         }
 
+        const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
+        const renderComment = (text) => {
+            const parts = [];
+            let lastIndex = 0;
+            text.replace(mentionRegex, (match, name, commentUserId, index) => {
+                if (index > lastIndex) {
+                    parts.push(text.substring(lastIndex, index));
+                }
+                parts.push(
+                    <Link key={commentUserId} to={`/users/${commentUserId}`} className="comment-link">
+                        @{name}
+                    </Link>
+                );
+                lastIndex = index + match.length;
+            });
+            if (lastIndex < text.length) {
+                parts.push(text.substring(lastIndex));
+            }
+            return parts;
+        };
+
         return (
             <Link
                 to={`/photos/${photo.user_id}/${photo.photo_index}`}
@@ -77,7 +100,7 @@ function UserDetail({userId}) {
             >
                 <Paper
                     sx={{backgroundColor: "var(--secondary-hover-color)", margin: "10px"}}
-                    className="comment-container flex-comment-container engagement-container"
+                    className="comment-container-details flex-comment-container engagement-container"
                 >
                     {/* Display the photo */}
                     <img
@@ -95,7 +118,21 @@ function UserDetail({userId}) {
                         >
                             {formatDateTime(photo.date_time)}
                         </Typography>
-
+                        {/* Display the comment information if available */}
+                        {photo.comment && (
+                            <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                <Typography variant="body1"
+                                            className="comment">{renderComment(photo.comment.comment)}
+                                </Typography>
+                                {/* Displays the user's name and the date of the comment */}
+                                <Typography variant="caption">
+                                    <Link to={`/users/${photo.comment.user._id}`} className="comment-link">
+                                        {photo.comment.user.first_name} {photo.comment.user.last_name}
+                                    </Link>
+                                    <span className="photo-date">{' - '}{formatDateTime(photo.comment.date_time)}</span>
+                                </Typography>
+                            </Box>
+                        )}
                         {/* Display the comment count if available */}
                         {photo.comment_count && (
                             <Typography
@@ -110,6 +147,24 @@ function UserDetail({userId}) {
                 </Paper>
             </Link>
         );
+    };
+
+    const renderMentions = () => {
+        const mentionsList = mentions?.mentions;
+
+        if (!Array.isArray(mentionsList) || mentionsList.length === 0) {
+            return (
+                <Typography variant="h6" className="no-comments user-detail-container" sx={{margin: "10px"}}>
+                    No mentions yet
+                </Typography>
+            );
+        }
+
+        return mentionsList.map((mention) => (
+            <div key={mention.user_id}>
+                {renderPhotoCard(mention, "No mentions yet")}
+            </div>
+        ));
     };
 
     return (
@@ -153,6 +208,8 @@ function UserDetail({userId}) {
                 {renderPhotoCard(latestPhoto, "No Photos Yet")}
                 {/* Display the most commented photo */}
                 {renderPhotoCard(mostCommentedPhoto, "No Comments Yet")}
+                <Typography variant="h4" className="user-name">@Mentions</Typography>
+                {renderMentions()}
             </div>
         </>
     );
