@@ -200,12 +200,20 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
 app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const comment = request.body.comment;
+    const mentioned_users = request.body.mentioned_users;
     try {
+        const transformedMentionedUsers = mentioned_users.map(user => ({
+            id: new Types.ObjectId(user.id),
+            display: user.display
+        }));
+
         const newComment = {
             comment: comment,
             user_id: request.session.user._id,
             date_time: new Date(),
+            mentioned_users: transformedMentionedUsers
         };
+
         const result = await Photo.findByIdAndUpdate(
             photo_id,
             {$push: {comments: newComment}},
@@ -763,7 +771,7 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
 //     const id = request.params.id;
 //     if (!Types.ObjectId.isValid(id)) {
 //         console.log(`Invalid UserId format: ${id}`);
-//         return response.status(400).send({error: `Invalid UserId: ${id}`});
+//         return response.status(400).send(`Invalid UserId: ${id}`);
 //     }
 //
 //     const objectId = new Types.ObjectId(id);
@@ -776,7 +784,7 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
 //             console.log(`User with _id: ${id} not found.`);
 //             await mongoSession.abortTransaction();
 //             await mongoSession.endSession();
-//             return response.status(404).send({error: `User with _id: ${id} not found.`});
+//             return response.status(404).send(`User with _id: ${id} not found.`);
 //         }
 //
 //         // Step 1: Remove user's comments from photos
@@ -814,12 +822,12 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
 //             }
 //         }
 //
-//         return response.status(200).send({message: "User account deleted successfully. You have been logged out."});
+//         return response.status(200).send("User account deleted successfully. You have been logged out.");
 //     } catch (error) {
 //         await mongoSession.abortTransaction();
 //         await mongoSession.endSession();
 //         console.log("Error in DELETE /user/:id with transaction:", error);
-//         return response.status(500).send({error: `An error occurred while deleting the account. ${error.message}`});
+//         return response.status(500).send(`An error occurred while deleting the account. ${error.message}`);
 //     }
 // });
 
@@ -827,7 +835,7 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
     const id = request.params.id;
     if (!Types.ObjectId.isValid(id)) {
         console.log(`Invalid UserId format: ${id}`);
-        return response.status(400).send({error: `Invalid UserId: ${id}`});
+        return response.status(400).send(`Invalid UserId: ${id}`);
     }
 
     const objectId = new Types.ObjectId(id);
@@ -837,7 +845,7 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
         const user = await User.findById(objectId);
         if (!user) {
             console.log(`User with _id: ${id} not found.`);
-            return response.status(404).send({error: `User with _id: ${id} not found.`});
+            return response.status(404).send(`User with _id: ${id} not found.`);
         }
 
         // Step 2: Remove user's comments from photos
@@ -848,6 +856,12 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
         );
         console.log(`Removed user comments from ${commentsDeleteResult.modifiedCount} photos.`);
 
+        const mentionedUsersDeleteResult = await Photo.updateMany(
+            {"comments.mentioned_users.id": objectId},
+            {$pull: {comments: {"mentioned_users.id": objectId}}}
+        );
+        console.log(`Removed ${mentionedUsersDeleteResult.modifiedCount} comments mentioning the user.`);
+        
         // Step 3: Find user's photos before deletion (needed for file deletion)
         const userPhotos = await Photo.find({user_id: objectId});
 
@@ -871,9 +885,159 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
             }
         }
 
-        return response.status(200).send({message: "User account deleted successfully. You have been logged out."});
+        return response.status(200).send("User account deleted successfully. You have been logged out.");
     } catch (error) {
         console.log("Error in DELETE /user/:id:", error);
-        return response.status(500).send({error: `An error occurred while deleting the account. ${error.message}`});
+        return response.status(500).send(`An error occurred while deleting the account. ${error.message}`);
     }
 });
+
+app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response) => {
+    const userId = request.params.userId;
+
+    // Ensure that the userId is valid
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+        return response.status(400).send("Invalid or missing userId.");
+    }
+
+    try {
+        // Step 1: Use aggregation to group photos by user_id and sort by photo_id
+        const photosGrouped = await Photo.aggregate([
+                {
+                    $unwind: {
+                        path: "$comments",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "comments.user_id",
+                        foreignField: "_id",
+                        as: "user_info"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$user_info",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $addFields: {
+                        "comments.user": {
+                            $cond: {
+                                if: {$ne: [{$type: "$user_info"}, "missing"]},
+                                then: {
+                                    _id: "$user_info._id",
+                                    first_name: "$user_info.first_name",
+                                    last_name: "$user_info.last_name"
+                                },
+                                else: "$$REMOVE"
+                            }
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        file_name: {$first: "$file_name"},
+                        date_time: {$first: "$date_time"},
+                        user_id: {$first: "$user_id"},
+                        comments: {$push: "$comments"},
+                    }
+                },
+                {
+                    $addFields: {
+                        comments: {
+                            $map: {
+                                input: "$comments",
+                                as: "comment",
+                                in: {
+                                    _id: "$$comment._id",
+                                    date_time: "$$comment.date_time",
+                                    user: "$$comment.user",
+                                    comment: "$$comment.comment",
+                                    photo_id: "$$comment.photo_id",
+                                    mentioned_users: "$$comment.mentioned_users",
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        comments: {
+                            $filter: {
+                                input: "$comments",
+                                as: "comment",
+                                cond: {$ne: ["$$comment", {}]}
+                            }
+                        }
+                    }
+                },
+                {
+                    $sort: {_id: 1}
+                },
+                {
+                    $group: {
+                        _id: "$user_id",
+                        photos: {
+                            $push: {
+                                _id: "$_id",
+                                file_name: "$file_name",
+                                comments: "$comments",
+                                user_id: "$user_id",
+                                date_time: "$date_time"
+                            }
+                        }
+                    }
+                },
+                {
+                    $sort: {_id: 1}
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        user_id: "$_id",
+                        photos: 1
+                    }
+                }
+            ]
+        );
+
+        if (!photosGrouped || photosGrouped.length === 0) {
+            return response.status(404).send("No photos found for the specified user.");
+        }
+
+        // Step 2: Filter photos for mentions of the specified user
+        const mentions = [];
+
+        photosGrouped.forEach(group => {
+            group.photos.forEach((photo, index) => {
+                // Check if the user is mentioned in the comments
+                photo.comments.forEach(comment => {
+                    const hasMention = comment.mentioned_users && comment.mentioned_users.some(user => user.id.toString() === userId);
+
+                    if (hasMention) {
+                        mentions.push({
+                            photo_index: index,
+                            file_name: photo.file_name,
+                            user_id: photo.user_id,
+                            comment: comment,
+                            mentioned_user: userId,
+                            date_time: photo.date_time,
+                        });
+                    }
+                });
+            });
+        });
+
+        return response.send({mentions});
+
+    } catch (err) {
+        console.error("Error fetching photos with mentions:", err);
+        return response.status(500).send("An error occurred while fetching photos with mentions.");
+    }
+});
+

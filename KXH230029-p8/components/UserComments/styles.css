@@ -15,3 +15,8 @@
 .photo-date {
     margin-bottom: 5px;
 }
+
+.comment-container-listed {
+    margin: 5px 0;
+    padding: 10px;
+}

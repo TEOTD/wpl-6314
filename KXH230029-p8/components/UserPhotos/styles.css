@@ -29,6 +29,7 @@
 .comment-input-box {
     overflow: hidden !important;
     justify-content: center !important;
+    width: 100%;
 }
 
 #standard-multiline-flexible {
@@ -120,4 +121,9 @@
     background: var(--secondary-hover-color) !important;
     color: var(--text-color-hover) !important;
     z-index: 10;
+}
+
+.comment-container-details {
+    margin: 5px 0;
+    padding: 10px;
 }
