@@ -12,6 +12,24 @@
     border-radius: 8px;
 }
 
+.favourite-box{
+    background-color: var(--text-color) !important;
+    margin-bottom: 10px;
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 8px !important;
+}
+
+.favourite-button{
+    height: 30px;
+    color: var(--text-color) !important;
+    background-color: var(--accent-hover-color) !important;
+}
+
+.favourite-button:hover{
+    background-color: var(--highlight-color) !important;
+}
+
 .photo-date {
     color: var(--text-color-hover);
 }

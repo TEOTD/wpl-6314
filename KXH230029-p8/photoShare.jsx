@@ -9,6 +9,7 @@ import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import UserComments from "./components/UserComments";
+import UserFavurites from "./components/Favourites";
 import {
     AdvancedContext,
     FirstLoadContext,
@@ -120,6 +121,12 @@ function PhotoShare({isLoggedIn, firstLoad}) {
                             path="/photos/:userId/:photoIndex"
                             element={(
                                 <UserPhotosRoute/>
+                            )}
+                        />
+                        <Route
+                            path="/favorites"
+                            element={(
+                                <UserFavurites/>
                             )}
                         />
                         <Route

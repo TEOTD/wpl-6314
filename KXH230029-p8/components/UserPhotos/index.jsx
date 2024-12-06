@@ -14,6 +14,7 @@ import {
     UserContext
 } from "../context/appContext";
 import formatDateTime from "../../lib/utils";
+import StarIcon from '@mui/icons-material/Star';
 
 function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
     return (
@@ -207,7 +208,7 @@ function CommentInput({imageId, onReload}) {
     );
 }
 
-function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onReload}) {
+function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onReload, userFavourites}) {
     const [loggedInUser] = useContext(LoggedInUserContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -223,6 +224,20 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             console.error("Failed to delete photo:", error);
         }
     };
+
+    const addFavourite = async () => {
+        try {
+            await axios.post(`/favouriteOfUser/${photo._id}`, {});
+            onReload();
+        } catch (error) {
+            console.error("Failed to add comment:", error);
+        }
+    };
+
+    const checkFavourite = () => {
+        return userFavourites.includes(photo._id);
+    }
+
 
     // Styles for the navigation buttons
     const navButtonStyles = (side) => ({
@@ -282,6 +297,12 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
                     </Box>
                 )}
             </Box>
+            {/* Favourite Section */}
+            <Paper className="favourite-box">
+                <Button className="favourite-button" disabled={checkFavourite()} onClick={addFavourite}>
+                <StarIcon/> {checkFavourite()? "Favourited": "Add To Favourites"}
+                </Button>
+            </Paper>
             {/* Comments section */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
             <CommentInput imageId={photo._id} onReload={onReload}/>
@@ -313,6 +334,8 @@ function UserPhotos({userId}) {
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
     const [photoIndex, setPhotoIndex] = useContext(PhotoIndexContext);
+    const [userFavourites, setUserFavourites] = useState([]);
+    const [loggedInUser, ] = useContext(LoggedInUserContext);
 
     // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {
@@ -323,6 +346,17 @@ function UserPhotos({userId}) {
                 .then((result) => setPhotos(result.data))
                 .catch((error) => console.error("Failed to fetch user photos:", error))
                 .finally(() => setLoading(false));
+        })();
+    }, [userId, reload]);
+
+    // Fetch user favourites photos field
+    useEffect(() => {
+        if (!userId) return;
+        setLoading(true);
+        (async () => {
+            await axios.get(`/user/${loggedInUser._id}`)
+                .then((result) => {setUserFavourites(result.data.favourite_img_list);})
+                .catch((error) => console.error("Failed to fetch user photos:", error));
         })();
     }, [userId, reload]);
 
@@ -347,6 +381,7 @@ function UserPhotos({userId}) {
             onStep={handleStep}
             enableAdvancedFeatures={enableAdvancedFeatures}
             onReload={() => setReload(!reload)}
+            userFavourites={userFavourites}
         />
     ) : (
         photos.map((photo, idx) => (
@@ -355,6 +390,7 @@ function UserPhotos({userId}) {
                 photo={photo}
                 index={idx}
                 onReload={() => setReload(!reload)}
+                userFavourites={userFavourites}
             />
         ))
     );

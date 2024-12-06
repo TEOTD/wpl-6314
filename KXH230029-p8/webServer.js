@@ -230,6 +230,57 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request,
     }
 });
 
+/**
+ * URL /favouriteOfUser/:photo_id - Adds photo to users favourite list.
+ */
+app.post("/favouriteOfUser/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const user_id = request.session.user._id;
+    
+    try {
+        const result = await User.findByIdAndUpdate(
+            user_id,
+            {$addToSet: {favourite_img_list: photo_id}},
+            {new: true}
+        );
+        console.log(result);
+
+        if (!result) {
+            return response.status(404).json('User not found');
+        }
+        return response.status(200).json({message: 'Photo added successfully'});
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json('Something went wrong...');
+    }
+});
+
+
+/**
+ * URL /removeFavorite/:photo_id - Remove photo from users favourite list.
+ */
+app.post("/removeFavorite/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const user_id = request.session.user._id;
+    
+    try {
+        const result = await User.findByIdAndUpdate(
+            user_id,
+            {$pull: {favourite_img_list: photo_id}},
+            {new: true}
+        );
+        console.log(result);
+
+        if (!result) {
+            return response.status(404).json('User not found');
+        }
+        return response.status(200).json({message: 'Photo added successfully'});
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json('Something went wrong...');
+    }
+});
+
 
 /**
  * URL /photos/new - Accepts an image file in the body. Adds photos.
@@ -510,6 +561,26 @@ app.get("/commentsOfUser/:id", isAuthenticated, async function (request, respons
 app.get("/photos/list", isAuthenticated, async function (request, response) {
     try {
         const photos = await Photo.find({}, {_id: 1, user_id: 1}).sort({_id: 1});
+        if (!photos) {
+            console.log("photos not found.");
+            return response.status(404).send("photos not found");
+        }
+        return response.status(200).send(photos);
+    } catch (error) {
+        console.log("Error in /photos/list:", error);
+        return response.status(500).send({error: `An error occurred while fetching photos. Error: ${error.message}`});
+    }
+});
+
+/**
+ * URL /photos/list - Returns the Photos of given id.
+ */
+app.get("/photos/", isAuthenticated, async function (request, response) {
+    try {
+        const ids = request.query.ids; console.log(ids);
+        const photos = await Photo.find({
+            '_id': { $in: ids }
+          });;
         if (!photos) {
             console.log("photos not found.");
             return response.status(404).send("photos not found");
