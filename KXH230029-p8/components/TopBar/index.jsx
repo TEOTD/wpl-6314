@@ -141,6 +141,7 @@ function TopBar() {
         if (pathname.startsWith("/users/")) return `${user.first_name} ${user.last_name}`;
         if (pathname.startsWith("/photos/")) return `Photos of ${user.first_name} ${user.last_name}`;
         if (pathname.startsWith("/comments/")) return `Comments of ${user.first_name} ${user.last_name}`;
+        if (pathname.startsWith("/activities")) return `Website Activities`;
         return "Home Page";
     }, [user, pathname]);
 
@@ -171,6 +172,9 @@ function TopBar() {
             });
     }, [setIsLoggedIn, setLoggedInUser, navigate]);
 
+    const handleActivities = useCallback(async () => {
+        navigate("/activities");
+    }, []);
 
     // Function to handle delete user and send it to the server
     const handleDeleteUser = async () => {
@@ -200,6 +204,10 @@ function TopBar() {
                             <Typography variant="caption" className="version">
                                 Version: {version}
                             </Typography>
+                            <Box className="separator"/>
+                            <Button color="inherit" onClick={handleActivities} className="add-photo-button">
+                                Activities
+                            </Button>
                             <Box className="separator"/>
                             <Button color="inherit" onClick={() => handleDialogToggle("image", true)}
                                     className="add-photo-button">

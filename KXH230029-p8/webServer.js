@@ -66,6 +66,7 @@ function isAuthenticated(request, response, next) {
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const {Types} = require("mongoose");
+const Activity = require("./schema/activity.js");
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
@@ -195,7 +196,7 @@ app.get("/user/:id", isAuthenticated, async function (request, response) {
 });
 
 /**
- * URL /commentsOfPhoto/:photo_id - Adds user comments for a photo.
+ * URL /commentsOfPhoto/:photo_id - Adds user comments for a photo and logs the activity.
  */
 app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
@@ -223,9 +224,25 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request,
         if (!result) {
             return response.status(404).json('Photo not found');
         }
-        return response.status(200).json({message: 'Comment added successfully', comment: comment});
+
+        // Log the activity
+        const activity = new Activity({
+            user_id: request.session.user._id,
+            activity_type: "comment-added",
+            timestamp: new Date(),
+            photo_id: photo_id,
+            comment_id: result.comments[result.comments.length - 1]._id,
+            comment_owner_id: result.comments[result.comments.length - 1].user_id
+        });
+
+        await activity.save();
+
+        return response.status(200).json({
+            message: 'Comment added successfully',
+            comment: comment
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Error adding comment:", error);
         return response.status(400).json('Something went wrong...');
     }
 });
@@ -346,10 +363,10 @@ app.post("/removeFavorite/:photo_id", isAuthenticated, async function (request, 
 
 
 /**
- * URL /photos/new - Accepts an image file in the body. Adds photos.
+ * URL /photos/new - Accepts an image file in the body. Adds photos and logs activity.
  */
 app.post('/photos/new', isAuthenticated, async function (request, response) {
-    processFormBody(request, response, (err) => {
+    processFormBody(request, response, async (err) => {
         if (err || !request.file) {
             console.error('File upload error:', err);
             return response.status(400).send('File upload failed');
@@ -366,23 +383,40 @@ app.post('/photos/new', isAuthenticated, async function (request, response) {
         const filePath = './images/' + fileName;
 
         // Write the file to the "images" directory
-        fs.writeFile(filePath, request.file.buffer, (err1) => {
+        fs.writeFile(filePath, request.file.buffer, async (err1) => {
             if (err1) {
                 console.error('Error saving file:', err1);
                 return response.status(500).send('File save failed');
             }
 
             try {
+                // Create the photo entry in the database
                 const image = {
                     file_name: fileName,
                     user_id: request.session.user._id,
                     date_time: timestamp,
                     comments: [],
                 };
-                Photo.create(image);
-                return response.status(200).json({message: 'File uploaded successfully', fileName});
+
+                const photo = await Photo.create(image);
+
+                // Log the photo-upload activity
+                const activity = new Activity({
+                    user_id: request.session.user._id,
+                    activity_type: "photo-upload",
+                    timestamp: new Date(),
+                    photo_id: photo._id,
+                });
+
+                await activity.save();
+
+                return response.status(200).json({
+                    message: 'File uploaded successfully',
+                    fileName: fileName,
+                });
             } catch (error1) {
-                return response.status(400).json('Could not save image to the table.');
+                console.error('Error saving photo or logging activity:', error1);
+                return response.status(400).json('Could not save image or log activity.');
             }
         });
         return response;
@@ -673,7 +707,7 @@ async function regenerateSession(request, response, user, next) {
 }
 
 /**
- * URL /admin/login - Returns user session by logging them in.
+ * URL /admin/login - Returns user session by logging them in and logs login activity.
  */
 app.post('/admin/login', async function (request, response, next) {
     const {login_name, password} = request.body;
@@ -686,25 +720,57 @@ app.post('/admin/login', async function (request, response, next) {
         if (!user || !doesPasswordMatch(user.password_digest, user.salt, password)) {
             return response.status(400).send('Invalid login_name or password');
         }
+        try {
+            const activity = new Activity({
+                user_id: user._id,
+                activity_type: "user-login",
+                timestamp: new Date(),
+            });
+
+            await activity.save();
+        } catch (error) {
+            console.error('Error logging login activity:', error);
+        }
         return await regenerateSession(request, response, user, next);
     } catch (error) {
+        console.error('Error during login:', error);
         return response.status(500).send('Internal server error');
     }
 });
 
+
 /**
- * URL /admin/logout - Destroys user session and logs them out.
+ * URL /admin/logout - Destroys user session, logs them out, and logs logout activity.
  */
 app.post('/admin/logout', async function (request, response) {
     if (request.session.user) {
-        return request.session.destroy(() => response.sendStatus(200));
+        const userId = request.session.user._id;
+        // Destroy the session
+        return request.session.destroy(async (err) => {
+            if (err) {
+                console.error("Error destroying session:", err);
+                return response.status(500).send("Failed to log out");
+            }
+            try {
+                const activity = new Activity({
+                    user_id: userId,
+                    activity_type: "user-logout",
+                    timestamp: new Date(),
+                });
+                await activity.save();
+            } catch (error) {
+                console.error("Error logging logout activity:", error);
+            }
+            return response.sendStatus(200);
+        });
     } else {
-        return response.status(400).send('No user is logged in');
+        return response.status(400).send("No user is logged in");
     }
 });
 
+
 /**
- * URL /user - Registers the user and logs them in.
+ * URL /user - Registers the user, logs them in, and logs registration activity.
  */
 app.post('/user', async function (request, response, next) {
     try {
@@ -723,6 +789,18 @@ app.post('/user', async function (request, response, next) {
 
         if (!user) {
             return response.status(400).send('Failed to create user');
+        }
+
+        try {
+            const activity = new Activity({
+                user_id: user._id,
+                activity_type: "user-registered",
+                timestamp: new Date(),
+            });
+
+            await activity.save();
+        } catch (error) {
+            console.error('Error logging registration activity:', error);
         }
 
         return await regenerateSession(request, response, user, next);
@@ -853,7 +931,11 @@ app.delete("/photosOfUser/:id", isAuthenticated, async (request, response) => {
             return response.status(404).send("Photo not found in database.");
         }
 
-        // Construct the file path and delete the file from the directory
+        // Step 3: Remove associated activity entries
+        const activityDeleteResult = await Activity.deleteMany({activity_type: "photo-upload", photo_id: id});
+        console.log(`Deleted ${activityDeleteResult.deletedCount} activity records for photo ID: ${id}.`);
+
+        // Step 4: Construct the file path and delete the file from the directory
         const filePath = path.join(__dirname, "images", photo.file_name);
         return fs.unlink(filePath, (err) => {
             if (err) {
@@ -861,7 +943,7 @@ app.delete("/photosOfUser/:id", isAuthenticated, async (request, response) => {
                 return response.status(500).send("Photo record deleted, but file removal failed.");
             }
 
-            return response.status(200).send("Photo and file successfully deleted.");
+            return response.status(200).send("Photo, file, and related activities successfully deleted.");
         });
     } catch (err) {
         console.error("Error deleting photo:", err);
@@ -880,7 +962,7 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
     }
 
     try {
-        // Find the photo containing the comment and remove the comment
+        // Step 1: Find the photo containing the comment and remove the comment
         const photo = await Photo.findOneAndUpdate(
             {"comments._id": id},
             {$pull: {comments: {_id: id}}},
@@ -890,6 +972,14 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
         if (!photo) {
             return response.status(404).send("Comment not found.");
         }
+
+        // Step 2: Remove associated activity entries
+        const activityDeleteResult = await Activity.deleteMany({
+            activity_type: "comment-added",
+            comment_id: id
+        });
+
+        console.log(`Deleted ${activityDeleteResult.deletedCount} activity records for comment ID: ${id}.`);
 
         return response.status(200).send("Comment deleted successfully.");
     } catch (err) {
@@ -996,7 +1086,7 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
             {$pull: {comments: {"mentioned_users.id": objectId}}}
         );
         console.log(`Removed ${mentionedUsersDeleteResult.modifiedCount} comments mentioning the user.`);
-        
+
         // Step 3: Find user's photos before deletion (needed for file deletion)
         const userPhotos = await Photo.find({user_id: objectId});
 
@@ -1019,6 +1109,10 @@ app.delete("/user/:id", isAuthenticated, async (request, response) => {
                 // Log the error but do not stop the process
             }
         }
+
+        // Step 7: Remove activity entries for the user
+        const activitiesDeleteResult = await Activity.deleteMany({user_id: objectId});
+        console.log(`Deleted ${activitiesDeleteResult.deletedCount} activity records for user with _id: ${id}.`);
 
         return response.status(200).send("User account deleted successfully. You have been logged out.");
     } catch (error) {
@@ -1175,4 +1269,78 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
         return response.status(500).send("An error occurred while fetching photos with mentions.");
     }
 });
+
+/**
+ * URL: /activities - Retrieve the 5 most recent activities in reverse chronological order.
+ */
+app.get("/activities", isAuthenticated, async (request, response) => {
+    try {
+        // Fetch the 5 most recent activities, sorted by timestamp in descending order
+        const activities = await Activity.find({})
+            .sort({timestamp: -1})
+            .limit(5)
+            .exec();
+
+        // Map activities to include specific details based on activity type
+        const formattedActivities = await Promise.all(
+            activities.map(async (activity) => {
+                const baseActivity = {
+                    _id: activity._id,
+                    user_id: activity.user_id,
+                    timestamp: activity.timestamp,
+                    type: activity.activity_type,
+                    photo_id: activity.photo_id,
+                    comment_owner_id: activity.comment_owner_id,
+                };
+
+                // Fetch user details
+                const user = await User.findById(new Types.ObjectId(activity.user_id));
+
+                if (!user) {
+                    console.warn(`User not found for user_id: ${activity.user_id}`);
+                    return baseActivity;
+                }
+
+                // Fetch additional details based on activity type
+                if (activity.activity_type === "photo-upload") {
+                    const photo = await Photo.findById(new Types.ObjectId(activity.photo_id));
+                    if (photo) {
+                        baseActivity.file_name = photo.file_name;
+                        baseActivity.first_name = user.first_name;
+                        baseActivity.last_name = user.last_name;
+                    }
+                } else if (activity.activity_type === "comment-added") {
+                    const photo = await Photo.findById(new Types.ObjectId(activity.photo_id));
+                    if (photo) {
+                        const comment = photo.comments.id(new Types.ObjectId(activity.comment_id));
+                        if (comment) {
+                            const commentOwner = await User.findById(new Types.ObjectId(photo.user_id));
+                            baseActivity.file_name = photo.file_name;
+                            baseActivity.first_name = user.first_name;
+                            baseActivity.last_name = user.last_name;
+                            baseActivity.comment = comment.comment;
+                            baseActivity.photo_owner_first_name = commentOwner?.first_name || "Unknown";
+                            baseActivity.photo_owner_last_name = commentOwner?.last_name || "Unknown";
+                        }
+                    }
+                } else if (
+                    activity.activity_type === "user-registered" ||
+                    activity.activity_type === "user-login" ||
+                    activity.activity_type === "user-logout"
+                ) {
+                    baseActivity.first_name = user.first_name;
+                    baseActivity.last_name = user.last_name;
+                }
+
+                return baseActivity;
+            })
+        );
+
+        return response.status(200).json(formattedActivities);
+    } catch (err) {
+        console.error("Error fetching activities:", err);
+        return response.status(500).send("An error occurred while retrieving activities.");
+    }
+});
+
 
