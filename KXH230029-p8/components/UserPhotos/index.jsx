@@ -6,6 +6,9 @@ import {Delete, Edit} from "@mui/icons-material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import axios from "axios";
 import {Mention, MentionsInput} from "react-mentions";
+import StarIcon from '@mui/icons-material/Star';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import {
     AdvancedContext,
     LoggedInUserContext,
@@ -14,6 +17,7 @@ import {
     UserContext
 } from "../context/appContext";
 import formatDateTime from "../../lib/utils";
+
 
 function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
     return (
@@ -207,7 +211,7 @@ function CommentInput({imageId, onReload}) {
     );
 }
 
-function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onReload}) {
+function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onReload, userFavourites, userLikes}) {
     const [loggedInUser] = useContext(LoggedInUserContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -223,6 +227,42 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             console.error("Failed to delete photo:", error);
         }
     };
+
+    const addFavourite = async () => {
+        try {
+            await axios.post(`/favouriteOfUser/${photo._id}`, {});
+            onReload();
+        } catch (error) {
+            console.error("Failed to add comment:", error);
+        }
+    };
+
+    const addLike = async () => {
+        try {
+            await axios.post(`/likePhoto/${photo._id}`, {});
+            onReload();
+        } catch (error) {
+            console.error("Failed to add comment:", error);
+        }
+    };
+
+    const addDislike = async () => {
+        try {
+            await axios.post(`/unlikePhoto/${photo._id}`, {});
+            onReload();
+        } catch (error) {
+            console.error("Failed to add comment:", error);
+        }
+    };
+
+    const checkFavourite = () => {
+        return userFavourites.includes(photo._id);
+    };
+
+    const checkLikes = () => {
+        return userLikes.includes(photo._id);
+    };
+
 
     // Styles for the navigation buttons
     const navButtonStyles = (side) => ({
@@ -246,7 +286,6 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
     useEffect(() => {
         setButtonState({left: index <= 0, right: index >= totalPhotos - 1});
     }, [index, totalPhotos]);
-
     return (
         <div key={photo._id} className="photo-container">
             {/* Navigation buttons for advanced features */}
@@ -263,6 +302,14 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
                 </div>
             )}
             {/* Photo display */}
+            {
+                checkLikes() && 
+                (
+                    <Button className="like-display" disabled key="likebutton">
+                        Liked Photo
+                    </Button>
+                )
+            }
             <img src={`/images/${photo.file_name}`} alt={photo.file_name} className="photo-image"/>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
                 <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
@@ -282,6 +329,23 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
                     </Box>
                 )}
             </Box>
+            {/* Favourite Section */}
+            <Paper className="favourite-box">
+                <Button className="favourite-button" onClick={() => {
+                    if(checkLikes()){
+                        addDislike();
+                    } else{
+                        addLike();
+                    }
+                }} key="likebutton">
+                    {checkLikes()? <ThumbDownIcon sx={{padding:"5px"}}/>: <ThumbUpIcon sx={{padding:"5px"}}/>}
+                    {checkLikes()? "  Unlike": "  Like"}
+                <Typography sx={{marginLeft: "10px"}}>{photo.like_count}</Typography>
+                </Button>
+                <Button className="favourite-button" disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
+                <StarIcon/> {checkFavourite()? "Favourited": "Add To Favourites"}
+                </Button>
+            </Paper>
             {/* Comments section */}
             <Typography variant="h7" className="comments-heading">COMMENTS</Typography>
             <CommentInput imageId={photo._id} onReload={onReload}/>
@@ -313,6 +377,9 @@ function UserPhotos({userId}) {
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     const [reload, setReload] = useContext(ReloadContext);
     const [photoIndex, setPhotoIndex] = useContext(PhotoIndexContext);
+    const [userFavourites, setUserFavourites] = useState([]);
+    const [userLikes, setUserLikes] = useState([]);
+    const [loggedInUser,] = useContext(LoggedInUserContext);
 
     // Fetch photos of the user when the userId or reload state changes
     useEffect(() => {
@@ -323,6 +390,19 @@ function UserPhotos({userId}) {
                 .then((result) => setPhotos(result.data))
                 .catch((error) => console.error("Failed to fetch user photos:", error))
                 .finally(() => setLoading(false));
+        })();
+    }, [userId, reload]);
+
+    // Fetch user favourites photos field
+    useEffect(() => {
+        if (!userId) return;
+        setLoading(true);
+        (async () => {
+            await axios.get(`/user/${loggedInUser._id}`)
+                .then((result) => {setUserFavourites(result.data.favourite_img_list);
+                    setUserLikes(result.data.liked_img_list);
+                })
+                .catch((error) => console.error("Failed to fetch user photos:", error));
         })();
     }, [userId, reload]);
 
@@ -338,6 +418,16 @@ function UserPhotos({userId}) {
         return <Typography variant="h6" className="no-photos">No Photos Yet.</Typography>;
     }
 
+    photos.sort((a, b) => {
+        if (a.like_count < b.like_count) return 1;
+        if (a.like_count === b.like_count){
+            if(a.date_time > b.date_time){
+                return 1;
+            }
+        }
+        return -1;
+      });
+
     // Toggle Screens based on advanced features
     return enableAdvancedFeatures && photoIndex >= 0 ? (
         <Photo
@@ -347,6 +437,8 @@ function UserPhotos({userId}) {
             onStep={handleStep}
             enableAdvancedFeatures={enableAdvancedFeatures}
             onReload={() => setReload(!reload)}
+            userFavourites={userFavourites}
+            userLikes={userLikes}
         />
     ) : (
         photos.map((photo, idx) => (
@@ -355,6 +447,8 @@ function UserPhotos({userId}) {
                 photo={photo}
                 index={idx}
                 onReload={() => setReload(!reload)}
+                userFavourites={userFavourites}
+                userLikes={userLikes}
             />
         ))
     );
