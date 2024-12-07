@@ -243,9 +243,72 @@ app.post("/favouriteOfUser/:photo_id", isAuthenticated, async function (request,
             {$addToSet: {favourite_img_list: photo_id}},
             {new: true}
         );
-        console.log(result);
 
         if (!result) {
+            return response.status(404).json('User not found');
+        }
+        return response.status(200).json({message: 'Photo added successfully'});
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json('Something went wrong...');
+    }
+});
+
+
+/**
+ * URL /likePhoto/:photo_id - Adds photo to users like list. and increses the likes count
+ */
+app.post("/likePhoto/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const user_id = request.session.user._id;
+    
+    try {
+        const result = await User.findByIdAndUpdate(
+            user_id,
+            {$addToSet: {liked_img_list: photo_id}},
+            {new: true}
+        );
+        
+        const result1 = await Photo.findByIdAndUpdate(
+            photo_id,
+            {$inc: {like_count: 1}},
+            {new: true}
+        );
+
+
+        if (!result || !result1) {
+            return response.status(404).json('User not found');
+        }
+        return response.status(200).json({message: 'Photo added successfully'});
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json('Something went wrong...');
+    }
+});
+
+
+/**
+ * URL /unlikePhoto/:photo_id - Adds photo to users like list. and increses the likes count
+ */
+app.post("/unlikePhoto/:photo_id", isAuthenticated, async function (request, response) {
+    const photo_id = request.params.photo_id;
+    const user_id = request.session.user._id;
+    
+    try {
+        const result = await User.findByIdAndUpdate(
+            user_id,
+            {$pull: {liked_img_list: photo_id}},
+            {new: true}
+        );
+        
+        const result1 = await Photo.findByIdAndUpdate(
+            photo_id,
+            {$inc: {like_count: -1}},
+            {new: true}
+        );
+
+
+        if (!result || !result1) {
             return response.status(404).json('User not found');
         }
         return response.status(200).json({message: 'Photo added successfully'});
@@ -384,6 +447,7 @@ app.get("/photosOfUser/:id", isAuthenticated, async function (request, response)
                 file_name: {$first: "$file_name"},
                 date_time: {$first: "$date_time"},
                 user_id: {$first: "$user_id"},
+                like_count: {$first: "$like_count"},
                 comments: {$push: "$comments"},
             }
         },
@@ -579,8 +643,8 @@ app.get("/photos/", isAuthenticated, async function (request, response) {
     try {
         const ids = request.query.ids; console.log(ids);
         const photos = await Photo.find({
-            '_id': { $in: ids }
-          });;
+            _id: { $in: ids }
+          });
         if (!photos) {
             console.log("photos not found.");
             return response.status(404).send("photos not found");

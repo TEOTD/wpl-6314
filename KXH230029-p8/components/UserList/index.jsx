@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography} from "@mui/material";
-import {Link} from "react-router-dom";
+import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography, Paper, Button} from "@mui/material";
+import {Link, useNavigate} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
 import {Message, PhotoLibrary} from "@mui/icons-material";
@@ -19,6 +19,7 @@ function UserList() {
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     // Context value to trigger a reload of data when needed
     const [reload] = useContext(ReloadContext);
+    const navigate = useNavigate();
 
     // Effect to fetch the list of users when the component mounts
     useEffect(() => {
@@ -119,39 +120,47 @@ function UserList() {
     const renderedUserList = useMemo(() => {
         if (!users) return null;
         return (
-            <List className="user-list">
-                {users.map((user) => (
-                    <div key={user._id + "user-name"} className="user-list-container">
-                        {/* Render each user as a list item with a link to the user's detail page */}
-                        <ListItem
-                            key={user._id}
-                            className="user-list-item"
-                            component={Link}
-                            to={`/users/${user._id}`}
-                        >
-                            <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
-                        </ListItem>
-                        {/* Render photo and message icons if advanced features are enabled */}
-                        {enableAdvancedFeatures && (
+            <>
+                <Paper className="user-list-item">
+                    <Button sx={{width: "100%", justifyContent: 'flex-start', paddingLeft: "15px"}} 
+                     onClick={() => {navigate("/favorites");}}>
+                        Favourites Page
+                    </Button>
+                </Paper>
+                <List className="user-list">
+                    {users.map((user) => (
+                        <div key={user._id + "user-name"} className="user-list-container">
+                            {/* Render each user as a list item with a link to the user's detail page */}
                             <ListItem
-                                key={user._id + "user-bubble"}
-                                className="user-bubble-item"
+                                key={user._id}
+                                className="user-list-item"
+                                component={Link}
+                                to={`/users/${user._id}`}
                             >
-                                <ListItemText
-                                    className="bubble-container"
-                                    primary={(
-                                        <>
-                                            {photoBubble(user._id)}
-                                            {' '}
-                                            {messageBubble(user._id)}
-                                        </>
-                                    )}
-                                />
+                                <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
                             </ListItem>
-                        )}
-                    </div>
-                ))}
-            </List>
+                            {/* Render photo and message icons if advanced features are enabled */}
+                            {enableAdvancedFeatures && (
+                                <ListItem
+                                    key={user._id + "user-bubble"}
+                                    className="user-bubble-item"
+                                >
+                                    <ListItemText
+                                        className="bubble-container"
+                                        primary={(
+                                            <>
+                                                {photoBubble(user._id)}
+                                                {' '}
+                                                {messageBubble(user._id)}
+                                            </>
+                                        )}
+                                    />
+                                </ListItem>
+                            )}
+                        </div>
+                    ))}
+                </List>
+            </>
         );
     }, [users, enableAdvancedFeatures, reload, numberOfPhotosOfUser]);
 

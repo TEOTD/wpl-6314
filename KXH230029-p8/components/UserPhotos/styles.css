@@ -26,6 +26,15 @@
     background-color: var(--accent-hover-color) !important;
 }
 
+.like-display{
+    background-color: var(--highlight-color) !important;
+    color: black !important;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-left-radius: 0 !important; 
+    border-bottom-right-radius: 0 !important;
+}
+
 .favourite-button:hover{
     background-color: var(--highlight-color) !important;
 }

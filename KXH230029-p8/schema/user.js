@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     description: String,
     occupation: String,
     favourite_img_list: [String],
+    liked_img_list: [String],
 });
 
 userSchema.index({login_name: 1}, {unique: true});
