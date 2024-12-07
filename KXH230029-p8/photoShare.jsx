@@ -20,6 +20,7 @@ import {
     UserContext
 } from "./components/context/appContext";
 import LoginRegister from "./components/LoginRegister";
+import Activities from "./components/Activities";
 
 // Route component for rendering UserDetail with a userId parameter
 function UserDetailRoute() {
@@ -136,6 +137,7 @@ function PhotoShare({isLoggedIn, firstLoad}) {
                             )}
                         />
                         <Route path="/users" element={<UserList/>}/>
+                        <Route path="/activities" element={<Activities/>}/>
                     </Routes>
                 ) :
                 (
