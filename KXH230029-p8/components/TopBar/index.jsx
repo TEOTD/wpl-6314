@@ -11,6 +11,7 @@ import {
     DialogTitle,
     FormControlLabel,
     FormGroup,
+    FormControl,
     Toolbar,
     Typography
 } from "@mui/material";
@@ -49,6 +50,27 @@ function TopBar() {
         show: false
     });
 
+    const [accessToAll, setAccessToAll] = useState(true);
+    const [users, setUsers] = useState();
+    const [checkedList, setCheckedList] = useState();
+
+
+    // Get users list to limit access control
+    useEffect(() => {
+        (async () => {
+            await axios.get('/user/list')
+                .then((result) => {
+                    let users1 = result.data;
+                    users1 = users1.filter(user => {return user._id !== loggedInUser._id;});
+                    setUsers(users1);
+                    setCheckedList(new Array(users1.length).fill(false));
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch users:", error);
+                });
+        })();
+    }, [loggedInUser]);
+
     // Effect to handle initial loading and enabling advanced features based on the URL path
     useEffect(() => {
         const routes = pathname.split("/");
@@ -58,7 +80,10 @@ function TopBar() {
     }, []);
 
     const handleDialogToggle = useCallback((type, open) => {
-        if (type === "image") setImageUploadShow(open);
+        if (type === "image") {
+            setImageUploadShow(open);
+            setAccessToAll(true);
+        }
         if (type === "delete") setDeleteUserShow(open);
     }, []);
 
@@ -86,6 +111,20 @@ function TopBar() {
         if (uploadInput?.files.length > 0) {
             const domForm = new FormData();
             domForm.append("uploadedphoto", uploadInput.files[0]);
+            let user_list = ['*'];
+            if(!accessToAll){
+                user_list = [];
+                users.map(
+                    (user, index) => {
+                        if(checkedList[index]){
+                            user_list.push(user._id);
+                        }
+                        return user;
+                    }
+                );
+                user_list.push(loggedInUser._id);
+            }
+            domForm.append("access_list", JSON.stringify(user_list));
             await axios.post("/photos/new", domForm)
                 .then(() => {
                     showAlert({
@@ -190,6 +229,14 @@ function TopBar() {
         handleDialogToggle("delete", false);
     };
 
+
+    const updateCheckedList = (index) => {
+        let newc = [...checkedList];
+        newc[index] = !newc[index];
+        setCheckedList(newc);
+    };
+
+
     // JSX structure of the top bar, including the photo upload dialog and alerts
     return (
         <AppBar position="static" className="top-bar" sx={{backgroundColor: "var(--primary-color)"}}>
@@ -235,6 +282,64 @@ function TopBar() {
                                         id="choose-photo-icon"
                                         className="dialog-button-input"
                                     />
+                                    <Button
+                                    sx={{
+                                        backgroundColor: accessToAll ? "#aa95ca": "#7fd860",
+                                        margin: "10px",
+                                        color: "white",
+                                    }}
+                                    onClick={() => {setAccessToAll(!accessToAll);}}
+                                    >
+                                    {
+                                    accessToAll ? "Limit Access": "Allow Access to All"
+                                    }
+                                    </Button>
+
+                                    { !accessToAll &&
+                                    (
+                                    <Box sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                    }}>
+                                        <Typography variant="body1"
+                                        sx={{
+                                            color: "white",
+                                            marginLeft: "10px",
+                                        }}
+                                        >
+                                            Select Users To Provide Access
+                                        </Typography>
+                                        <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
+                                        <FormGroup> {
+                                        users.map((user1, index) => {
+                                            return (
+                                                <FormControlLabel
+                                                    sx={{
+                                                        color: "white",
+                                                    }}
+                                                    control={
+                                                        
+                                                    (
+                                                        <Checkbox
+                                                        sx={{
+                                                            color: "white",
+                                                          }}
+                                                        onChange={() => {updateCheckedList(index);}}
+                                                        checked={checkedList[index]}
+                                                        name={user1.first_name}
+                                                        />
+                                                    )
+                                                    }
+                                                    key={user1._id}
+                                                    label={user1.first_name + " "+ user1.last_name}
+                                                />
+                                        );})
+                                        }
+                                        </FormGroup>
+                                        </FormControl>
+                                    </Box>
+                                    )}   
+                                    
                                 </DialogContent>
                                 <DialogActions>
                                     <Button className="dialog-button"
