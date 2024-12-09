@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography, Paper, Button} from "@mui/material";
+import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography, Paper, Button, Divider} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
@@ -18,7 +18,9 @@ function UserList() {
     // Context value to check if advanced features are enabled
     const [enableAdvancedFeatures] = useContext(AdvancedContext);
     // Context value to trigger a reload of data when needed
-    const [reload] = useContext(ReloadContext);
+    const [reload, setReload] = useContext(ReloadContext);
+    //Stores latest user activities
+    const [activities, setActivities] = useState({});
     const navigate = useNavigate();
 
     // Effect to fetch the list of users when the component mounts
@@ -37,6 +39,41 @@ function UserList() {
                 });
         })();
     }, []);
+    function formatShortDateTime(date) {
+        return new Date(date).toLocaleString('en-US', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
+
+
+    const renderUpdate = (update) => {
+        if(update.activity_type === "user-logout"){
+            return(<Typography>User Logged Out at: {formatShortDateTime(update.timestamp)}</Typography>);
+        }
+        if(update.activity_type === "user-login"){
+            return(<Typography>User Logged In at: {formatShortDateTime(update.timestamp)}</Typography>);
+        }
+        if(update.activity_type === "user-registered"){
+            return(<Typography>New User Registered</Typography>);
+        }
+        if(update.activity_type === "comment-added"){
+            return(<Typography>Added a comment</Typography>);
+        }
+        if(update.activity_type === "photo-upload"){
+            return(
+            <>
+            <Typography>Uploaded a Photo</Typography>
+            <img src={`/images/${update.file_name}`} alt={update.file_name} className="comment-photo-image"/>
+            </>
+            );
+        }
+        return -1;
+    };
 
     // Effect to fetch the number of photos for each user
     useEffect(() => {
@@ -62,6 +99,24 @@ function UserList() {
             await axios.get('/comments/count')
                 .then((result) => {
                     setNumberOfCommentsOfUser(result.data);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch comment counts:", error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        })();
+    }, [reload]);
+
+     // Effect to fetch the number of comments for each user
+     useEffect(() => {
+        setLoading(true);
+        (async () => {
+            await axios.get('/activity/users')
+                .then((result) => {
+                    setReload(true);
+                    setActivities(result.data);
                 })
                 .catch((error) => {
                     console.error("Failed to fetch comment counts:", error);
@@ -136,9 +191,36 @@ function UserList() {
                                 className="user-list-item"
                                 component={Link}
                                 to={`/users/${user._id}`}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "left",
+                                    alignItems: "flex-start", 
+                                    margin: "0",
+                                    
+                                    
+                                }}
                             >
-                                <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
+                            <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
+                                {
+                                user._id in activities && 
+                                (
+                                <>
+                                <Typography 
+                                sx={{
+                                    fontSize: "14px",
+                                    textAlign: "left",
+                                }}
+                                variant="body1">Latest Update:
+                                </Typography>
+                                {renderUpdate(activities[user._id])}
+                                </>
+                                )
+                                }
+                               
                             </ListItem>
+                            
+                          
                             {/* Render photo and message icons if advanced features are enabled */}
                             {enableAdvancedFeatures && (
                                 <ListItem
@@ -157,12 +239,17 @@ function UserList() {
                                     />
                                 </ListItem>
                             )}
+                            <Divider sx={{
+                                height: 1,     // Adjust the thickness of the divider line
+                                margin: '2px 0',
+                                backgroundColor: 'gray',
+                            }} />
                         </div>
                     ))}
                 </List>
             </>
         );
-    }, [users, enableAdvancedFeatures, reload, numberOfPhotosOfUser]);
+    }, [users, enableAdvancedFeatures, reload, numberOfPhotosOfUser, activities]);
 
     // Show a loading spinner if data is still being fetched
     if (loading) return <CircularProgress className="loading-spinner"/>;
