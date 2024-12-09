@@ -117,7 +117,6 @@ function UserList() {
                 .then((result) => {
                     setReload(true);
                     setActivities(result.data);
-                    console.log(result.data);
                 })
                 .catch((error) => {
                     console.error("Failed to fetch comment counts:", error);
