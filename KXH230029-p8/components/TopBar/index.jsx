@@ -60,6 +60,7 @@ function TopBar() {
         (async () => {
             await axios.get('/user/list')
                 .then((result) => {
+                    if(!loggedInUser){return;}
                     let users1 = result.data;
                     users1 = users1.filter(user => {return user._id !== loggedInUser._id;});
                     setUsers(users1);

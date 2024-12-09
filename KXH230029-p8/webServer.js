@@ -1379,3 +1379,52 @@ app.get("/activities", isAuthenticated, async (request, response) => {
 });
 
 
+app.get("/activity/users", isAuthenticated, async (request, response) => {
+    try {
+
+        const users = await User.find({}, {first_name: 1, last_name: 1, _id: 1}).sort({_id: 1});
+
+
+        // Fetch the most recent activity of the user, sorted by timestamp in descending order
+        const activities = await Promise.all(
+            users.map(async (user) => {
+                const user_id = user._id;
+                const latestActivity = await Activity.findOne({ user_id: user_id })
+                    .sort({ timestamp: -1 }) // Sort by timestamp in descending order
+                    .limit(1); // Fetch only the latest entry
+                if (latestActivity && latestActivity.activity_type === "photo-upload") {
+                        
+                        const photo = await Photo.findById(new Types.ObjectId(latestActivity.photo_id));
+                        if(!checkUserPhotoAccess(request.session.user._id, photo)){
+                            return null;
+                        }
+                        if (photo) {
+                            const latestActivityObject = latestActivity.toObject();
+                            latestActivityObject.file_name = photo.file_name;
+                            return latestActivityObject;
+                        }
+                        console.log(photo);
+                        console.log(latestActivity);
+                }
+                return latestActivity; // Return the result for Promise.all to collect
+            })
+        );
+
+        const userActivities = {};
+        activities.map(
+            (activity) => {
+                if(activity){
+                    userActivities[activity.user_id] = activity;
+                }
+                return activity;
+            }
+        );
+        
+        return response.status(200).json(userActivities);
+        
+    } catch (err) {
+        console.error("Error fetching activities:", err);
+        return response.status(500).send("An error occurred while retrieving activities.");
+    }
+});
+
