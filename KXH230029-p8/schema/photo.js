@@ -32,7 +32,9 @@ const photoSchema = new mongoose.Schema({
     // Array of comment objects representing the comments made on this photo.
     comments: [commentSchema],
     // Stores the number of likes of the images.
-    like_count: {type: Number, default: 0}
+    like_count: {type: Number, default: 0},
+    //Store the list of user ids that have access to the photo.
+    access_list: {type: [String], default: ["*"]},
 });
 
 /**

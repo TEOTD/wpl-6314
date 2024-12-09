@@ -72,6 +72,15 @@ function UserDetail({userId}) {
             );
         }
 
+        // check if image is hidden from the user
+        if(photo._id === -1){
+            return (
+                <Typography variant="h6" className="no-comments user-detail-container"
+                            sx={{margin: "10px"}}>{"Sorry, image is not accessible to you."}
+                </Typography>
+            );
+        }
+
         const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
         const renderComment = (text) => {
             const parts = [];

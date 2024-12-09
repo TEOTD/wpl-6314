@@ -64,6 +64,11 @@ function isAuthenticated(request, response, next) {
     else response.status(401).send('Unauthorized');
 }
 
+function checkUserPhotoAccess(user_id, photo){
+    return photo.access_list[0].includes("*") || photo.access_list.includes(user_id);
+}
+
+
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const {Types} = require("mongoose");
 const Activity = require("./schema/activity.js");
@@ -371,6 +376,7 @@ app.post('/photos/new', isAuthenticated, async function (request, response) {
             console.error('File upload error:', err);
             return response.status(400).send('File upload failed');
         }
+        const access_list = JSON.parse(request.body.access_list);
 
         // Validate file type and size
         const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -396,6 +402,7 @@ app.post('/photos/new', isAuthenticated, async function (request, response) {
                     user_id: request.session.user._id,
                     date_time: timestamp,
                     comments: [],
+                    access_list: access_list,
                 };
 
                 const photo = await Photo.create(image);
@@ -483,6 +490,7 @@ app.get("/photosOfUser/:id", isAuthenticated, async function (request, response)
                 user_id: {$first: "$user_id"},
                 like_count: {$first: "$like_count"},
                 comments: {$push: "$comments"},
+                access_list: {$push: "$access_list"},
             }
         },
         {
@@ -519,7 +527,10 @@ app.get("/photosOfUser/:id", isAuthenticated, async function (request, response)
     ];
 
     try {
-        const photos = await Photo.aggregate(aggregationFunction);
+        let photos = await Photo.aggregate(aggregationFunction);
+        photos = photos.filter((photo) => {
+            return photo.access_list[0].includes("*") || photo.access_list[0].includes(request.session.user._id);
+        });
         if (!photos) {
             console.log("Photos for user with _id: " + id + " not found.");
             return response.status(404).send("Photos not found");
@@ -632,7 +643,8 @@ app.get("/commentsOfUser/:id", isAuthenticated, async function (request, respons
                 photo_user_id: "$user_id",
                 file_name: "$file_name",
                 comment: "$comments.comment",
-                date_time: "$comments.date_time"
+                date_time: "$comments.date_time",
+                access_list: "$access_list",
             }
         },
         {
@@ -641,11 +653,14 @@ app.get("/commentsOfUser/:id", isAuthenticated, async function (request, respons
     ];
 
     try {
-        const commentsOfUser = await Photo.aggregate(aggregationFunction);
+        let commentsOfUser = await Photo.aggregate(aggregationFunction);
         if (!commentsOfUser) {
             console.log("Comments for user with _id: " + id + " not found.");
             return response.status(404).send("Comments not found");
         }
+
+        // Filtering out photos where user dont have access to view it
+        commentsOfUser = commentsOfUser.filter((photo) => checkUserPhotoAccess(request.session.user._id, photo));
         return response.status(200).send(commentsOfUser);
     } catch (error) {
         console.log("Error in /commentsOfUser/:id:", error);
@@ -658,11 +673,12 @@ app.get("/commentsOfUser/:id", isAuthenticated, async function (request, respons
  */
 app.get("/photos/list", isAuthenticated, async function (request, response) {
     try {
-        const photos = await Photo.find({}, {_id: 1, user_id: 1}).sort({_id: 1});
+        let photos = await Photo.find({}, {_id: 1, user_id: 1, access_list: 1}).sort({_id: 1});
         if (!photos) {
             console.log("photos not found.");
             return response.status(404).send("photos not found");
         }
+        photos = photos.filter((photo) => checkUserPhotoAccess(request.session.user._id, photo));
         return response.status(200).send(photos);
     } catch (error) {
         console.log("Error in /photos/list:", error);
@@ -835,7 +851,7 @@ app.get("/latestPhotoOfUser/:id", isAuthenticated, async (request, response) => 
 
     try {
         const photosList
-            = await Photo.find({user_id: id}, {_id: 1, file_name: 1, date_time: 1, user_id: 1})
+            = await Photo.find({user_id: id}, {_id: 1, file_name: 1, date_time: 1, user_id: 1, access_list: 1})
             .sort({_id: 1});
 
         if (!photosList || photosList.length === 0) {
@@ -845,6 +861,12 @@ app.get("/latestPhotoOfUser/:id", isAuthenticated, async (request, response) => 
         const sortedPhotos = [...photosList].sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
         const recentPhoto = sortedPhotos[0];
         const photoIndex = photosList.findIndex(photo => photo._id.toString() === recentPhoto._id.toString());
+        if(!checkUserPhotoAccess(request.session.user._id, recentPhoto)){
+            return response.send({
+                _id: -1,
+                user_id: -1,
+            });
+        }
 
         return response.send({
             _id: recentPhoto._id,
@@ -892,6 +914,13 @@ app.get("/mostCommentedPhotoOfUser/:id", isAuthenticated, async (request, respon
 
         if (!mostCommentedPhoto) {
             return response.status(404).send("No comments found on any photos for the specified user.");
+        }
+
+        if(!checkUserPhotoAccess(request.session.user._id, mostCommentedPhoto)){
+            return response.send({
+                _id: -1,
+                user_id: -1,
+            });
         }
 
         return response.send({
@@ -1174,6 +1203,7 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
                         date_time: {$first: "$date_time"},
                         user_id: {$first: "$user_id"},
                         comments: {$push: "$comments"},
+                        access_list: {$push: "$access_list"},
                     }
                 },
                 {
@@ -1217,7 +1247,8 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
                                 file_name: "$file_name",
                                 comments: "$comments",
                                 user_id: "$user_id",
-                                date_time: "$date_time"
+                                date_time: "$date_time",
+                                access_list: "$access_list",
                             }
                         }
                     }
@@ -1240,14 +1271,13 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
         }
 
         // Step 2: Filter photos for mentions of the specified user
-        const mentions = [];
+        let mentions = [];
 
         photosGrouped.forEach(group => {
             group.photos.forEach((photo, index) => {
                 // Check if the user is mentioned in the comments
                 photo.comments.forEach(comment => {
                     const hasMention = comment.mentioned_users && comment.mentioned_users.some(user => user.id.toString() === userId);
-
                     if (hasMention) {
                         mentions.push({
                             photo_index: index,
@@ -1256,11 +1286,16 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
                             comment: comment,
                             mentioned_user: userId,
                             date_time: photo.date_time,
+                            access_list: photo.access_list,
                         });
                     }
                 });
             });
         });
+
+        // Filter out images where user does not have access to view
+        mentions = mentions.filter((mention) => { return mention.access_list[0].includes("*") || 
+            mention.access_list[0].includes(request.session.user._id);});
 
         return response.send({mentions});
 
