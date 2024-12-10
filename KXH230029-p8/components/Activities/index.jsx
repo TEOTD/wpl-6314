@@ -43,24 +43,49 @@ function Activities() {
                 switch (activity.type) {
                     case "photo-upload":
                         return (
+                            <Box sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}>
                             <img src={`/images/${activity.file_name}`} alt={activity.file_name}
                                  className="comment-photo-image"/>
+                                 </Box>
                         );
                     case "comment-added":
                         return (
                             <>
+                                <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                                >
                                 {/* Image associated with the comment */}
                                 <img src={`/images/${activity.file_name}`} alt={activity.file_name}
                                      className="comment-photo-image"/>
                                 {/* The actual comment text */}
-                                <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                <Paper sx={
+                                    {display: 'flex', 
+                                    flexDirection: 'column',
+                                    backgroundColor: "#ED2939",
+                                    width: "250px",
+                                    padding: "10px",
+                                    height: 'fit-content',
+                                    
+                                    }}>
                                     <Typography variant="body1"
                                                 className="comment">{renderComment(activity.comment)}
                                     </Typography>
                                     {/* Displays the user's name and the date of the comment */}
-                                    <Typography variant="caption" className="comment-link">
-                                        {activity.photo_owner_first_name} {activity.photo_owner_last_name}
+                                    <Typography variant="caption" 
+                                    sx={{
+                                        color: 'var(--highlight-color)',
+                                    }}
+                                    >
+                                       - {activity.photo_owner_first_name} {activity.photo_owner_last_name}
                                     </Typography>
+                                </Paper>
                                 </Box>
                             </>
                         );
@@ -71,12 +96,14 @@ function Activities() {
             };
 
             return (
-                <Paper sx={{backgroundColor: "var(--secondary-hover-color)"}}
+                <Paper sx={{backgroundColor: "var(--secondary-hover-color)", justifyContent: "center", marginLeft: "100px",
+                    marginRight: "100px",
+                }}
                        className="comment-container-listed" key={activity._id}>
-                    <Typography variant="h4" className="user-name">
+                    <Typography variant="h4" className="user-name" sx={{textAlign: "center",}}>
                         {activity.first_name} {activity.last_name} - {activity.type}
                     </Typography>
-                    <Typography variant="body2" sx={{margin: "10px 0"}} className="photo-date">
+                    <Typography variant="body2" sx={{margin: "10px 0", textAlign: "center",}} className="photo-date">
                         {formatDateTime(activity.timestamp)}
                     </Typography>
                     {renderCardContent()}

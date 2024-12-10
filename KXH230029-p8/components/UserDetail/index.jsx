@@ -130,9 +130,19 @@ function UserDetail({userId}) {
                         {/* Display the comment information if available */}
                         {photo.comment && (
                             <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                <Paper sx={
+                                {display: 'flex', 
+                                flexDirection: 'column',
+                                backgroundColor: "#ED2939",
+                                width: "600px",
+                                padding: "10px",
+                                height: 'fit-content',
+                                
+                                }}>
                                 <Typography variant="body1"
                                             className="comment">{renderComment(photo.comment.comment)}
                                 </Typography>
+                                
                                 {/* Displays the user's name and the date of the comment */}
                                 <Typography variant="caption">
                                     <Link to={`/users/${photo.comment.user._id}`} className="comment-link">
@@ -140,10 +150,20 @@ function UserDetail({userId}) {
                                     </Link>
                                     <span className="photo-date">{' - '}{formatDateTime(photo.comment.date_time)}</span>
                                 </Typography>
+                                </Paper>
                             </Box>
                         )}
                         {/* Display the comment count if available */}
                         {photo.comment_count && (
+                            <Paper sx={
+                                {display: 'flex', 
+                                flexDirection: 'column',
+                                backgroundColor: "#ED2939",
+                                width: "300px",
+                                padding: "10px",
+                                height: 'fit-content',
+                                
+                                }}>
                             <Typography
                                 variant="body2"
                                 sx={{margin: "10px 0"}}
@@ -151,6 +171,7 @@ function UserDetail({userId}) {
                             >
                                 Comment Count: {photo.comment_count}
                             </Typography>
+                            </Paper>
                         )}
                     </div>
                 </Paper>
