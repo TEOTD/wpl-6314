@@ -303,7 +303,7 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             )}
             {/* Photo display */}
             {
-                checkLikes() && 
+                checkLikes() &&
                 (
                     <Button className="like-display" disabled key="likebutton">
                         Liked Photo
@@ -324,7 +324,10 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
                             open={open}
                             anchorEl={anchorEl}
                             handleClose={handleMenuClose}
-                            onDelete={() => deletePhoto().then(() => onReload())}
+                            onDelete={() => deletePhoto().then(() => {
+                                onReload();
+                                onStep(-1);
+                            })}
                         />
                     </Box>
                 )}
@@ -332,18 +335,18 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             {/* Favourite Section */}
             <Paper className="favourite-box">
                 <Button className="favourite-button" onClick={() => {
-                    if(checkLikes()){
+                    if (checkLikes()) {
                         addDislike();
-                    } else{
+                    } else {
                         addLike();
                     }
                 }} key="likebutton">
-                    {checkLikes()? <ThumbDownIcon sx={{padding:"5px"}}/>: <ThumbUpIcon sx={{padding:"5px"}}/>}
-                    {checkLikes()? "  Unlike": "  Like"}
-                <Typography sx={{marginLeft: "10px"}}>{photo.like_count}</Typography>
+                    {checkLikes() ? <ThumbDownIcon sx={{padding: "5px"}}/> : <ThumbUpIcon sx={{padding: "5px"}}/>}
+                    {checkLikes() ? "  Unlike" : "  Like"}
+                    <Typography sx={{marginLeft: "10px"}}>{photo.like_count}</Typography>
                 </Button>
                 <Button className="favourite-button" disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
-                <StarIcon/> {checkFavourite()? "Favourited": "Add To Favourites"}
+                    <StarIcon/> {checkFavourite() ? "Favourited" : "Add To Favourites"}
                 </Button>
             </Paper>
             {/* Comments section */}
@@ -399,7 +402,8 @@ function UserPhotos({userId}) {
         setLoading(true);
         (async () => {
             await axios.get(`/user/${loggedInUser._id}`)
-                .then((result) => {setUserFavourites(result.data.favourite_img_list);
+                .then((result) => {
+                    setUserFavourites(result.data.favourite_img_list);
                     setUserLikes(result.data.liked_img_list);
                 })
                 .catch((error) => console.error("Failed to fetch user photos:", error));
@@ -420,13 +424,13 @@ function UserPhotos({userId}) {
 
     photos.sort((a, b) => {
         if (a.like_count < b.like_count) return 1;
-        if (a.like_count === b.like_count){
-            if(a.date_time > b.date_time){
+        if (a.like_count === b.like_count) {
+            if (a.date_time > b.date_time) {
                 return 1;
             }
         }
         return -1;
-      });
+    });
 
     // Toggle Screens based on advanced features
     return enableAdvancedFeatures && photoIndex >= 0 ? (
