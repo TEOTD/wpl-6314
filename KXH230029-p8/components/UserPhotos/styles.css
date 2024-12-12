@@ -20,10 +20,9 @@
     padding: 8px !important;
 }
 
-.favourite-button{
+.favourite-button1{
     height: 30px;
     color: var(--text-color) !important;
-    background-color: var(--accent-hover-color) !important;
 }
 
 .like-display{
@@ -35,7 +34,7 @@
     border-bottom-right-radius: 0 !important;
 }
 
-.favourite-button:hover{
+.favourite-button1:hover{
     background-color: var(--highlight-color) !important;
 }
 
