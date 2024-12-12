@@ -67,14 +67,15 @@ function UserFavorites() {
 
     return (
     <>
-    <Button disabled className="favourite-button">Favorite List</Button>
+    <Typography variant="h5" >Favorite List</Typography>
+    { photoList.length>0?
     <Paper sx={{
         display: "flex",
         flexDirection: 'row', 
         flexWrap: 'wrap',
     }}>
         
-    {photoList.length>0? photoList.map((photo, index) => (
+    {photoList.map((photo, index) => (
         <Paper
           key={index} // Unique key for each item
           sx={{
@@ -100,16 +101,8 @@ function UserFavorites() {
                 </IconButton>
             </Tooltip>
         </Paper>
-    )):
-    <Typography variant="h5"
-    sx={{
-        padding:"20px",
-        color: "var(--secondary-hover-color)",
-    }}
-    >
-        You have not added any photos to favorites yet.    
-    </Typography> 
-    
+    ))
+     
     }
         <Dialog open={open} onClose={handleClose} sx={{
                                     "& .MuiPaper-root": {
@@ -151,7 +144,24 @@ function UserFavorites() {
             </Button>
             </DialogActions>
         </Dialog>
+    </Paper>:
+    <Paper
+    sx={{
+        backgroundColor: "var(--secondary-hover-color)",
+        justifyContent: "center",
+    }}
+    >
+    <Typography variant="h5"
+    sx={{
+        padding:"20px",
+        color: "white",
+        textAlign: "center",
+    }}
+    >
+        You have not added any photos to favorites yet.    
+    </Typography>
     </Paper>
+}
     </>
     );
 }
