@@ -334,7 +334,11 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             </Box>
             {/* Favourite Section */}
             <Paper className="favourite-box">
-                <Button className="favourite-button" onClick={() => {
+                <Button className="favourite-button1" 
+                sx={{
+                    backgroundColor: checkLikes() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
+                }}
+                onClick={() => {
                     if (checkLikes()) {
                         addDislike();
                     } else {
@@ -345,7 +349,11 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
                     {checkLikes() ? "  Unlike" : "  Like"}
                     <Typography sx={{marginLeft: "10px"}}>{photo.like_count}</Typography>
                 </Button>
-                <Button className="favourite-button" disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
+                <Button className="favourite-button1" 
+                 sx={{
+                    backgroundColor: checkFavourite() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
+                }}
+                disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
                     <StarIcon/> {checkFavourite() ? "Favourited" : "Add To Favourites"}
                 </Button>
             </Paper>

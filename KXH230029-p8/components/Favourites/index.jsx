@@ -74,7 +74,7 @@ function UserFavorites() {
         flexWrap: 'wrap',
     }}>
         
-    {photoList.map((photo, index) => (
+    {photoList.length>0? photoList.map((photo, index) => (
         <Paper
           key={index} // Unique key for each item
           sx={{
@@ -100,7 +100,17 @@ function UserFavorites() {
                 </IconButton>
             </Tooltip>
         </Paper>
-    ))}
+    )):
+    <Typography variant="h5"
+    sx={{
+        padding:"20px",
+        color: "var(--secondary-hover-color)",
+    }}
+    >
+        You have not added any photos to favorites yet.    
+    </Typography> 
+    
+    }
         <Dialog open={open} onClose={handleClose} sx={{
                                     "& .MuiPaper-root": {
                                         background: "#000",
