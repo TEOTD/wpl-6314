@@ -223,6 +223,7 @@ describe("Photo App: Session and Input API Tests", function () {
       axios
         .post(makeFullUrl("/commentsOfPhoto/" + photo_id), {
           comment: newCommentText,
+          mentioned_users: []
         }, {
           headers: {
             Cookie: sessionCookie // use the session cookie from the previous test
@@ -318,7 +319,9 @@ describe("Photo App: Session and Input API Tests", function () {
         filename: uniquePhotoName,
         contentType: "image/jpg",
       });
-    
+      let user_list = ['*'];
+      form.append("access_list", JSON.stringify(user_list));
+
       axios.post(makeFullUrl("/photos/new"), form, {
         headers: {
           "Content-Type": `multipart/form-data; boundary=${form._boundary}`,
