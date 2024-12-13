@@ -64,7 +64,7 @@ function isAuthenticated(request, response, next) {
     else response.status(401).send('Unauthorized');
 }
 
-function checkUserPhotoAccess(user_id, photo){
+function checkUserPhotoAccess(user_id, photo) {
     return photo.access_list[0].includes("*") || photo.access_list.includes(user_id);
 }
 
@@ -258,7 +258,7 @@ app.post("/commentsOfPhoto/:photo_id", isAuthenticated, async function (request,
 app.post("/favouriteOfUser/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const user_id = request.session.user._id;
-    
+
     try {
         const result = await User.findByIdAndUpdate(
             user_id,
@@ -283,14 +283,14 @@ app.post("/favouriteOfUser/:photo_id", isAuthenticated, async function (request,
 app.post("/likePhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const user_id = request.session.user._id;
-    
+
     try {
         const result = await User.findByIdAndUpdate(
             user_id,
             {$addToSet: {liked_img_list: photo_id}},
             {new: true}
         );
-        
+
         const result1 = await Photo.findByIdAndUpdate(
             photo_id,
             {$inc: {like_count: 1}},
@@ -315,14 +315,14 @@ app.post("/likePhoto/:photo_id", isAuthenticated, async function (request, respo
 app.post("/unlikePhoto/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const user_id = request.session.user._id;
-    
+
     try {
         const result = await User.findByIdAndUpdate(
             user_id,
             {$pull: {liked_img_list: photo_id}},
             {new: true}
         );
-        
+
         const result1 = await Photo.findByIdAndUpdate(
             photo_id,
             {$inc: {like_count: -1}},
@@ -347,7 +347,7 @@ app.post("/unlikePhoto/:photo_id", isAuthenticated, async function (request, res
 app.post("/removeFavorite/:photo_id", isAuthenticated, async function (request, response) {
     const photo_id = request.params.photo_id;
     const user_id = request.session.user._id;
-    
+
     try {
         const result = await User.findByIdAndUpdate(
             user_id,
@@ -691,10 +691,11 @@ app.get("/photos/list", isAuthenticated, async function (request, response) {
  */
 app.get("/photos/", isAuthenticated, async function (request, response) {
     try {
-        const ids = request.query.ids; console.log(ids);
+        const ids = request.query.ids;
+        console.log(ids);
         const photos = await Photo.find({
-            _id: { $in: ids }
-          });
+            _id: {$in: ids}
+        });
         if (!photos) {
             console.log("photos not found.");
             return response.status(404).send("photos not found");
@@ -861,7 +862,7 @@ app.get("/latestPhotoOfUser/:id", isAuthenticated, async (request, response) => 
         const sortedPhotos = [...photosList].sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
         const recentPhoto = sortedPhotos[0];
         const photoIndex = photosList.findIndex(photo => photo._id.toString() === recentPhoto._id.toString());
-        if(!checkUserPhotoAccess(request.session.user._id, recentPhoto)){
+        if (!checkUserPhotoAccess(request.session.user._id, recentPhoto)) {
             return response.send({
                 _id: -1,
                 user_id: -1,
@@ -916,7 +917,7 @@ app.get("/mostCommentedPhotoOfUser/:id", isAuthenticated, async (request, respon
             return response.status(404).send("No comments found on any photos for the specified user.");
         }
 
-        if(!checkUserPhotoAccess(request.session.user._id, mostCommentedPhoto)){
+        if (!checkUserPhotoAccess(request.session.user._id, mostCommentedPhoto)) {
             return response.send({
                 _id: -1,
                 user_id: -1,
@@ -1016,74 +1017,6 @@ app.delete("/commentOfUser/:id", isAuthenticated, async (request, response) => {
         return response.status(500).send("An error occurred while deleting the comment.");
     }
 });
-
-/**
- * URL: /user/:id - Delete user and its traces.
- */
-//todo: add more handling as features are added
-// app.delete("/user/:id", isAuthenticated, async (request, response) => {
-//     const id = request.params.id;
-//     if (!Types.ObjectId.isValid(id)) {
-//         console.log(`Invalid UserId format: ${id}`);
-//         return response.status(400).send(`Invalid UserId: ${id}`);
-//     }
-//
-//     const objectId = new Types.ObjectId(id);
-//     const mongoSession = await startSession();
-//     mongoSession.startTransaction();
-//
-//     try {
-//         const user = await User.findById(objectId).session(mongoSession);
-//         if (!user) {
-//             console.log(`User with _id: ${id} not found.`);
-//             await mongoSession.abortTransaction();
-//             await mongoSession.endSession();
-//             return response.status(404).send(`User with _id: ${id} not found.`);
-//         }
-//
-//         // Step 1: Remove user's comments from photos
-//         const commentsDeleteResult = await Photo.updateMany(
-//             {"comments.user_id": objectId},
-//             {$pull: {comments: {user_id: objectId}}},
-//             {multi: true, session: mongoSession}
-//         );
-//         console.log(`Removed user comments from ${commentsDeleteResult.modifiedCount} photos.`);
-//
-//         // Step 2: Find user's photos before deletion (needed for file deletion)
-//         const userPhotos = await Photo.find({user_id: objectId}).session(mongoSession);
-//
-//         // Step 3: Delete photos from database
-//         const photosDeleteResult = await Photo.deleteMany({user_id: objectId}).session(mongoSession);
-//         console.log(`Deleted ${photosDeleteResult.deletedCount} photos of user with _id: ${id}.`);
-//
-//         // Step 4: Delete user from the database
-//         await User.findByIdAndDelete(objectId).session(mongoSession);
-//         console.log(`User with _id: ${id} deleted successfully.`);
-//
-//         // Commit the transaction if all database operations are successful
-//         await mongoSession.commitTransaction();
-//         await mongoSession.endSession();
-//
-//         // Step 5: Delete physical files associated with the user's photos
-//         for (const photo of userPhotos) {
-//             const filePath = path.join(__dirname, "images", photo.file_name);
-//             try {
-//                 fs.unlinkSync(filePath); // Delete the file synchronously
-//                 console.log(`Deleted file: ${filePath}`);
-//             } catch (err) {
-//                 console.error(`Failed to delete file: ${filePath}`, err);
-//                 // Log the error but do not affect the transaction
-//             }
-//         }
-//
-//         return response.status(200).send("User account deleted successfully. You have been logged out.");
-//     } catch (error) {
-//         await mongoSession.abortTransaction();
-//         await mongoSession.endSession();
-//         console.log("Error in DELETE /user/:id with transaction:", error);
-//         return response.status(500).send(`An error occurred while deleting the account. ${error.message}`);
-//     }
-// });
 
 app.delete("/user/:id", isAuthenticated, async (request, response) => {
     const id = request.params.id;
@@ -1294,8 +1227,10 @@ app.get("/photosWithMentions/:userId", isAuthenticated, async (request, response
         });
 
         // Filter out images where user does not have access to view
-        mentions = mentions.filter((mention) => { return mention.access_list[0].includes("*") || 
-            mention.access_list[0].includes(request.session.user._id);});
+        mentions = mentions.filter((mention) => {
+            return mention.access_list[0].includes("*") ||
+                mention.access_list[0].includes(request.session.user._id);
+        });
 
         return response.send({mentions});
 
@@ -1389,22 +1324,22 @@ app.get("/activity/users", isAuthenticated, async (request, response) => {
         const activities = await Promise.all(
             users.map(async (user) => {
                 const user_id = user._id;
-                const latestActivity = await Activity.findOne({ user_id: user_id })
-                    .sort({ timestamp: -1 }) // Sort by timestamp in descending order
+                const latestActivity = await Activity.findOne({user_id: user_id})
+                    .sort({timestamp: -1}) // Sort by timestamp in descending order
                     .limit(1); // Fetch only the latest entry
                 if (latestActivity && latestActivity.activity_type === "photo-upload") {
-                        
-                        const photo = await Photo.findById(new Types.ObjectId(latestActivity.photo_id));
-                        if(!checkUserPhotoAccess(request.session.user._id, photo)){
-                            return null;
-                        }
-                        if (photo) {
-                            const latestActivityObject = latestActivity.toObject();
-                            latestActivityObject.file_name = photo.file_name;
-                            return latestActivityObject;
-                        }
-                        console.log(photo);
-                        console.log(latestActivity);
+
+                    const photo = await Photo.findById(new Types.ObjectId(latestActivity.photo_id));
+                    if (!checkUserPhotoAccess(request.session.user._id, photo)) {
+                        return null;
+                    }
+                    if (photo) {
+                        const latestActivityObject = latestActivity.toObject();
+                        latestActivityObject.file_name = photo.file_name;
+                        return latestActivityObject;
+                    }
+                    console.log(photo);
+                    console.log(latestActivity);
                 }
                 return latestActivity; // Return the result for Promise.all to collect
             })
@@ -1413,15 +1348,15 @@ app.get("/activity/users", isAuthenticated, async (request, response) => {
         const userActivities = {};
         activities.map(
             (activity) => {
-                if(activity){
+                if (activity) {
                     userActivities[activity.user_id] = activity;
                 }
                 return activity;
             }
         );
-        
+
         return response.status(200).json(userActivities);
-        
+
     } catch (err) {
         console.error("Error fetching activities:", err);
         return response.status(500).send("An error occurred while retrieving activities.");

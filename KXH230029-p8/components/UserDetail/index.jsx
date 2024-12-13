@@ -73,7 +73,7 @@ function UserDetail({userId}) {
         }
 
         // check if image is hidden from the user
-        if(photo._id === -1){
+        if (photo._id === -1) {
             return (
                 <Typography variant="h6" className="no-comments user-detail-container"
                             sx={{margin: "10px"}}>{"Sorry, image is not accessible to you."}
@@ -131,46 +131,52 @@ function UserDetail({userId}) {
                         {photo.comment && (
                             <Box sx={{display: 'flex', flexDirection: 'column'}}>
                                 <Paper sx={
-                                {display: 'flex', 
-                                flexDirection: 'column',
-                                backgroundColor: "#ED2939",
-                                width: "600px",
-                                padding: "10px",
-                                height: 'fit-content',
-                                
-                                }}>
-                                <Typography variant="body1"
-                                            className="comment">{renderComment(photo.comment.comment)}
-                                </Typography>
-                                
-                                {/* Displays the user's name and the date of the comment */}
-                                <Typography variant="caption">
-                                    <Link to={`/users/${photo.comment.user._id}`} className="comment-link">
-                                        {photo.comment.user.first_name} {photo.comment.user.last_name}
-                                    </Link>
-                                    <span className="photo-date">{' - '}{formatDateTime(photo.comment.date_time)}</span>
-                                </Typography>
+                                    {
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        backgroundColor: "#ED2939",
+                                        width: "600px",
+                                        padding: "10px",
+                                        height: 'fit-content',
+
+                                    }
+}>
+                                    <Typography variant="body1"
+                                                className="comment">{renderComment(photo.comment.comment)}
+                                    </Typography>
+
+                                    {/* Displays the user's name and the date of the comment */}
+                                    <Typography variant="caption">
+                                        <Link to={`/users/${photo.comment.user._id}`} className="comment-link">
+                                            {photo.comment.user.first_name} {photo.comment.user.last_name}
+                                        </Link>
+                                        <span
+                                            className="photo-date">{' - '}{formatDateTime(photo.comment.date_time)}
+                                        </span>
+                                    </Typography>
                                 </Paper>
                             </Box>
                         )}
                         {/* Display the comment count if available */}
                         {photo.comment_count && (
                             <Paper sx={
-                                {display: 'flex', 
-                                flexDirection: 'column',
-                                backgroundColor: "#ED2939",
-                                width: "300px",
-                                padding: "10px",
-                                height: 'fit-content',
-                                
-                                }}>
-                            <Typography
-                                variant="body2"
-                                sx={{margin: "10px 0"}}
-                                className="photo-date photo-comment-count"
-                            >
-                                Comment Count: {photo.comment_count}
-                            </Typography>
+                                {
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    backgroundColor: "#ED2939",
+                                    width: "300px",
+                                    padding: "10px",
+                                    height: 'fit-content',
+
+                                }
+}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{margin: "10px 0"}}
+                                    className="photo-date photo-comment-count"
+                                >
+                                    Comment Count: {photo.comment_count}
+                                </Typography>
                             </Paper>
                         )}
                     </div>

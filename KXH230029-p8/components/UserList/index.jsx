@@ -1,5 +1,17 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {Badge, CircularProgress, IconButton, List, ListItem, ListItemText, Typography, Paper, Button, Divider, Box} from "@mui/material";
+import {
+    Badge,
+    Box,
+    Button,
+    CircularProgress,
+    Divider,
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    Paper,
+    Typography
+} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import "./styles.css";
 import axios from "axios";
@@ -39,6 +51,7 @@ function UserList() {
                 });
         })();
     }, []);
+
     function formatShortDateTime(date) {
         return new Date(date).toLocaleString('en-US', {
             day: '2-digit',
@@ -50,26 +63,33 @@ function UserList() {
     }
 
 
-
     const renderUpdate = (update) => {
-        if(update.activity_type === "user-logout"){
-            return(<Typography sx={{fontSize: "13px",}}>User Logged Out at: {formatShortDateTime(update.timestamp)}</Typography>);
+        if (update.activity_type === "user-logout") {
+            return (
+<Typography sx={{fontSize: "13px",}}>User Logged Out
+                at: {formatShortDateTime(update.timestamp)}
+</Typography>
+);
         }
-        if(update.activity_type === "user-login"){
-            return(<Typography sx={{fontSize: "13px",}}>User Logged In at: {formatShortDateTime(update.timestamp)}</Typography>);
+        if (update.activity_type === "user-login") {
+            return (
+<Typography sx={{fontSize: "13px",}}>User Logged In
+                at: {formatShortDateTime(update.timestamp)}
+</Typography>
+);
         }
-        if(update.activity_type === "user-registered"){
-            return(<Typography sx={{fontSize: "13px",}}>New User Registered</Typography>);
+        if (update.activity_type === "user-registered") {
+            return (<Typography sx={{fontSize: "13px",}}>New User Registered</Typography>);
         }
-        if(update.activity_type === "comment-added"){
-            return(<Typography sx={{fontSize: "13px",}}>Added a comment</Typography>);
+        if (update.activity_type === "comment-added") {
+            return (<Typography sx={{fontSize: "13px",}}>Added a comment</Typography>);
         }
-        if(update.activity_type === "photo-upload"){
-            return(
-            <>
-            <Typography sx={{fontSize: "13px",}}>Uploaded a Photo</Typography>
-            <img src={`/images/${update.file_name}`} alt={update.file_name} className="comment-photo-image"/>
-            </>
+        if (update.activity_type === "photo-upload") {
+            return (
+                <>
+                    <Typography sx={{fontSize: "13px",}}>Uploaded a Photo</Typography>
+                    <img src={`/images/${update.file_name}`} alt={update.file_name} className="comment-photo-image"/>
+                </>
             );
         }
         return -1;
@@ -109,8 +129,8 @@ function UserList() {
         })();
     }, [reload]);
 
-     // Effect to fetch the number of comments for each user
-     useEffect(() => {
+    // Effect to fetch the number of comments for each user
+    useEffect(() => {
         setLoading(true);
         (async () => {
             await axios.get('/activity/users')
@@ -177,8 +197,10 @@ function UserList() {
         return (
             <>
                 <Paper className="user-list-item">
-                    <Button sx={{width: "100%", justifyContent: 'flex-start', paddingLeft: "15px"}} 
-                     onClick={() => {navigate("/favorites");}}>
+                    <Button sx={{width: "100%", justifyContent: 'flex-start', paddingLeft: "15px"}}
+                            onClick={() => {
+                                navigate("/favorites");
+                            }}>
                         Favourites Page
                     </Button>
                 </Paper>
@@ -195,68 +217,67 @@ function UserList() {
                                     display: "flex",
                                     flexDirection: "row",
                                     justifyContent: "space-between",
-                                    alignItems: "flex-start", 
+                                    alignItems: "flex-start",
                                     margin: "0",
-                                    
-                                    
+
+
                                 }}
                             >
-                            <Box>
-                            <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
-                                {
-                                user._id in activities && 
-                                (
-                                <>
-                                <Typography 
-                                sx={{
-                                    fontSize: "13px",
-                                    textAlign: "left",
-                                    paddingTop: "10px",
-                                }}
-                                variant="body1">Latest Update:
-                                </Typography>
-                                {renderUpdate(activities[user._id])}
-                                </>
-                                )
-                                }
-                            </Box>
-                            
-                            {/* Render photo and message icons if advanced features are enabled */}
-                            {enableAdvancedFeatures && (
-                                <ListItem
-                                    key={user._id + "user-bubble"}
-                                    className="user-bubble-item"
-                                    sx={{
-                                        display:"flex",
-                                        flexDirection: "column",
-                                        right: 0,
-                                        paddingRight: 0,
-                                    }}
-                                >
-                                    <ListItemText
-                                        className="bubble-container"
-                                        primary={(
-                                            photoBubble(user._id)
-                                        )}
-                                    />
-                                    <ListItemText
-                                        className="bubble-container"
-                                        primary={(
-                                            messageBubble(user._id)
-                                        )}
-                                    />
-                                </ListItem>
-                            )}
-                               
+                                <Box>
+                                    <ListItemText primary={`${user.first_name} ${user.last_name}`}/>
+                                    {
+                                        user._id in activities &&
+                                        (
+                                            <>
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: "13px",
+                                                        textAlign: "left",
+                                                        paddingTop: "10px",
+                                                    }}
+                                                    variant="body1">Latest Update:
+                                                </Typography>
+                                                {renderUpdate(activities[user._id])}
+                                            </>
+                                        )
+                                    }
+                                </Box>
+
+                                {/* Render photo and message icons if advanced features are enabled */}
+                                {enableAdvancedFeatures && (
+                                    <ListItem
+                                        key={user._id + "user-bubble"}
+                                        className="user-bubble-item"
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            right: 0,
+                                            paddingRight: 0,
+                                        }}
+                                    >
+                                        <ListItemText
+                                            className="bubble-container"
+                                            primary={(
+                                                photoBubble(user._id)
+                                            )}
+                                        />
+                                        <ListItemText
+                                            className="bubble-container"
+                                            primary={(
+                                                messageBubble(user._id)
+                                            )}
+                                        />
+                                    </ListItem>
+                                )}
+
                             </ListItem>
-                            
-                          
-                            
+
+
                             <Divider sx={{
                                 height: 1,     // Adjust the thickness of the divider line
                                 margin: '2px 0',
                                 backgroundColor: 'gray',
-                            }} />
+                            }}/>
                         </div>
                     ))}
                 </List>

@@ -334,26 +334,26 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
             </Box>
             {/* Favourite Section */}
             <Paper className="favourite-box">
-                <Button className="favourite-button1" 
-                sx={{
-                    backgroundColor: checkLikes() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
-                }}
-                onClick={() => {
-                    if (checkLikes()) {
-                        addDislike();
-                    } else {
-                        addLike();
-                    }
-                }} key="likebutton">
+                <Button className="favourite-button1"
+                        sx={{
+                            backgroundColor: checkLikes() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
+                        }}
+                        onClick={() => {
+                            if (checkLikes()) {
+                                addDislike();
+                            } else {
+                                addLike();
+                            }
+                        }} key="likebutton">
                     {checkLikes() ? <ThumbDownIcon sx={{padding: "5px"}}/> : <ThumbUpIcon sx={{padding: "5px"}}/>}
                     {checkLikes() ? "  Unlike" : "  Like"}
                     <Typography sx={{marginLeft: "10px"}}>{photo.like_count}</Typography>
                 </Button>
-                <Button className="favourite-button1" 
-                 sx={{
-                    backgroundColor: checkFavourite() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
-                }}
-                disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
+                <Button className="favourite-button1"
+                        sx={{
+                            backgroundColor: checkFavourite() ? "var(--tertiary-color)" : "var(--accent-hover-color)"
+                        }}
+                        disabled={checkFavourite()} onClick={addFavourite} key="favbutton">
                     <StarIcon/> {checkFavourite() ? "Favourited" : "Add To Favourites"}
                 </Button>
             </Paper>

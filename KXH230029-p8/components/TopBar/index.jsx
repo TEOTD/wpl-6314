@@ -9,9 +9,9 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControl,
     FormControlLabel,
     FormGroup,
-    FormControl,
     Toolbar,
     Typography
 } from "@mui/material";
@@ -60,9 +60,13 @@ function TopBar() {
         (async () => {
             await axios.get('/user/list')
                 .then((result) => {
-                    if(!loggedInUser){return;}
+                    if (!loggedInUser) {
+                        return;
+                    }
                     let users1 = result.data;
-                    users1 = users1.filter(user => {return user._id !== loggedInUser._id;});
+                    users1 = users1.filter(user => {
+                        return user._id !== loggedInUser._id;
+                    });
                     setUsers(users1);
                     setCheckedList(new Array(users1.length).fill(false));
                 })
@@ -113,11 +117,11 @@ function TopBar() {
             const domForm = new FormData();
             domForm.append("uploadedphoto", uploadInput.files[0]);
             let user_list = ['*'];
-            if(!accessToAll){
+            if (!accessToAll) {
                 user_list = [];
                 users.map(
                     (user, index) => {
-                        if(checkedList[index]){
+                        if (checkedList[index]) {
                             user_list.push(user._id);
                         }
                         return user;
@@ -284,63 +288,68 @@ function TopBar() {
                                         className="dialog-button-input"
                                     />
                                     <Button
-                                    sx={{
-                                        backgroundColor: accessToAll ? "#aa95ca": "#7fd860",
-                                        margin: "10px",
-                                        color: "white",
-                                    }}
-                                    onClick={() => {setAccessToAll(!accessToAll);}}
+                                        sx={{
+                                            backgroundColor: accessToAll ? "#aa95ca" : "#7fd860",
+                                            margin: "10px",
+                                            color: "white",
+                                        }}
+                                        onClick={() => {
+                                            setAccessToAll(!accessToAll);
+                                        }}
                                     >
-                                    {
-                                    accessToAll ? "Limit Access": "Allow Access to All"
-                                    }
+                                        {
+                                            accessToAll ? "Limit Access" : "Allow Access to All"
+                                        }
                                     </Button>
 
-                                    { !accessToAll &&
-                                    (
-                                    <Box sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                    }}>
-                                        <Typography variant="body1"
-                                        sx={{
-                                            color: "white",
-                                            marginLeft: "10px",
-                                        }}
-                                        >
-                                            Select Users To Provide Access
-                                        </Typography>
-                                        <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-                                        <FormGroup> {
-                                        users.map((user1, index) => {
-                                            return (
-                                                <FormControlLabel
-                                                    sx={{
-                                                        color: "white",
-                                                    }}
-                                                    control={
-                                                        
-                                                    (
-                                                        <Checkbox
-                                                        sx={{
-                                                            color: "white",
-                                                          }}
-                                                        onChange={() => {updateCheckedList(index);}}
-                                                        checked={checkedList[index]}
-                                                        name={user1.first_name}
-                                                        />
-                                                    )
+                                    {!accessToAll &&
+                                        (
+                                            <Box sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                            }}>
+                                                <Typography variant="body1"
+                                                            sx={{
+                                                                color: "white",
+                                                                marginLeft: "10px",
+                                                            }}
+                                                >
+                                                    Select Users To Provide Access
+                                                </Typography>
+                                                <FormControl sx={{m: 3}} component="fieldset" variant="standard">
+                                                    <FormGroup> {
+                                                        users.map((user1, index) => {
+                                                            return (
+                                                                <FormControlLabel
+                                                                    sx={{
+                                                                        color: "white",
+                                                                    }}
+                                                                    control={
+
+                                                                        (
+                                                                            <Checkbox
+                                                                                sx={{
+                                                                                    color: "white",
+                                                                                }}
+                                                                                onChange={() => {
+                                                                                    updateCheckedList(index);
+                                                                                }}
+                                                                                checked={checkedList[index]}
+                                                                                name={user1.first_name}
+                                                                            />
+                                                                        )
+                                                                    }
+                                                                    key={user1._id}
+                                                                    label={user1.first_name + " " + user1.last_name}
+                                                                />
+                                                            );
+                                                        })
                                                     }
-                                                    key={user1._id}
-                                                    label={user1.first_name + " "+ user1.last_name}
-                                                />
-                                        );})
-                                        }
-                                        </FormGroup>
-                                        </FormControl>
-                                    </Box>
-                                    )}   
-                                    
+                                                    </FormGroup>
+                                                </FormControl>
+                                            </Box>
+                                        )}
+
                                 </DialogContent>
                                 <DialogActions>
                                     <Button className="dialog-button"

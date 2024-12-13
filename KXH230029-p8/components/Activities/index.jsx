@@ -47,47 +47,47 @@ function Activities() {
                                 display: "flex",
                                 justifyContent: "center",
                             }}>
-                            <img src={`/images/${activity.file_name}`} alt={activity.file_name}
-                                 className="comment-photo-image"/>
-                                 </Box>
+                                <img src={`/images/${activity.file_name}`} alt={activity.file_name}
+                                     className="comment-photo-image"/>
+                            </Box>
                         );
                     case "comment-added":
                         return (
-                            <>
-                                <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                                >
-                                {/* Image associated with the comment */}
-                                <img src={`/images/${activity.file_name}`} alt={activity.file_name}
-                                     className="comment-photo-image"/>
-                                {/* The actual comment text */}
-                                <Paper sx={
-                                    {display: 'flex', 
-                                    flexDirection: 'column',
-                                    backgroundColor: "#ED2939",
-                                    width: "250px",
-                                    padding: "10px",
-                                    height: 'fit-content',
-                                    
-                                    }}>
-                                    <Typography variant="body1"
-                                                className="comment">{renderComment(activity.comment)}
-                                    </Typography>
-                                    {/* Displays the user's name and the date of the comment */}
-                                    <Typography variant="caption" 
+                            <Box
                                     sx={{
-                                        color: 'var(--highlight-color)',
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
                                     }}
-                                    >
-                                       - {activity.photo_owner_first_name} {activity.photo_owner_last_name}
-                                    </Typography>
-                                </Paper>
-                                </Box>
-                            </>
+                                >
+                                    {/* Image associated with the comment */}
+                                    <img src={`/images/${activity.file_name}`} alt={activity.file_name}
+                                         className="comment-photo-image"/>
+                                    {/* The actual comment text */}
+                                    <Paper sx={
+                                        {
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            backgroundColor: "#ED2939",
+                                            width: "250px",
+                                            padding: "10px",
+                                            height: 'fit-content',
+
+                                        }
+}>
+                                        <Typography variant="body1"
+                                                    className="comment">{renderComment(activity.comment)}
+                                        </Typography>
+                                        {/* Displays the user's name and the date of the comment */}
+                                        <Typography variant="caption"
+                                                    sx={{
+                                                        color: 'var(--highlight-color)',
+                                                    }}
+                                        >
+                                            - {activity.photo_owner_first_name} {activity.photo_owner_last_name}
+                                        </Typography>
+                                    </Paper>
+                            </Box>
                         );
 
                     default:
@@ -96,7 +96,10 @@ function Activities() {
             };
 
             return (
-                <Paper sx={{backgroundColor: "var(--secondary-hover-color)", justifyContent: "center", marginLeft: "100px",
+                <Paper sx={{
+                    backgroundColor: "var(--secondary-hover-color)",
+justifyContent: "center",
+marginLeft: "100px",
                     marginRight: "100px",
                 }}
                        className="comment-container-listed" key={activity._id}>
