@@ -82,6 +82,8 @@ function UserDetail({userId}) {
         }
 
         const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
+
+        // Method used to render comment count display of the user while showing the imahge with most comments.
         const renderComment = (text) => {
             const parts = [];
             let lastIndex = 0;

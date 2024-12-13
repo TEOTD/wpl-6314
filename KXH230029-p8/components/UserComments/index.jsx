@@ -63,7 +63,6 @@ function UserComments({userId}) {
 
     // Effect to fetch comments and photos when the userId changes
     // Group photos by user and sort them by ID
-
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
@@ -90,6 +89,7 @@ function UserComments({userId}) {
         })();
     }, [userId]);
 
+    // Effect to fetch comments and photos when the userId changes
     useEffect(() => {
         const routes = pathname.split("/");
         if (!firstLoad && !enableAdvancedFeatures) {

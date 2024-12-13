@@ -19,6 +19,7 @@ import {
 import formatDateTime from "../../lib/utils";
 
 
+// Function that renders option to take action for comment/image .
 function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
     return (
         <Menu
@@ -41,13 +42,16 @@ function OptionsMenu({onEdit, onDelete, open, anchorEl, handleClose}) {
     );
 }
 
+// function that returns a component of a comment made by users.
 function Comment({comment, loggedInUser, onReload}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
+    // Options used to handle the menu item selection
     const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
 
+    // deletes the comment if it is made by the current logged in user
     const deleteComment = async () => {
         try {
             await axios.delete(`/commentOfUser/${comment._id}`);
@@ -57,6 +61,7 @@ function Comment({comment, loggedInUser, onReload}) {
         }
     };
 
+    // Renders the comment to the page with the mentions being highlighted.
     const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
     const renderComment = (text) => {
         const parts = [];
@@ -112,6 +117,7 @@ function CommentInput({imageId, onReload}) {
     const [users] = useContext(UserContext);
     const [mentionedUsers, setMentionedUsers] = useState([]);
 
+    // Adds comments to the photo from the current logged in user
     const addComment = async () => {
         if (!comment.trim()) return;
         try {
@@ -123,6 +129,7 @@ function CommentInput({imageId, onReload}) {
         }
     };
 
+    // Provides a list of users to mentions/ friends list to mention
     const handleMentionSelect = (id, display) => {
         const userExists = users.some(user => user._id === id);
         if (!userExists) {
@@ -217,9 +224,11 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
     const open = Boolean(anchorEl);
     const [buttonState, setButtonState] = useState({left: false, right: false});
 
+    // Events use to handle selction of the options displayed in the menu.
     const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
 
+     // Delete the photo if its from the current logged in user
     const deletePhoto = async () => {
         try {
             await axios.delete(`/photosOfUser/${photo._id}`);
@@ -228,6 +237,7 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
         }
     };
 
+     // Add a favorite to the photo for the current logged in user
     const addFavourite = async () => {
         try {
             await axios.post(`/favouriteOfUser/${photo._id}`, {});
@@ -237,6 +247,7 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
         }
     };
 
+     // Add a like to the photo for the current logged in user
     const addLike = async () => {
         try {
             await axios.post(`/likePhoto/${photo._id}`, {});
@@ -246,6 +257,7 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
         }
     };
 
+     // Add a unlike to the photo for the current logged in user
     const addDislike = async () => {
         try {
             await axios.post(`/unlikePhoto/${photo._id}`, {});
@@ -255,10 +267,12 @@ function Photo({photo, index, totalPhotos, onStep, enableAdvancedFeatures, onRel
         }
     };
 
+     // Check if user has favorited the photo
     const checkFavourite = () => {
         return userFavourites.includes(photo._id);
     };
 
+    // Check if user has liked the photo
     const checkLikes = () => {
         return userLikes.includes(photo._id);
     };
@@ -430,6 +444,7 @@ function UserPhotos({userId}) {
         return <Typography variant="h6" className="no-photos">No Photos Yet.</Typography>;
     }
 
+    // Sort phottos based on like count, if they have same likes sort them based on the date of upload
     photos.sort((a, b) => {
         if (a.like_count < b.like_count) return 1;
         if (a.like_count === b.like_count) {

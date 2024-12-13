@@ -50,6 +50,7 @@ function TopBar() {
         show: false
     });
 
+    // Some states used to provide user access control.
     const [accessToAll, setAccessToAll] = useState(true);
     const [users, setUsers] = useState();
     const [checkedList, setCheckedList] = useState();
@@ -84,6 +85,7 @@ function TopBar() {
         }
     }, []);
 
+    // handles the diaglog to delte or image upload.
     const handleDialogToggle = useCallback((type, open) => {
         if (type === "image") {
             setImageUploadShow(open);
@@ -195,6 +197,7 @@ function TopBar() {
         return `Hi ${loggedInUser.first_name} !!!!`;
     }, [isLoggedIn, loggedInUser]);
 
+    // Resets the context whenever a refresh is required.
     function resetAllContext() {
         setIsLoggedIn(false);
         setLoggedInUser(null);
@@ -216,6 +219,7 @@ function TopBar() {
             });
     }, [setIsLoggedIn, setLoggedInUser, navigate]);
 
+    // Redirecxts user to the activities page
     const handleActivities = useCallback(async () => {
         navigate("/activities");
     }, []);
@@ -234,7 +238,7 @@ function TopBar() {
         handleDialogToggle("delete", false);
     };
 
-
+    // Updates the list of users to provide access to.
     const updateCheckedList = (index) => {
         let newc = [...checkedList];
         newc[index] = !newc[index];
