@@ -23,9 +23,11 @@ const userDetailProperties = [
     "location",
     "description",
     "occupation",
+    "favourite_img_list",
+    "liked_img_list"
 ];
 // Valid properties of the photo model
-const photoProperties = ["file_name", "date_time", "user_id", "_id", "comments"];
+const photoProperties = ["file_name", "date_time", "user_id", "_id", "comments", "like_count", "access_list"];
 // Valid comments properties
 const commentProperties = ["comment", "date_time", "_id", "user"];
 
