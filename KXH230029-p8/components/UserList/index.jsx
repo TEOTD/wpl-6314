@@ -52,6 +52,7 @@ function UserList() {
         })();
     }, []);
 
+    // Formate timestamp to show small format time and date.
     function formatShortDateTime(date) {
         return new Date(date).toLocaleString('en-US', {
             day: '2-digit',
@@ -62,7 +63,7 @@ function UserList() {
         });
     }
 
-
+    // Updates when user activity is login, logout, photo upload or comment.
     const renderUpdate = (update) => {
         if (update.activity_type === "user-logout") {
             return (

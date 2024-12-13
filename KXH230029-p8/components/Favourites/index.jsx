@@ -25,15 +25,17 @@ function UserFavorites() {
     const [imageDetails, setImageDetails] = useState();
     const [imageUser, setImageUser] = useState();
 
+    // Handles the closing of items from the favorites list.
     const handleClose = () => {
         setOpen(false);
     };
 
+    // Fetches favorite images id list from the user table.
     useEffect(() => {
         (async () => {
             await axios.get(`/user/${loggedInUser._id}`)
                 .then((result) => {
-                    setUserFavourites(result.data.favourite_img_list);
+                    setUserFavourites(result.data.favourite_img_list);    // get only the favorites list field
                 })
                 .catch((error) => console.error("Failed to fetch user photos:", error));
         })();
@@ -45,13 +47,15 @@ function UserFavorites() {
             (async () => {
                 await axios.get(`/user/${imageDetails.user_id}`)
                     .then((result) => {
-                        setImageUser(result.data);
+                        setImageUser(result.data);    // get all te data
                     })
                     .catch((error) => console.error("Failed to fetch user photos:", error));
             })();
         }
     }, [imageDetails, reload]);
 
+    // Fetches a list of all the photos that are favorites for the current user.
+    // Depends on the user favorites list.
     useEffect(() => {
 
         (async () => {
@@ -70,6 +74,7 @@ function UserFavorites() {
 
     }, [userFavourites]);
 
+    // Removes the favorites photo from the user favorites list 
     const RemoveFavourite = async (photo_id) => {
         try {
             setReload(true);

@@ -6,10 +6,13 @@ import {ReloadContext} from "../context/appContext";
 import formatDateTime from "../../lib/utils";
 
 function Activities() {
+
+    // States used to handle the activity log page.
     const [reload] = useContext(ReloadContext);
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // fetcehes the latest activities of all the users to show activity log.
     useEffect(() => {
         setLoading(true);
         (async () => {
@@ -20,6 +23,7 @@ function Activities() {
         })();
     }, [reload]);
 
+    // Use cached data to display the activity log unless required to reload
     const renderMainActivityComponent = useMemo(() => {
         const mentionRegex = /@\[(.+?)]\((.+?)\)/g;
         const renderComment = (text) => {
